@@ -1,1 +1,81 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>Naptár CSV alapján</title>
+<style>
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #333; padding: 5px; text-align: center; width: 14.28%; }
+  .unnep { background-color: #f88; }
+  .piheno { background-color: #ffeb99; }
+  .ledolgozas { background-color: #99ccff; }
+  .szabadsag { background-color: #99ff99; }
+  .tappenz { background-color: #cc99ff; }
+</style>
+</head>
+<body>
 
+<h1>Naptár CSV alapján</h1>
+<input type="file" id="csvFile" accept=".csv" />
+<div id="calendar"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script>
+document.getElementById('csvFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+        header: true,
+        delimiter: ';',
+        skipEmptyLines: true,
+        complete: function(results) {
+            renderCalendar(results.data);
+        }
+    });
+});
+
+function renderCalendar(data) {
+    const months = [...new Set(data.map(d => d.honap))];
+    let html = '';
+
+    months.forEach(month => {
+        html += `<h2>Hónap: ${month}</h2>`;
+        html += '<table>';
+        html += '<tr><th>H</th><th>K</th><th>Sze</th><th>Cs</th><th>P</th><th>Szo</th><th>V</th></tr>';
+
+        const monthData = data.filter(d => d.honap == month);
+        let dayIndex = 1;
+        let rowOpen = false;
+
+        monthData.forEach(day => {
+            if (day.napIndex == 1) {
+                html += '<tr>';
+                rowOpen = true;
+            }
+
+            const classes = [];
+            if (day.unnep === 'true') classes.push('unnep');
+            if (day.piheno === 'true') classes.push('piheno');
+            if (day.ledolgozas === 'true') classes.push('ledolgozas');
+            if (day.szabadsag === 'true') classes.push('szabadsag');
+            if (day.tappenz === 'true') classes.push('tappenz');
+
+            html += `<td class="${classes.join(' ')}">${day.nap}<br>${day.muszak1}/${day.muszak2}</td>`;
+
+            if (day.napIndex == 7) {
+                html += '</tr>';
+                rowOpen = false;
+            }
+        });
+
+        if (rowOpen) html += '</tr>';
+        html += '</table>';
+    });
+
+    document.getElementById('calendar').innerHTML = html;
+}
+</script>
+
+</body>
+</html>
