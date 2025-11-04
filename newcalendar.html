@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>Munkaidő naptár generálás</title>
+</head>
+<body>
+<h1>Munkaidő naptár generálás</h1>
+
+<form id="naptarForm">
+  <label>Év:</label>
+  <input type="number" id="ev" value="2026" min="2020" max="2100"><br><br>
+
+  <label>Te kezdő műszak (1–4):</label>
+  <select id="muszak1Kezd">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select><br>
+
+  <label>Asszony kezdő műszak (2–4):</label>
+  <select id="muszak2Kezd">
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select><br><br>
+
+  <label>Ünnepnapok (pl. 01.01;12.24):</label><br>
+  <input type="text" id="unnep" placeholder="01.01;12.24" size="40"><br>
+
+  <label>Pihenőnapok (pl. 03.15;08.20):</label><br>
+  <input type="text" id="piheno" placeholder="03.15;08.20" size="40"><br>
+
+  <label>Ledolgozós napok (pl. 12.31):</label><br>
+  <input type="text" id="ledolgozas" placeholder="12.31" size="40"><br><br>
+
+  <button type="button" onclick="generalNaptar()">Generálás és CSV letöltés</button>
+</form>
+
+<script>
+function generalNaptar() {
+  const ev = parseInt(document.getElementById("ev").value);
+
+  // 🔹 kezdő műszakok
+  let muszak1Kezd = parseInt(document.getElementById("muszak1Kezd").value);
+  let muszak2Kezd = parseInt(document.getElementById("muszak2Kezd").value);
+
+  // 🔹 műszak ciklus minták
+  const muszak1Ciklus = [1, 2, 4, 3];
+  const muszak2Ciklus = [2, 4, 3];
+
+  // 🔹 bemeneti adatok
+  const unnepInput = document.getElementById("unnep").value.split(";").map(s => s.trim()).filter(s=>s);
+  const pihenoInput = document.getElementById("piheno").value.split(";").map(s => s.trim()).filter(s=>s);
+  const ledolgozasInput = document.getElementById("ledolgozas").value.split(";").map(s => s.trim()).filter(s=>s);
+
+  let naptar = [];
+
+  // 🔹 indexek a ciklushoz
+  let muszak1Index = muszak1Ciklus.indexOf(muszak1Kezd);
+  if (muszak1Index === -1) muszak1Index = 0;
+
+  let muszak2Index = muszak2Ciklus.indexOf(muszak2Kezd);
+  if (muszak2Index === -1) muszak2Index = 0;
+
+  // 🔹 naptár generálás
+  for (let honap = 1; honap <= 12; honap++) {
+    const napok = new Date(ev, honap, 0).getDate();
+    for (let nap = 1; nap <= napok; nap++) {
+      const datum = new Date(ev, honap - 1, nap);
+      let napIndex = datum.getDay(); // 0=vasárnap, 1=hétfő
+      if (napIndex === 0) napIndex = 7;
+
+      // 🔁 új hét → műszakváltás
+      if (napIndex === 1 && (honap !== 1 || nap !== 1)) {
+        muszak1Index = (muszak1Index + 1) % muszak1Ciklus.length;
+        muszak2Index = (muszak2Index + 1) % muszak2Ciklus.length;
+      }
+
+      const key = ("0" + honap).slice(-2) + "." + ("0" + nap).slice(-2);
+
+      naptar.push({
+        honap,
+        nap,
+        napIndex,
+        muszak1: muszak1Ciklus[muszak1Index],
+        muszak2: muszak2Ciklus[muszak2Index],
+        unnep: unnepInput.includes(key),
+        piheno: pihenoInput.includes(key),
+        ledolgozas: ledolgozasInput.includes(key),
+        szabadsag: false,
+        tappenz: false,
+        komment: ""
+      });
+    }
+  }
+
+  // 🔹 CSV generálás
+  let csv = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;komment\n";
+  naptar.forEach(d => {
+    csv += [
+      d.honap, d.nap, d.napIndex,
+      d.muszak1, d.muszak2,
+      d.unnep, d.piheno, d.ledolgozas,
+      d.szabadsag, d.tappenz,
+      `"${d.komment}"`
+    ].join(";") + "\n";
+  });
+
+  // 🔹 letöltés
+  const blob = new Blob([csv], {type: "text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${ev}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+</script>
+</body>
+</html>
