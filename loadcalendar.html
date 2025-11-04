@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Naptár CSV alapján</title>
 <style>
+  body {font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   table { border-collapse: collapse; width: 100%; }
   th, td { border: 1px solid #333; padding: 5px; text-align: center; width: 14.28%; }
   .unnep { background-color: #f88; }
@@ -11,11 +12,25 @@
   .ledolgozas { background-color: #99ccff; }
   .szabadsag { background-color: #99ff99; }
   .tappenz { background-color: #cc99ff; }
+  .honap{ width: 300px; display: block; }
+  #calendar {
+    display: flex;
+    flex-wrap: wrap; /* Több sorba törik, ha kevés a hely */
+    gap: 20px; /* távolság a hasábok között */
+  }
+
+  .month {
+    flex: 1 1 300px; /* minimum 300px széles, de rugalmasan nő */
+    max-width: 400px; /* opcionális korlátozás */
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+  }
 </style>
 </head>
 <body>
 
-<h1>Naptár CSV alapján</h1>
+<h1>Naptár beolvasása (.cvs file-ból)</h1>
 <input type="file" id="csvFile" accept=".csv" />
 <div id="calendar"></div>
 
@@ -35,23 +50,48 @@ document.getElementById('csvFile').addEventListener('change', function(e) {
     });
 });
 
+const honapNevek = [
+    '', // üres, hogy az index 1-től kezdődjön
+    'Január', 'Február', 'Március', 'Április', 'Május', 'Június', 'Július', 'Augusztus', 'Szeptember', 'Október', 'November', 'December'
+];
+
+const muszakNevek = {
+    '1': 'DE',
+    '2': 'DE',
+    '3': 'DU',
+    '4': 'ÉJ'
+};
+
 function renderCalendar(data) {
     const months = [...new Set(data.map(d => d.honap))];
     let html = '';
 
     months.forEach(month => {
-        html += `<h2>Hónap: ${month}</h2>`;
+	html += '<div class="month>"';
+        html += `<h2>${honapNevek[parseInt(month)]}</h2>`;
         html += '<table>';
         html += '<tr><th>H</th><th>K</th><th>Sze</th><th>Cs</th><th>P</th><th>Szo</th><th>V</th></tr>';
 
         const monthData = data.filter(d => d.honap == month);
-        let dayIndex = 1;
+
+        let dayCounter = 1;
         let rowOpen = false;
 
-        monthData.forEach(day => {
+        for (let i = 0; i < monthData.length; i++) {
+            const day = monthData[i];
+
+            // Ha a napIndex == 1, új sort kezdünk (hétfő)
             if (day.napIndex == 1) {
+                if (rowOpen) html += '</tr>'; // bezárjuk az előző sort
                 html += '<tr>';
                 rowOpen = true;
+            }
+
+            // Ha a napIndex > 1 és az első nap nincs hétfőn, üres cellák a sor elején
+            if (dayCounter === 1) {
+                for (let empty = 1; empty < day.napIndex; empty++) {
+                    html += '<td></td>';
+                }
             }
 
             const classes = [];
@@ -61,16 +101,23 @@ function renderCalendar(data) {
             if (day.szabadsag === 'true') classes.push('szabadsag');
             if (day.tappenz === 'true') classes.push('tappenz');
 
-            html += `<td class="${classes.join(' ')}">${day.nap}<br>${day.muszak1}/${day.muszak2}</td>`;
+	    const muszak1 = muszakNevek[day.muszak1] || day.muszak1;
+	    const muszak2 = muszakNevek[day.muszak2] || day.muszak2;
 
+	    html += `<td class="${classes.join(' ')}">${day.nap}<br>${muszak1}/${muszak2}</td>`;
+
+            // Ha vasárnap, zárjuk a sort
             if (day.napIndex == 7) {
                 html += '</tr>';
                 rowOpen = false;
             }
-        });
+
+            dayCounter++;
+        }
 
         if (rowOpen) html += '</tr>';
         html += '</table>';
+	html += '</div>';
     });
 
     document.getElementById('calendar').innerHTML = html;
