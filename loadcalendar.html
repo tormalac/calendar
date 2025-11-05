@@ -4,39 +4,73 @@
 <meta charset="UTF-8">
 <title>Naptár CSV alapján</title>
 <style>
-  body {font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #333; padding: 5px; text-align: center; width: 14.28%; }
+  body {font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; margin: 20px;}
+  
+#calendar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px; /* ez eltolja a hónapokat a gombtól */
+  }
+
+  .month {
+    flex: 1 1 300px;
+    max-width: 500px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .month table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .month th, .month td {
+    border: 1px solid #333;
+    padding: 5px;
+    text-align: center;
+    width: 14.28%; /* 7 nap = 100% */
+  }
+
   .unnep { background-color: #f88; }
   .piheno { background-color: #ffeb99; }
   .ledolgozas { background-color: #99ccff; }
   .szabadsag { background-color: #99ff99; }
   .tappenz { background-color: #cc99ff; }
-  .honap{ width: 300px; display: block; }
-  #calendar {
-    display: flex;
-    flex-wrap: wrap; /* Több sorba törik, ha kevés a hely */
-    gap: 20px; /* távolság a hasábok között */
+
+  button {
+    margin: 10px 0;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
   }
 
-  .month {
-    flex: 1 1 300px; /* minimum 300px széles, de rugalmasan nő */
-    max-width: 400px; /* opcionális korlátozás */
-    border: 1px solid #ccc;
-    padding: 10px;
-    box-sizing: border-box;
-  }
+  /* rejtett file input */
+  #csvFile { display: none; }
 </style>
 </head>
 <body>
 
-<h1>Naptár beolvasása (.csv file-ból)</h1>
-<input type="file" id="csvFile" accept=".csv" />
+<h1>Naptár beolvasása</h1>
+
+<div id="fileUploadContainer">
+  <button id="selectFileBtn">📂 CSV megnyitása</button>
+  <input type="file" id="csvFile" accept=".csv" />
+</div>
+
 <div id="calendar"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
-document.getElementById('csvFile').addEventListener('change', function(e) {
+const fileInput = document.getElementById('csvFile');
+const selectBtn = document.getElementById('selectFileBtn');
+
+selectBtn.addEventListener('click', () => {
+    fileInput.click(); // a gomb megnyomásakor a rejtett input aktiválódik
+});
+
+fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -50,50 +84,24 @@ document.getElementById('csvFile').addEventListener('change', function(e) {
     });
 });
 
-const honapNevek = [
-    '', // üres, hogy az index 1-től kezdődjön
-    'Január', 'Február', 'Március', 'Április', 'Május', 'Június', 'Július', 'Augusztus', 'Szeptember', 'Október', 'November', 'December'
-];
-
-const muszakNevek = {
-    '1': 'DE',
-    '2': 'DE',
-    '3': 'DU',
-    '4': 'ÉJ'
-};
+const honapNevek = ['', 'Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
+const muszakNevek = { '1':'DE','2':'DE','3':'DU','4':'ÉJ' };
 
 function renderCalendar(data) {
     const months = [...new Set(data.map(d => d.honap))];
     let html = '';
 
     months.forEach(month => {
-	html += '<div class="month>"';
+        html += '<div class="month">';
         html += `<h2>${honapNevek[parseInt(month)]}</h2>`;
         html += '<table>';
         html += '<tr><th>H</th><th>K</th><th>Sze</th><th>Cs</th><th>P</th><th>Szo</th><th>V</th></tr>';
 
         const monthData = data.filter(d => d.honap == month);
-
-        let dayCounter = 1;
-        let rowOpen = false;
+        let currentWeek = [];
 
         for (let i = 0; i < monthData.length; i++) {
             const day = monthData[i];
-
-            // Ha a napIndex == 1, új sort kezdünk (hétfő)
-            if (day.napIndex == 1) {
-                if (rowOpen) html += '</tr>'; // bezárjuk az előző sort
-                html += '<tr>';
-                rowOpen = true;
-            }
-
-            // Ha a napIndex > 1 és az első nap nincs hétfőn, üres cellák a sor elején
-            if (dayCounter === 1) {
-                for (let empty = 1; empty < day.napIndex; empty++) {
-                    html += '<td></td>';
-                }
-            }
-
             const classes = [];
             if (day.unnep === 'true') classes.push('unnep');
             if (day.piheno === 'true') classes.push('piheno');
@@ -101,23 +109,26 @@ function renderCalendar(data) {
             if (day.szabadsag === 'true') classes.push('szabadsag');
             if (day.tappenz === 'true') classes.push('tappenz');
 
-	    const muszak1 = muszakNevek[day.muszak1] || day.muszak1;
-	    const muszak2 = muszakNevek[day.muszak2] || day.muszak2;
+            const muszak1 = muszakNevek[day.muszak1] || day.muszak1;
+            const muszak2 = muszakNevek[day.muszak2] || day.muszak2;
 
-	    html += `<td class="${classes.join(' ')}">${day.nap}<br>${muszak1}/${muszak2}</td>`;
-
-            // Ha vasárnap, zárjuk a sort
-            if (day.napIndex == 7) {
-                html += '</tr>';
-                rowOpen = false;
+            // Hónap első napja előtt üres cellák
+            if (day.nap == 1) {
+                for (let j = 1; j < day.napIndex; j++) {
+                    currentWeek.push('<td></td>');
+                }
             }
 
-            dayCounter++;
+            currentWeek.push(`<td class="${classes.join(' ')}">${day.nap}<br>${muszak1}/${muszak2}</td>`);
+
+            // Vasárnap vagy utolsó nap a hónapban
+            if (day.napIndex == 7 || i === monthData.length - 1) {
+                html += '<tr>' + currentWeek.join('') + '</tr>';
+                currentWeek = [];
+            }
         }
 
-        if (rowOpen) html += '</tr>';
-        html += '</table>';
-	html += '</div>';
+        html += '</table></div>';
     });
 
     document.getElementById('calendar').innerHTML = html;
