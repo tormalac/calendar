@@ -51,27 +51,39 @@
   <button type="button" onclick="uploadToDrive()">☁️ Feltöltés Google Drive-ra</button>
 </form>
 
-<script src="https://apis.google.com/js/api.js?onload=onGapiLoad"></script>
+<p id="driveStatus" style="color: gray;">🔄 Google Drive kapcsolat inicializálása...</p>
+
+<!-- Google API -->
+<script async defer src="https://apis.google.com/js/api.js?onload=onGapiLoad"></script>
 
 <script>
-const CLIENT_ID = "138092907737-892ojmsu4u2s829p0er3nh741i6haem2.apps.googleusercontent.com"; // 🔹 ide a saját Client ID
+const CLIENT_ID = "138092907737-892ojmsu4u2s829p0er3nh741i6haem2.apps.googleusercontent.com"; // <-- saját Client ID
 const SCOPES = "https://www.googleapis.com/auth/drive.file";
 let gapiLoaded = false;
 let lastCsv = "";
 
-// 🔹 Google API betöltése
+// 🔹 Google API inicializálás
 function onGapiLoad() {
+  console.log("🔹 Google API script betöltődött, inicializálás...");
   gapi.load('client:auth2', async () => {
-    await gapi.client.init({
-      clientId: CLIENT_ID,
-      scope: SCOPES
-    });
-    gapiLoaded = true;
-    console.log("✅ Google API betöltve");
+    try {
+      await gapi.client.init({
+        clientId: CLIENT_ID,
+        scope: SCOPES
+      });
+      gapiLoaded = true;
+      console.log("✅ Google API inicializálva");
+      document.getElementById("driveStatus").textContent = "✅ Google Drive kapcsolat aktív";
+      document.getElementById("driveStatus").style.color = "green";
+    } catch (err) {
+      console.error("❌ Google API inicializálási hiba:", err);
+      document.getElementById("driveStatus").textContent = "❌ Google API inicializálása nem sikerült";
+      document.getElementById("driveStatus").style.color = "red";
+    }
   });
 }
 
-// 🔹 CSV generálás
+// 🔹 CSV generálás és letöltés
 function generalNaptar() {
   const ev = parseInt(document.getElementById("ev").value);
   const muszak1Kezd = parseInt(document.getElementById("muszak1Kezd").value);
@@ -128,12 +140,13 @@ function generalNaptar() {
   alert("✅ CSV sikeresen generálva és letöltve!");
 }
 
-// 🔹 Drive feltöltés
+// 🔹 Feltöltés Google Drive-ra
 async function uploadToDrive() {
   if (!lastCsv) {
     alert("Először generáld le a CSV-t!");
     return;
   }
+
   if (!gapiLoaded) {
     alert("A Google Drive kapcsolat még nem készült el. Próbáld újra pár másodperc múlva!");
     return;
