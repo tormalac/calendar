@@ -6,10 +6,17 @@
   <style>
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 30px;
+    }
+    button {
+      margin: 8px 5px;
+      padding: 8px 12px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
+
 <h1>Munkaidő naptár generálás</h1>
 
 <form id="naptarForm">
@@ -31,27 +38,40 @@
     <option value="4">4</option>
   </select><br><br>
 
-  <label>Ünnepnapok (pl. 01.01;12.24):</label><br>
-  <input type="text" id="unnep" placeholder="01.01;12.24" size="40"><br>
+  <label>Ünnepnapok:</label><br>
+  <input type="text" id="unnep" placeholder="01.01;12.25" size="40"><br>
 
-  <label>Pihenőnapok (pl. 03.15;08.20):</label><br>
-  <input type="text" id="piheno" placeholder="03.15;08.20" size="40"><br>
+  <label>Pihenőnapok:</label><br>
+  <input type="text" id="piheno" placeholder="03.16;08.19" size="40"><br>
 
-  <label>Ledolgozós napok (pl. 12.31):</label><br>
-  <input type="text" id="ledolgozas" placeholder="12.31" size="40"><br><br>
+  <label>Ledolgozós napok:</label><br>
+  <input type="text" id="ledolgozas" placeholder="01.10;08.21" size="40"><br><br>
 
-  <button type="button" onclick="generalNaptar()">Generálás és CSV letöltés</button>
-  <button type="button" onclick="uploadToDrive()">Feltöltés Google Drive-ra</button>
+  <button type="button" onclick="generalNaptar()">📄 Generálás és CSV letöltés</button>
+  <button type="button" onclick="uploadToDrive()">☁️ Feltöltés Google Drive-ra</button>
 </form>
 
-<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://apis.google.com/js/api.js?onload=onGapiLoad"></script>
 
 <script>
-const CLIENT_ID = "138092907737-892ojmsu4u2s829p0er3nh741i6haem2.apps.googleusercontent.com";
+const CLIENT_ID = "138092907737-892ojmsu4u2s829p0er3nh741i6haem2.apps.googleusercontent.com"; // 🔹 ide a saját Client ID
 const SCOPES = "https://www.googleapis.com/auth/drive.file";
+let gapiLoaded = false;
+let lastCsv = "";
 
-let lastCsv = ""; // ebben tároljuk a legutóbb generált CSV-t
+// 🔹 Google API betöltése
+function onGapiLoad() {
+  gapi.load('client:auth2', async () => {
+    await gapi.client.init({
+      clientId: CLIENT_ID,
+      scope: SCOPES
+    });
+    gapiLoaded = true;
+    console.log("✅ Google API betöltve");
+  });
+}
 
+// 🔹 CSV generálás
 function generalNaptar() {
   const ev = parseInt(document.getElementById("ev").value);
   const muszak1Kezd = parseInt(document.getElementById("muszak1Kezd").value);
@@ -60,116 +80,95 @@ function generalNaptar() {
   const muszak1Ciklus = [1, 2, 4, 3];
   const muszak2Ciklus = [2, 4, 3];
 
-  const unnepInput = document.getElementById("unnep").value.split(";").map(s => s.trim()).filter(s=>s);
-  const pihenoInput = document.getElementById("piheno").value.split(";").map(s => s.trim()).filter(s=>s);
-  const ledolgozasInput = document.getElementById("ledolgozas").value.split(";").map(s => s.trim()).filter(s=>s);
-
-  let naptar = [];
+  const unnepInput = document.getElementById("unnep").value.split(";").map(s => s.trim()).filter(s => s);
+  const pihenoInput = document.getElementById("piheno").value.split(";").map(s => s.trim()).filter(s => s);
+  const ledolgozasInput = document.getElementById("ledolgozas").value.split(";").map(s => s.trim()).filter(s => s);
 
   let muszak1Index = muszak1Ciklus.indexOf(muszak1Kezd);
-  if (muszak1Index === -1) muszak1Index = 0;
   let muszak2Index = muszak2Ciklus.indexOf(muszak2Kezd);
+  if (muszak1Index === -1) muszak1Index = 0;
   if (muszak2Index === -1) muszak2Index = 0;
+
+  let csv = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;komment\n";
 
   for (let honap = 1; honap <= 12; honap++) {
     const napok = new Date(ev, honap, 0).getDate();
     for (let nap = 1; nap <= napok; nap++) {
       const datum = new Date(ev, honap - 1, nap);
-      let napIndex = datum.getDay(); 
+      let napIndex = datum.getDay();
       if (napIndex === 0) napIndex = 7;
+
       if (napIndex === 1 && (honap !== 1 || nap !== 1)) {
         muszak1Index = (muszak1Index + 1) % muszak1Ciklus.length;
         muszak2Index = (muszak2Index + 1) % muszak2Ciklus.length;
       }
+
       const key = ("0" + honap).slice(-2) + "." + ("0" + nap).slice(-2);
-      naptar.push({
-        honap,
-        nap,
-        napIndex,
-        muszak1: muszak1Ciklus[muszak1Index],
-        muszak2: muszak2Ciklus[muszak2Index],
-        unnep: unnepInput.includes(key),
-        piheno: pihenoInput.includes(key),
-        ledolgozas: ledolgozasInput.includes(key),
-        szabadsag: false,
-        tappenz: false,
-        komment: ""
-      });
+      csv += [
+        honap, nap, napIndex,
+        muszak1Ciklus[muszak1Index],
+        muszak2Ciklus[muszak2Index],
+        unnepInput.includes(key),
+        pihenoInput.includes(key),
+        ledolgozasInput.includes(key),
+        false, false, ""
+      ].join(";") + "\n";
     }
   }
 
-  let csv = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;komment\n";
-  naptar.forEach(d => {
-    csv += [
-      d.honap, d.nap, d.napIndex,
-      d.muszak1, d.muszak2,
-      d.unnep, d.piheno, d.ledolgozas,
-      d.szabadsag, d.tappenz,
-      `"${d.komment}"`
-    ].join(";") + "\n";
-  });
+  lastCsv = csv;
 
-  lastCsv = csv; // elmentjük a későbbi feltöltéshez
-
-  const blob = new Blob([csv], {type: "text/csv"});
+  const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = `${ev}.csv`;
-  document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert("✅ CSV sikeresen generálva és letöltve!");
 }
 
-// --- Google Drive rész ---
-function loadGapi() {
-  return new Promise(resolve => gapi.load('client:auth2', resolve));
-}
-
-async function initClient() {
-  await gapi.client.init({
-    clientId: CLIENT_ID,
-    scope: SCOPES
-  });
-}
-
-async function authenticate() {
-  await gapi.auth2.getAuthInstance().signIn();
-}
-
+// 🔹 Drive feltöltés
 async function uploadToDrive() {
   if (!lastCsv) {
     alert("Először generáld le a CSV-t!");
     return;
   }
+  if (!gapiLoaded) {
+    alert("A Google Drive kapcsolat még nem készült el. Próbáld újra pár másodperc múlva!");
+    return;
+  }
 
-  await loadGapi();
-  await initClient();
-  await authenticate();
+  try {
+    const auth = gapi.auth2.getAuthInstance();
+    if (!auth.isSignedIn.get()) {
+      await auth.signIn();
+    }
 
-  const ev = document.getElementById("ev").value;
-  const blob = new Blob([lastCsv], { type: "text/csv" });
-  const file = new File([blob], `${ev}.csv`, { type: "text/csv" });
+    const ev = document.getElementById("ev").value;
+    const blob = new Blob([lastCsv], { type: "text/csv" });
+    const metadata = {
+      name: `${ev}.csv`,
+      mimeType: "text/csv"
+    };
 
-  const metadata = {
-    name: `${ev}.csv`,
-    mimeType: 'text/csv'
-  };
+    const form = new FormData();
+    form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+    form.append("file", blob);
 
-  const form = new FormData();
-  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-  form.append('file', file);
+    const token = gapi.client.getToken().access_token;
+    const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+      method: "POST",
+      headers: new Headers({ Authorization: "Bearer " + token }),
+      body: form
+    });
 
-  const accessToken = gapi.auth.getToken().access_token;
-
-  const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-    method: "POST",
-    headers: new Headers({ Authorization: "Bearer " + accessToken }),
-    body: form
-  });
-
-  const data = await res.json();
-  alert("✅ Feltöltve a Google Drive-ra!\nFájl ID: " + data.id);
+    const data = await res.json();
+    alert("✅ Feltöltve a Google Drive-ra!\nFájl ID: " + data.id);
+  } catch (err) {
+    console.error(err);
+    alert("❌ Hiba történt a feltöltés közben.");
+  }
 }
 </script>
 </body>
