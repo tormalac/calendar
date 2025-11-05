@@ -1,10 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="hu">
 <head>
   <meta charset="UTF-8">
   <title>Munkaidő naptár generálás</title>
-  <style>body{ font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; }</style>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+  </style>
 </head>
 <body>
 <h1>Munkaidő naptár generálás</h1>
@@ -38,50 +41,47 @@
   <input type="text" id="ledolgozas" placeholder="12.31" size="40"><br><br>
 
   <button type="button" onclick="generalNaptar()">Generálás és CSV letöltés</button>
+  <button type="button" onclick="uploadToDrive()">Feltöltés Google Drive-ra</button>
 </form>
 
+<script src="https://apis.google.com/js/api.js"></script>
+
 <script>
+const CLIENT_ID = "138092907737-892ojmsu4u2s829p0er3nh741i6haem2.apps.googleusercontent.com";
+const SCOPES = "https://www.googleapis.com/auth/drive.file";
+
+let lastCsv = ""; // ebben tároljuk a legutóbb generált CSV-t
+
 function generalNaptar() {
   const ev = parseInt(document.getElementById("ev").value);
+  const muszak1Kezd = parseInt(document.getElementById("muszak1Kezd").value);
+  const muszak2Kezd = parseInt(document.getElementById("muszak2Kezd").value);
 
-  // 🔹 kezdő műszakok
-  let muszak1Kezd = parseInt(document.getElementById("muszak1Kezd").value);
-  let muszak2Kezd = parseInt(document.getElementById("muszak2Kezd").value);
-
-  // 🔹 műszak ciklus minták
   const muszak1Ciklus = [1, 2, 4, 3];
   const muszak2Ciklus = [2, 4, 3];
 
-  // 🔹 bemeneti adatok
   const unnepInput = document.getElementById("unnep").value.split(";").map(s => s.trim()).filter(s=>s);
   const pihenoInput = document.getElementById("piheno").value.split(";").map(s => s.trim()).filter(s=>s);
   const ledolgozasInput = document.getElementById("ledolgozas").value.split(";").map(s => s.trim()).filter(s=>s);
 
   let naptar = [];
 
-  // 🔹 indexek a ciklushoz
   let muszak1Index = muszak1Ciklus.indexOf(muszak1Kezd);
   if (muszak1Index === -1) muszak1Index = 0;
-
   let muszak2Index = muszak2Ciklus.indexOf(muszak2Kezd);
   if (muszak2Index === -1) muszak2Index = 0;
 
-  // 🔹 naptár generálás
   for (let honap = 1; honap <= 12; honap++) {
     const napok = new Date(ev, honap, 0).getDate();
     for (let nap = 1; nap <= napok; nap++) {
       const datum = new Date(ev, honap - 1, nap);
-      let napIndex = datum.getDay(); // 0=vasárnap, 1=hétfő
+      let napIndex = datum.getDay(); 
       if (napIndex === 0) napIndex = 7;
-
-      // 🔁 új hét → műszakváltás
       if (napIndex === 1 && (honap !== 1 || nap !== 1)) {
         muszak1Index = (muszak1Index + 1) % muszak1Ciklus.length;
         muszak2Index = (muszak2Index + 1) % muszak2Ciklus.length;
       }
-
       const key = ("0" + honap).slice(-2) + "." + ("0" + nap).slice(-2);
-
       naptar.push({
         honap,
         nap,
@@ -98,7 +98,6 @@ function generalNaptar() {
     }
   }
 
-  // 🔹 CSV generálás
   let csv = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;komment\n";
   naptar.forEach(d => {
     csv += [
@@ -110,7 +109,8 @@ function generalNaptar() {
     ].join(";") + "\n";
   });
 
-  // 🔹 letöltés
+  lastCsv = csv; // elmentjük a későbbi feltöltéshez
+
   const blob = new Blob([csv], {type: "text/csv"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -119,6 +119,57 @@ function generalNaptar() {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+}
+
+// --- Google Drive rész ---
+function loadGapi() {
+  return new Promise(resolve => gapi.load('client:auth2', resolve));
+}
+
+async function initClient() {
+  await gapi.client.init({
+    clientId: CLIENT_ID,
+    scope: SCOPES
+  });
+}
+
+async function authenticate() {
+  await gapi.auth2.getAuthInstance().signIn();
+}
+
+async function uploadToDrive() {
+  if (!lastCsv) {
+    alert("Először generáld le a CSV-t!");
+    return;
+  }
+
+  await loadGapi();
+  await initClient();
+  await authenticate();
+
+  const ev = document.getElementById("ev").value;
+  const blob = new Blob([lastCsv], { type: "text/csv" });
+  const file = new File([blob], `${ev}.csv`, { type: "text/csv" });
+
+  const metadata = {
+    name: `${ev}.csv`,
+    mimeType: 'text/csv'
+  };
+
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', file);
+
+  const accessToken = gapi.auth.getToken().access_token;
+
+  const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+    method: "POST",
+    headers: new Headers({ Authorization: "Bearer " + accessToken }),
+    body: form
+  });
+
+  const data = await res.json();
+  alert("✅ Feltöltve a Google Drive-ra!\nFájl ID: " + data.id);
 }
 </script>
 </body>
