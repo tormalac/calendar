@@ -48,41 +48,9 @@
   <input type="text" id="ledolgozas" placeholder="01.10;08.21" size="40"><br><br>
 
   <button type="button" onclick="generalNaptar()">📄 Generálás és CSV letöltés</button>
-  <button type="button" onclick="uploadToDrive()">☁️ Feltöltés Google Drive-ra</button>
 </form>
 
-<p id="driveStatus" style="color: gray;">🔄 Google Drive kapcsolat inicializálása...</p>
-
-<!-- Google API -->
-<script async defer src="https://apis.google.com/js/api.js?onload=onGapiLoad"></script>
-
 <script>
-const CLIENT_ID = "138092907737-892ojmsu4u2s829p0er3nh741i6haem2.apps.googleusercontent.com"; // <-- saját Client ID
-const SCOPES = "https://www.googleapis.com/auth/drive.file";
-let gapiLoaded = false;
-let lastCsv = "";
-
-// 🔹 Google API inicializálás
-function onGapiLoad() {
-  console.log("🔹 Google API script betöltődött, inicializálás...");
-  gapi.load('client:auth2', async () => {
-    try {
-      await gapi.client.init({
-        clientId: CLIENT_ID,
-        scope: SCOPES
-      });
-      gapiLoaded = true;
-      console.log("✅ Google API inicializálva");
-      document.getElementById("driveStatus").textContent = "✅ Google Drive kapcsolat aktív";
-      document.getElementById("driveStatus").style.color = "green";
-    } catch (err) {
-      console.error("❌ Google API inicializálási hiba:", err);
-      document.getElementById("driveStatus").textContent = "❌ Google API inicializálása nem sikerült";
-      document.getElementById("driveStatus").style.color = "red";
-    }
-  });
-}
-
 // 🔹 CSV generálás és letöltés
 function generalNaptar() {
   const ev = parseInt(document.getElementById("ev").value);
@@ -128,8 +96,6 @@ function generalNaptar() {
     }
   }
 
-  lastCsv = csv;
-
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -139,50 +105,7 @@ function generalNaptar() {
   URL.revokeObjectURL(url);
   alert("✅ CSV sikeresen generálva és letöltve!");
 }
-
-// 🔹 Feltöltés Google Drive-ra
-async function uploadToDrive() {
-  if (!lastCsv) {
-    alert("Először generáld le a CSV-t!");
-    return;
-  }
-
-  if (!gapiLoaded) {
-    alert("A Google Drive kapcsolat még nem készült el. Próbáld újra pár másodperc múlva!");
-    return;
-  }
-
-  try {
-    const auth = gapi.auth2.getAuthInstance();
-    if (!auth.isSignedIn.get()) {
-      await auth.signIn();
-    }
-
-    const ev = document.getElementById("ev").value;
-    const blob = new Blob([lastCsv], { type: "text/csv" });
-    const metadata = {
-      name: `${ev}.csv`,
-      mimeType: "text/csv"
-    };
-
-    const form = new FormData();
-    form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
-    form.append("file", blob);
-
-    const token = gapi.client.getToken().access_token;
-    const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-      method: "POST",
-      headers: new Headers({ Authorization: "Bearer " + token }),
-      body: form
-    });
-
-    const data = await res.json();
-    alert("✅ Feltöltve a Google Drive-ra!\nFájl ID: " + data.id);
-  } catch (err) {
-    console.error(err);
-    alert("❌ Hiba történt a feltöltés közben.");
-  }
-}
 </script>
+
 </body>
 </html>
