@@ -26,9 +26,9 @@ input.muszak { width:55px; text-align:center; font-size:14px; padding:1px; box-s
 </head>
 <body>
 
-<h1>Naptár beolvasása</h1>
+<h1>Naptár szerkesztő</h1>
 <div id="fileUploadContainer">
-  <button id="selectFileBtn">📂 CSV megnyitása</button>
+  <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
   <input type="file" id="csvFile" accept=".csv" />
 </div>
 
@@ -38,8 +38,8 @@ input.muszak { width:55px; text-align:center; font-size:14px; padding:1px; box-s
 <div id="popupOverlay"></div>
 <div id="dayEditPopup">
   <h3 id="popupTitle"></h3>
-  <label>Műszak 1: <input type="number" id="editMuszak1" min="1" max="4"></label>
-  <label>Műszak 2: <input type="number" id="editMuszak2" min="1" max="4"></label>
+  <label>Műszakom: <input type="number" id="editMuszak1" min="1" max="4"></label>
+  <label>Párom műszakja: <input type="number" id="editMuszak2" min="1" max="4"></label>
   <label><input type="checkbox" id="editSzabadsag"> Szabadság</label>
   <label><input type="checkbox" id="editTappenz"> Táppénz</label>
   <label><input type="checkbox" id="editPiheno"> Pihenőnap</label>
@@ -147,7 +147,7 @@ function renderCalendar() {
   if (!document.getElementById('saveCsvBtn')) {
     const saveBtn = document.createElement('button');
     saveBtn.id = 'saveCsvBtn';
-    saveBtn.innerHTML = '⬇️ Mentés CSV-be';
+    saveBtn.innerHTML = '💾 Mentés (.csv)';
     saveBtn.addEventListener('click', exportTableToCSV);
     document.body.insertBefore(saveBtn, document.getElementById('calendar'));
   }
