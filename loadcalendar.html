@@ -4,35 +4,140 @@
 <meta charset="UTF-8">
 <title>Naptár CSV alapján</title>
 <style>
-body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; margin:20px; }
-#calendar { display:flex; flex-wrap:wrap; gap:20px; margin-top:20px; justify-content:flex-start; }
-.month { flex:0 0 320px; max-width:560px; border:1px solid #ccc; padding:10px; box-sizing:border-box; }
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin:20px;
+  position: relative;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+#calendar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:20px;
+  margin-top:20px;
+  justify-content:flex-start;
+}
+.month {
+  flex:0 0 320px;
+  max-width:560px;
+  border:1px solid #ccc;
+  padding:10px;
+  box-sizing:border-box;
+}
 .month table { width:100%; border-collapse:collapse; }
-.month th, .month td { border:1px solid #333; padding:5px; text-align:center; width:14.28%; position:relative; cursor:pointer; }
+.month th, .month td {
+  border:1px solid #333;
+  padding:5px;
+  text-align:center;
+  width:14.28%;
+  position:relative;
+  cursor:pointer;
+}
 .ledolgozott { background-color:#d3d3d3 !important; }
 .szabadsag { background-color:#ffff99 !important; }
-.tappenz { background-color:#cc99ff }
+.tappenz { background-color:#cc99ff; }
 .ledolgozas { background-color:#99ccff; }
-.piheno { background-color:#ffeb99 }
-.unnep { background-color:#f88 }
-button { margin:10px 0; padding:8px 12px; cursor:pointer; font-size:16px; }
+.piheno { background-color:#ffeb99; }
+.unnep { background-color:#f88; }
+button {
+  margin:10px 0;
+  padding:8px 12px;
+  cursor:pointer;
+  font-size:16px;
+}
 #csvFile { display:none; }
-input.muszak { width:55px; text-align:center; font-size:14px; padding:1px; box-sizing:border-box; }
-.comment-icon { position: absolute; top: 0px; right: 0px; font-size: 12px; z-index: 10; display: block; }
-#dayEditPopup { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:15px; border:2px solid #333; z-index:1000; box-shadow:0 0 10px rgba(0,0,0,0.5); max-width:300px;}
+input.muszak {
+  width:55px;
+  text-align:center;
+  font-size:14px;
+  padding:1px;
+  box-sizing:border-box;
+}
+.comment-icon {
+  position:absolute;
+  top:0px;
+  right:0px;
+  font-size:12px;
+  z-index:10;
+  display:block;
+}
+#dayEditPopup {
+  display:none;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:white;
+  padding:15px;
+  border:2px solid #333;
+  z-index:1000;
+  box-shadow:0 0 10px rgba(0,0,0,0.5);
+  max-width:300px;
+}
 #dayEditPopup label { display:block; margin:5px 0; }
-#popupOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); z-index:900; }
+#popupOverlay {
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.3);
+  z-index:900;
+}
+
+/* --- Jelmagyarázat --- */
+#legend {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:12px 24px;
+  margin-top:20px;
+  margin-bottom:10px;
+  font-size:15px;
+  border-top:1px solid #ccc;
+  padding-top:10px;
+}
+.legend-item { display:flex; align-items:center; gap:6px; }
+.color-box {
+  width:20px; height:20px; border:1px solid #555;
+  display:inline-block; vertical-align:middle;
+}
+.color-box.unnep { background-color:#f88; }
+.color-box.piheno { background-color:#ffeb99; }
+.color-box.ledolgozas { background-color:#99ccff; }
+.color-box.szabadsag { background-color:#ffff99; }
+.color-box.tappenz { background-color:#cc99ff; }
+
+/* --- Évjelölés --- */
+#yearLabel {
+  position:absolute;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  font-weight:bold;
+  opacity:0.6;
+  font-size:16px;
+}
 </style>
 </head>
 <body>
 
 <h1>Naptár szerkesztő</h1>
-<div id="fileUploadContainer">
+
+<div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
   <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
   <input type="file" id="csvFile" accept=".csv" />
+  <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
 </div>
 
 <div id="calendar"></div>
+
+<!-- Jelmagyarázat helye -->
+<div id="legend"></div>
+
+<div id="yearLabel"></div>
 
 <!-- Popup -->
 <div id="popupOverlay"></div>
@@ -114,7 +219,6 @@ function renderCalendar() {
       if (day.ledolgozas) classes.push('ledolgozas');
       if (day.piheno) classes.push('piheno');
       if (day.unnep) classes.push('unnep');
-      if (day.komment.trim() !== '') classes.push('comment-day');
 
       if (day.nap === 1) {
         for (let j = 1; j < day.napIndex; j++) currentWeek.push('<td></td>');
@@ -144,15 +248,31 @@ function renderCalendar() {
 
   document.getElementById('calendar').innerHTML = html;
 
-  if (!document.getElementById('saveCsvBtn')) {
-    const saveBtn = document.createElement('button');
-    saveBtn.id = 'saveCsvBtn';
-    saveBtn.innerHTML = '💾 Mentés (.csv)';
-    saveBtn.addEventListener('click', exportTableToCSV);
-    document.body.insertBefore(saveBtn, document.getElementById('calendar'));
+  // Jelmagyarázat
+  document.getElementById('legend').innerHTML = `
+    <h3>🗓️ Jelmagyarázat</h3>
+    <div class="legend-item"><span class="color-box unnep"></span> Ünnepnap</div>
+    <div class="legend-item"><span class="color-box piheno"></span> Pihenőnap</div>
+    <div class="legend-item"><span class="color-box ledolgozas"></span> Ledolgozás</div>
+    <div class="legend-item"><span class="color-box szabadsag"></span> Szabadság</div>
+    <div class="legend-item"><span class="color-box tappenz"></span> Táppénz</div>
+  `;
+
+  const saveBtn = document.getElementById('saveCsvBtn');
+  if (saveBtn) {
+    saveBtn.style.display = 'inline-block';
+    saveBtn.onclick = exportTableToCSV;
   }
 
-  // Eventek muszak mezőkre
+  // Év alul
+  let detectedYear = new Date().getFullYear();
+  if (fileInput.files.length > 0) {
+    const match = fileInput.files[0].name.match(/(20\d{2})/);
+    if (match) detectedYear = match[1];
+  }
+  document.getElementById('yearLabel').innerText = detectedYear;
+
+  // Muszak input szerkesztés
   document.querySelectorAll('.muszak').forEach(input => {
     input.addEventListener('focus', e => {
       const idx = parseInt(e.target.dataset.index);
@@ -169,91 +289,70 @@ function renderCalendar() {
     });
   });
 
-  // Cellára kattintás a szerkesztéshez
-  document.querySelectorAll('.month td').forEach(td => {
-    td.addEventListener('click', e => {
-      if (e.target.tagName === 'INPUT' || e.target.classList.contains('comment-icon')) return;
+  // Popup események
+  document.querySelectorAll('#calendar td').forEach(td => {
+    td.addEventListener('click', () => {
       const idx = td.dataset.index;
-      if (idx !== undefined) openDayEdit(idx);
-    });
-  });
+      if(idx === undefined) return;
+      const day = data[idx];
 
-  // Komment ikonra kattintás
-  document.querySelectorAll('.comment-icon').forEach(icon => {
-    icon.addEventListener('click', e => {
-      const td = e.target.closest('td');
-      openDayEdit(td.dataset.index);
+      document.getElementById('popupTitle').innerText = `Nap: ${day.nap}.${honapNevek[day.honap]}`;
+      document.getElementById('editMuszak1').value = day.muszak1;
+      document.getElementById('editMuszak2').value = day.muszak2;
+      document.getElementById('editSzabadsag').checked = day.szabadsag;
+      document.getElementById('editTappenz').checked = day.tappenz;
+      document.getElementById('editPiheno').checked = day.piheno;
+      document.getElementById('editLedolgozas').checked = day.ledolgozas;
+      document.getElementById('editLedolgozott').checked = day.ledolgozott;
+      document.getElementById('editLedolgozottOra').value = day.ledolgozottOra;
+      document.getElementById('editTulora').value = day.tulora;
+      document.getElementById('editComment').value = day.komment;
+
+      document.getElementById('popupOverlay').style.display = 'block';
+      document.getElementById('dayEditPopup').style.display = 'block';
+
+      document.getElementById('saveDayEditBtn').onclick = () => {
+        day.muszak1 = parseInt(document.getElementById('editMuszak1').value);
+        day.muszak2 = parseInt(document.getElementById('editMuszak2').value);
+        day.szabadsag = document.getElementById('editSzabadsag').checked;
+        day.tappenz = document.getElementById('editTappenz').checked;
+        day.piheno = document.getElementById('editPiheno').checked;
+        day.ledolgozas = document.getElementById('editLedolgozas').checked;
+        day.ledolgozott = document.getElementById('editLedolgozott').checked;
+        day.ledolgozottOra = parseInt(document.getElementById('editLedolgozottOra').value);
+        day.tulora = parseInt(document.getElementById('editTulora').value);
+        day.komment = document.getElementById('editComment').value;
+
+        closePopup();
+        renderCalendar();
+      };
+
+      document.getElementById('closeDayEditBtn').onclick = closePopup;
+      document.getElementById('popupOverlay').onclick = closePopup;
+
+      function closePopup() {
+        document.getElementById('popupOverlay').style.display = 'none';
+        document.getElementById('dayEditPopup').style.display = 'none';
+      }
     });
   });
 }
 
-// Popup logika
-const dayPopup = document.getElementById('dayEditPopup');
-const popupOverlay = document.getElementById('popupOverlay');
-const saveDayEditBtn = document.getElementById('saveDayEditBtn');
-const closeDayEditBtn = document.getElementById('closeDayEditBtn');
-let currentDayIndex = null;
-
-function openDayEdit(idx) {
-  currentDayIndex = parseInt(idx);
-  const d = data[currentDayIndex];
-  document.getElementById('popupTitle').innerText = `Nap: ${d.nap}.${d.honap}`;
-  document.getElementById('editMuszak1').value = d.muszak1;
-  document.getElementById('editMuszak2').value = d.muszak2;
-  document.getElementById('editSzabadsag').checked = d.szabadsag;
-  document.getElementById('editTappenz').checked = d.tappenz;
-  document.getElementById('editPiheno').checked = d.piheno;
-  document.getElementById('editLedolgozas').checked = d.ledolgozas;
-  document.getElementById('editLedolgozott').checked = d.ledolgozott;
-  document.getElementById('editLedolgozottOra').value = d.ledolgozottOra || 8;
-  document.getElementById('editTulora').value = d.tulora || 0;
-  document.getElementById('editComment').value = d.komment;
-  dayPopup.style.display = 'block';
-  popupOverlay.style.display = 'block';
-}
-
-saveDayEditBtn.addEventListener('click', () => {
-  if (currentDayIndex == null) return;
-  const d = data[currentDayIndex];
-  d.muszak1 = parseInt(document.getElementById('editMuszak1').value) || d.muszak1;
-  d.muszak2 = parseInt(document.getElementById('editMuszak2').value) || d.muszak2;
-  d.szabadsag = document.getElementById('editSzabadsag').checked;
-  d.tappenz = document.getElementById('editTappenz').checked;
-  d.piheno = document.getElementById('editPiheno').checked;
-  d.ledolgozas = document.getElementById('editLedolgozas').checked;
-  d.ledolgozott = document.getElementById('editLedolgozott').checked;
-  d.ledolgozottOra = parseInt(document.getElementById('editLedolgozottOra').value) || 8;
-  d.tulora = parseInt(document.getElementById('editTulora').value) || 0;
-  d.komment = document.getElementById('editComment').value.trim();
-  dayPopup.style.display = 'none';
-  popupOverlay.style.display = 'none';
-  renderCalendar();
-});
-
-closeDayEditBtn.addEventListener('click', () => {
-  dayPopup.style.display = 'none';
-  popupOverlay.style.display = 'none';
-});
-
+// Mentés CSV-be
 function exportTableToCSV() {
   const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
   let csv = header;
   data.forEach(d => {
     const kommentEscaped = `"${(d.komment || '').replace(/"/g,'""')}"`;
-    const row = [
-      d.honap,d.nap,d.napIndex,d.muszak1,d.muszak2,
-      d.unnep,d.piheno,d.ledolgozas,d.szabadsag,d.tappenz,d.ledolgozott,d.ledolgozottOra,d.tulora, kommentEscaped
-    ];
-    csv += row.join(";") + "\n";
+    csv += `${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};${kommentEscaped}\n`;
   });
 
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-
   const now = new Date();
-  const pad = n => n.toString().padStart(2, '0');
+  const pad = n => n.toString().padStart(2,'0');
   const fileName = `naptar_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.csv`;
 
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = fileName;
@@ -261,6 +360,5 @@ function exportTableToCSV() {
   URL.revokeObjectURL(url);
 }
 </script>
-
 </body>
 </html>
