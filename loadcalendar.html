@@ -4,81 +4,51 @@
 <meta charset="UTF-8">
 <title>Naptár CSV alapján</title>
 <style>
-  body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
-  }
-
-  #calendar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-top: 20px;
-    justify-content: flex-start;
-  }
-
-  .month {
-    flex: 0 0 320px; /* fix szélesség */
-    max-width: 560px;
-    border: 1px solid #ccc;
-    padding: 10px;
-    box-sizing: border-box;
-  }
-
-  .month table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .month th, .month td {
-    border: 1px solid #333;
-    padding: 5px;
-    text-align: center;
-    width: 14.28%;
-  }
-
-  .unnep { background-color: #f88; }
-  .piheno { background-color: #ffeb99; }
-  .ledolgozas { background-color: #99ccff; }
-  .szabadsag { background-color: #99ff99; }
-  .tappenz { background-color: #cc99ff; }
-
-  button {
-    margin: 10px 0;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-
-  /* rejtett file input */
-  #csvFile {
-    display: none;
-  }
-
-  input.muszak {
-    width: 55px;
-    text-align: center;
-    font-size: 14px;
-    padding: 1px;
-    box-sizing: border-box;
-  }
-
-  td.selected {
-    background-color: #b3e6b3 !important;
-    border: 1px solid #339933;
-  }
+body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; margin:20px; }
+#calendar { display:flex; flex-wrap:wrap; gap:20px; margin-top:20px; justify-content:flex-start; }
+.month { flex:0 0 320px; max-width:560px; border:1px solid #ccc; padding:10px; box-sizing:border-box; }
+.month table { width:100%; border-collapse:collapse; }
+.month th, .month td { border:1px solid #333; padding:5px; text-align:center; width:14.28%; position:relative; cursor:pointer; }
+.ledolgozott { background-color:#d3d3d3 !important; }
+.szabadsag { background-color:#ffff99 !important; }
+.tappenz { background-color:#cc99ff }
+.ledolgozas { background-color:#99ccff; }
+.piheno { background-color:#ffeb99 }
+.unnep { background-color:#f88 }
+button { margin:10px 0; padding:8px 12px; cursor:pointer; font-size:16px; }
+#csvFile { display:none; }
+input.muszak { width:55px; text-align:center; font-size:14px; padding:1px; box-sizing:border-box; }
+.comment-icon { position:absolute; top:2px; right:2px; cursor:pointer; }
+#dayEditPopup { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:15px; border:2px solid #333; z-index:1000; box-shadow:0 0 10px rgba(0,0,0,0.5);}
+#dayEditPopup label { display:block; margin:5px 0; }
+#popupOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); z-index:900; }
 </style>
 </head>
 <body>
 
 <h1>Naptár beolvasása</h1>
-
 <div id="fileUploadContainer">
   <button id="selectFileBtn">📂 CSV megnyitása</button>
   <input type="file" id="csvFile" accept=".csv" />
 </div>
 
 <div id="calendar"></div>
+
+<!-- Popup -->
+<div id="popupOverlay"></div>
+<div id="dayEditPopup">
+  <h3 id="popupTitle"></h3>
+  <label>Műszak 1: <input type="number" id="editMuszak1" min="1" max="4"></label>
+  <label>Műszak 2: <input type="number" id="editMuszak2" min="1" max="4"></label>
+  <label><input type="checkbox" id="editSzabadsag"> Szabadság</label>
+  <label><input type="checkbox" id="editTappenz"> Táppénz</label>
+  <label><input type="checkbox" id="editPiheno"> Pihenőnap</label>
+  <label><input type="checkbox" id="editLedolgozas"> Ledolgozás</label>
+  <label><input type="checkbox" id="editLedolgozott"> Ledolgoztam</label>
+  <label><textarea id="editComment" rows="3" style="width:100%"></textarea> Komment</label>
+  <button id="saveDayEditBtn">Mentés</button>
+  <button id="closeDayEditBtn">Mégse</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
@@ -97,14 +67,27 @@ fileInput.addEventListener('change', (e) => {
     delimiter: ';',
     skipEmptyLines: true,
     complete: function(results) {
-      data = results.data;
+      data = results.data.map(d => ({
+        honap: parseInt(d.honap),
+        nap: parseInt(d.nap),
+        napIndex: parseInt(d.napIndex),
+        muszak1: parseInt(d.muszak1),
+        muszak2: parseInt(d.muszak2),
+        unnep: d.unnep === 'true',
+        piheno: d.piheno === 'true',
+        ledolgozas: d.ledolgozas === 'true',
+        szabadsag: d.szabadsag === 'true',
+        tappenz: d.tappenz === 'true',
+        ledolgozott: d.ledolgozott === 'true',
+        komment: d.komment || ''
+      }));
       renderCalendar();
     }
   });
 });
 
 const honapNevek = ['', 'Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
-const muszakNevek = { '1':'DE', '2':'DE', '3':'DU', '4':'ÉJ' };
+const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
 
 function renderCalendar() {
   const months = [...new Set(data.map(d => d.honap))];
@@ -112,40 +95,41 @@ function renderCalendar() {
 
   months.forEach(month => {
     html += '<div class="month">';
-    html += `<h2>${honapNevek[parseInt(month)]}</h2>`;
-    html += '<table>';
-    html += '<tr><th>H</th><th>K</th><th>Sze</th><th>Cs</th><th>P</th><th>Szo</th><th>V</th></tr>';
+    html += `<h2>${honapNevek[month]}</h2>`;
+    html += '<table><tr><th>H</th><th>K</th><th>Sze</th><th>Cs</th><th>P</th><th>Szo</th><th>V</th></tr>';
 
-    const monthData = data.filter(d => d.honap == month);
+    const monthData = data.filter(d => d.honap === month);
     let currentWeek = [];
 
     for (let i = 0; i < monthData.length; i++) {
       const day = monthData[i];
       const classes = [];
-      if (day.unnep === 'true') classes.push('unnep');
-      if (day.piheno === 'true') classes.push('piheno');
-      if (day.ledolgozas === 'true') classes.push('ledolgozas');
-      if (day.szabadsag === 'true') classes.push('szabadsag');
-      if (day.tappenz === 'true') classes.push('tappenz');
+      if (day.ledolgozott) classes.push('ledolgozott');
+      if (day.szabadsag) classes.push('szabadsag');
+      if (day.tappenz) classes.push('tappenz');
+      if (day.ledolgozas) classes.push('ledolgozas');
+      if (day.piheno) classes.push('piheno');
+      if (day.unnep) classes.push('unnep');
+      if (day.komment.trim() !== '') classes.push('comment-day');
 
-      if (day.nap == 1) {
-        for (let j = 1; j < day.napIndex; j++) {
-          currentWeek.push('<td></td>');
-        }
+      if (day.nap === 1) {
+        for (let j = 1; j < day.napIndex; j++) currentWeek.push('<td></td>');
       }
 
       currentWeek.push(`
-        <td class="${classes.join(' ')}">
-          ${day.nap}<br>
-          <input class="muszak" type="text"
-            value="${muszakNevek[day.muszak1] || day.muszak1}/${muszakNevek[day.muszak2] || day.muszak2}" 
-            data-index="${data.indexOf(day)}"
-            data-field1="muszak1"
-            data-field2="muszak2">
+        <td class="${classes.join(' ')}" data-index="${data.indexOf(day)}">
+          <div style="position: relative;">
+            <div style="font-weight:bold;">${day.nap}</div>
+            <input class="muszak" type="text"
+              value="${muszakNevek[day.muszak1] || day.muszak1}/${muszakNevek[day.muszak2] || day.muszak2}" 
+              data-index="${data.indexOf(day)}"
+              style="width:50px;text-align:center;font-size:12px;">
+            ${day.komment.trim() !== '' ? '<span class="comment-icon">🖉</span>' : ''}
+          </div>
         </td>
       `);
 
-      if (day.napIndex == 7 || i === monthData.length - 1) {
+      if (day.napIndex === 7 || i === monthData.length - 1) {
         html += '<tr>' + currentWeek.join('') + '</tr>';
         currentWeek = [];
       }
@@ -156,58 +140,125 @@ function renderCalendar() {
 
   document.getElementById('calendar').innerHTML = html;
 
-  // Fókusz / blur események
-  document.querySelectorAll('.muszak').forEach(input => {
-    input.addEventListener('focus', (e) => {
-      const idx = parseInt(e.target.dataset.index);
-      e.target.value = data[idx].muszak1 + '/' + data[idx].muszak2;
-    });
-
-    input.addEventListener('blur', (e) => {
-      const idx = parseInt(e.target.dataset.index);
-      let [m1, m2] = e.target.value.split('/').map(x => parseInt(x.trim()));
-      if (![1,2,3,4].includes(m1)) m1 = data[idx].muszak1;
-      if (![1,2,3,4].includes(m2)) m2 = data[idx].muszak2;
-      data[idx].muszak1 = m1;
-      data[idx].muszak2 = m2;
-      e.target.value = (muszakNevek[m1] || m1) + '/' + (muszakNevek[m2] || m2);
-    });
-  });
-
-  // 🟩 Kattintásra kijelölés
-  document.querySelectorAll('.month td').forEach(cell => {
-    cell.addEventListener('click', (e) => {
-      document.querySelectorAll('.month td').forEach(c => c.classList.remove('selected'));
-      e.currentTarget.classList.add('selected');
-    });
-  });
-
-  // Mentés gomb csak egyszer
-  if (!document.getElementById('saveCsvBtn')) {
+if (!document.getElementById('saveCsvBtn')) {
     const saveBtn = document.createElement('button');
     saveBtn.id = 'saveCsvBtn';
     saveBtn.innerHTML = '⬇️ Mentés CSV-be';
     saveBtn.addEventListener('click', exportTableToCSV);
     document.body.insertBefore(saveBtn, document.getElementById('calendar'));
   }
+
+  // Eventek muszak mezőkre
+  document.querySelectorAll('.muszak').forEach(input => {
+    input.addEventListener('focus', e => {
+      const idx = parseInt(e.target.dataset.index);
+      e.target.value = `${data[idx].muszak1}/${data[idx].muszak2}`;
+    });
+    input.addEventListener('blur', e => {
+      const idx = parseInt(e.target.dataset.index);
+      let [m1,m2] = e.target.value.split('/').map(x => parseInt(x.trim()));
+      if (![1,2,3,4].includes(m1)) m1 = data[idx].muszak1;
+      if (![1,2,3,4].includes(m2)) m2 = data[idx].muszak2;
+      data[idx].muszak1 = m1;
+      data[idx].muszak2 = m2;
+      e.target.value = `${muszakNevek[m1] || m1}/${muszakNevek[m2] || m2}`;
+    });
+  });
+
+  // Cellára kattintás a szerkesztéshez
+  document.querySelectorAll('.month td').forEach(td => {
+    td.addEventListener('click', e => {
+      if (e.target.tagName === 'INPUT' || e.target.classList.contains('comment-icon')) return;
+      const idx = td.dataset.index;
+      if (idx !== undefined) openDayEdit(idx);
+    });
+  });
+
+  // Komment ikonra kattintás
+  document.querySelectorAll('.comment-icon').forEach(icon => {
+    icon.addEventListener('click', e => {
+      const td = e.target.closest('td');
+      openDayEdit(td.dataset.index);
+    });
+  });
 }
 
+// Popup logika
+const dayPopup = document.getElementById('dayEditPopup');
+const popupOverlay = document.getElementById('popupOverlay');
+const saveDayEditBtn = document.getElementById('saveDayEditBtn');
+const closeDayEditBtn = document.getElementById('closeDayEditBtn');
+let currentDayIndex = null;
+
+function openDayEdit(idx) {
+  currentDayIndex = parseInt(idx);
+  const d = data[currentDayIndex];
+  document.getElementById('popupTitle').innerText = `Nap: ${d.nap}.${d.honap}`;
+  document.getElementById('editMuszak1').value = d.muszak1;
+  document.getElementById('editMuszak2').value = d.muszak2;
+  document.getElementById('editSzabadsag').checked = d.szabadsag;
+  document.getElementById('editTappenz').checked = d.tappenz;
+  document.getElementById('editPiheno').checked = d.piheno;
+  document.getElementById('editLedolgozas').checked = d.ledolgozas;
+  document.getElementById('editLedolgozott').checked = d.ledolgozott;
+  document.getElementById('editComment').value = d.komment;
+  dayPopup.style.display = 'block';
+  popupOverlay.style.display = 'block';
+}
+
+saveDayEditBtn.addEventListener('click', () => {
+  if (currentDayIndex == null) return;
+  const d = data[currentDayIndex];
+  d.muszak1 = parseInt(document.getElementById('editMuszak1').value) || d.muszak1;
+  d.muszak2 = parseInt(document.getElementById('editMuszak2').value) || d.muszak2;
+  d.szabadsag = document.getElementById('editSzabadsag').checked;
+  d.tappenz = document.getElementById('editTappenz').checked;
+  d.piheno = document.getElementById('editPiheno').checked;
+  d.ledolgozas = document.getElementById('editLedolgozas').checked;
+  d.ledolgozott = document.getElementById('editLedolgozott').checked;
+  d.komment = document.getElementById('editComment').value.trim();
+  dayPopup.style.display = 'none';
+  popupOverlay.style.display = 'none';
+  renderCalendar();
+});
+
+closeDayEditBtn.addEventListener('click', () => {
+  dayPopup.style.display = 'none';
+  popupOverlay.style.display = 'none';
+});
+
+/* CSV export gomb
+if (!document.getElementById('saveCsvBtn')) {
+  const saveBtn = document.createElement('button');
+  saveBtn.id = 'saveCsvBtn';
+  saveBtn.innerHTML = '⬇️ Mentés CSV-be';
+  saveBtn.addEventListener('click', exportTableToCSV);
+  document.body.insertBefore(saveBtn, document.getElementById('calendar'));
+}*/
+
 function exportTableToCSV() {
-  const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;komment\n";
+  const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;komment\n";
   let csv = header;
   data.forEach(d => {
+    const kommentEscaped = `"${(d.komment || '').replace(/"/g,'""')}"`;
     const row = [
-      d.honap, d.nap, d.napIndex, d.muszak1, d.muszak2,
-      d.unnep, d.piheno, d.ledolgozas, d.szabadsag, d.tappenz, d.komment || '""'
+      d.honap,d.nap,d.napIndex,d.muszak1,d.muszak2,
+      d.unnep,d.piheno,d.ledolgozas,d.szabadsag,d.tappenz,d.ledolgozott,kommentEscaped
     ];
     csv += row.join(";") + "\n";
   });
 
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
+
+  // Dinamikus fájlnév generálása
+  const now = new Date();
+  const pad = n => n.toString().padStart(2, '0');
+  const fileName = `naptar_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.csv`;
+
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'szerkesztett_naptar.csv';
+  a.download = fileName;
   a.click();
   URL.revokeObjectURL(url);
 }
