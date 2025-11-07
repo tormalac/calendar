@@ -19,7 +19,7 @@ button { margin:10px 0; padding:8px 12px; cursor:pointer; font-size:16px; }
 #csvFile { display:none; }
 input.muszak { width:55px; text-align:center; font-size:14px; padding:1px; box-sizing:border-box; }
 .comment-icon { position: absolute; top: 0px; right: 0px; font-size: 12px; z-index: 10; display: block; }
-#dayEditPopup { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:15px; border:2px solid #333; z-index:1000; box-shadow:0 0 10px rgba(0,0,0,0.5);}
+#dayEditPopup { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:15px; border:2px solid #333; z-index:1000; box-shadow:0 0 10px rgba(0,0,0,0.5); max-width:300px;}
 #dayEditPopup label { display:block; margin:5px 0; }
 #popupOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); z-index:900; }
 </style>
@@ -45,6 +45,8 @@ input.muszak { width:55px; text-align:center; font-size:14px; padding:1px; box-s
   <label><input type="checkbox" id="editPiheno"> Pihenőnap</label>
   <label><input type="checkbox" id="editLedolgozas"> Ledolgozás</label>
   <label><input type="checkbox" id="editLedolgozott"> Ledolgoztam</label>
+  <label>Ledolgozott órák: <input type="number" id="editLedolgozottOra" min="0" max="24" value="8"></label>
+  <label>Túlóra órák: <input type="number" id="editTulora" min="0" max="24" value="0"></label>
   <label><textarea id="editComment" rows="3" style="width:100%"></textarea> Komment</label>
   <button id="saveDayEditBtn">Mentés</button>
   <button id="closeDayEditBtn">Mégse</button>
@@ -79,6 +81,8 @@ fileInput.addEventListener('change', (e) => {
         szabadsag: d.szabadsag === 'true',
         tappenz: d.tappenz === 'true',
         ledolgozott: d.ledolgozott === 'true',
+        ledolgozottOra: d.ledolgozottOra ? parseInt(d.ledolgozottOra) : 8,
+        tulora: d.tulora ? parseInt(d.tulora) : 0,
         komment: d.komment || ''
       }));
       renderCalendar();
@@ -140,7 +144,7 @@ function renderCalendar() {
 
   document.getElementById('calendar').innerHTML = html;
 
-if (!document.getElementById('saveCsvBtn')) {
+  if (!document.getElementById('saveCsvBtn')) {
     const saveBtn = document.createElement('button');
     saveBtn.id = 'saveCsvBtn';
     saveBtn.innerHTML = '⬇️ Mentés CSV-be';
@@ -201,6 +205,8 @@ function openDayEdit(idx) {
   document.getElementById('editPiheno').checked = d.piheno;
   document.getElementById('editLedolgozas').checked = d.ledolgozas;
   document.getElementById('editLedolgozott').checked = d.ledolgozott;
+  document.getElementById('editLedolgozottOra').value = d.ledolgozottOra || 8;
+  document.getElementById('editTulora').value = d.tulora || 0;
   document.getElementById('editComment').value = d.komment;
   dayPopup.style.display = 'block';
   popupOverlay.style.display = 'block';
@@ -216,6 +222,8 @@ saveDayEditBtn.addEventListener('click', () => {
   d.piheno = document.getElementById('editPiheno').checked;
   d.ledolgozas = document.getElementById('editLedolgozas').checked;
   d.ledolgozott = document.getElementById('editLedolgozott').checked;
+  d.ledolgozottOra = parseInt(document.getElementById('editLedolgozottOra').value) || 8;
+  d.tulora = parseInt(document.getElementById('editTulora').value) || 0;
   d.komment = document.getElementById('editComment').value.trim();
   dayPopup.style.display = 'none';
   popupOverlay.style.display = 'none';
@@ -227,23 +235,14 @@ closeDayEditBtn.addEventListener('click', () => {
   popupOverlay.style.display = 'none';
 });
 
-/* CSV export gomb
-if (!document.getElementById('saveCsvBtn')) {
-  const saveBtn = document.createElement('button');
-  saveBtn.id = 'saveCsvBtn';
-  saveBtn.innerHTML = '⬇️ Mentés CSV-be';
-  saveBtn.addEventListener('click', exportTableToCSV);
-  document.body.insertBefore(saveBtn, document.getElementById('calendar'));
-}*/
-
 function exportTableToCSV() {
-  const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;komment\n";
+  const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
   let csv = header;
   data.forEach(d => {
     const kommentEscaped = `"${(d.komment || '').replace(/"/g,'""')}"`;
     const row = [
       d.honap,d.nap,d.napIndex,d.muszak1,d.muszak2,
-      d.unnep,d.piheno,d.ledolgozas,d.szabadsag,d.tappenz,d.ledolgozott,kommentEscaped
+      d.unnep,d.piheno,d.ledolgozas,d.szabadsag,d.tappenz,d.ledolgozott,d.ledolgozottOra,d.tulora, kommentEscaped
     ];
     csv += row.join(";") + "\n";
   });
@@ -251,7 +250,6 @@ function exportTableToCSV() {
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
 
-  // Dinamikus fájlnév generálása
   const now = new Date();
   const pad = n => n.toString().padStart(2, '0');
   const fileName = `naptar_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.csv`;
