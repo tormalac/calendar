@@ -6,106 +6,175 @@
   <style>
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      margin: 30px;
+      background: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding-top: 50px;
     }
+
+    .container {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 25px 40px;
+      width: 380px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    label {
+      font-weight: 500;
+      margin-top: 10px;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
     button {
-      margin: 8px 5px;
-      padding: 8px 12px;
+      margin-top: 15px;
+      padding: 10px 14px;
       cursor: pointer;
+      border: none;
+      background-color: #0078d7;
+      color: white;
+      font-size: 15px;
+      border-radius: 8px;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    button:hover {
+      background-color: #005ea6;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    small {
+      color: #666;
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
 
-<h1>Munkaidő naptár generálás</h1>
+  <div class="container">
+    <h1>Munkaidő naptár generálás</h1>
 
-<form id="naptarForm">
-  <label>Év:</label>
-  <input type="number" id="ev" value="2026" min="2020" max="2100"><br><br>
+    <form id="naptarForm">
+      <label>Év:</label>
+      <input type="number" id="ev" value="2026" min="2020" max="2100">
 
-  <label>Te kezdő műszak (1–4):</label>
-  <select id="muszak1Kezd">
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-  </select><br>
+      <label>Te kezdő műszak (1–4):</label>
+      <select id="muszak1Kezd">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
 
-  <label>Asszony kezdő műszak (2–4):</label>
-  <select id="muszak2Kezd">
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-  </select><br><br>
+      <label>Asszony kezdő műszak (2–4):</label>
+      <select id="muszak2Kezd">
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
 
-  <label>Ünnepnapok:</label><br>
-  <input type="text" id="unnep" placeholder="01.01;12.25" size="40"><br>
+      <label>Ünnepnapok:</label>
+      <input type="text" id="unnep" placeholder="01.01;12.25">
 
-  <label>Pihenőnapok:</label><br>
-  <input type="text" id="piheno" placeholder="03.16;08.19" size="40"><br>
+      <label>Pihenőnapok:</label>
+      <input type="text" id="piheno" placeholder="03.16;08.19">
 
-  <label>Ledolgozós napok:</label><br>
-  <input type="text" id="ledolgozas" placeholder="01.10;08.21" size="40"><br><br>
+      <label>Ledolgozós napok:</label>
+      <input type="text" id="ledolgozas" placeholder="01.10;08.21">
 
-  <button type="button" onclick="generalNaptar()">⬇️ Generálás és CSV letöltés</button>
-</form>
+      <button type="button" onclick="generalNaptar()">⬇️ Generálás és CSV letöltés</button>
 
-<script>
-// 🔹 CSV generálás és letöltés
-function generalNaptar() {
-  const ev = parseInt(document.getElementById("ev").value);
-  const muszak1Kezd = parseInt(document.getElementById("muszak1Kezd").value);
-  const muszak2Kezd = parseInt(document.getElementById("muszak2Kezd").value);
+      <small>Formátum: hónap.nap (pl. 03.15;08.19)</small>
+    </form>
+  </div>
 
-  const muszak1Ciklus = [1, 2, 4, 3];
-  const muszak2Ciklus = [2, 4, 3];
+  <script>
+  // 🔹 CSV generálás és letöltés
+  function generalNaptar() {
+    const ev = parseInt(document.getElementById("ev").value);
+    const muszak1Kezd = parseInt(document.getElementById("muszak1Kezd").value);
+    const muszak2Kezd = parseInt(document.getElementById("muszak2Kezd").value);
 
-  const unnepInput = document.getElementById("unnep").value.split(";").map(s => s.trim()).filter(s => s);
-  const pihenoInput = document.getElementById("piheno").value.split(";").map(s => s.trim()).filter(s => s);
-  const ledolgozasInput = document.getElementById("ledolgozas").value.split(";").map(s => s.trim()).filter(s => s);
+    const muszak1Ciklus = [1, 2, 4, 3];
+    const muszak2Ciklus = [2, 4, 3];
 
-  let muszak1Index = muszak1Ciklus.indexOf(muszak1Kezd);
-  let muszak2Index = muszak2Ciklus.indexOf(muszak2Kezd);
-  if (muszak1Index === -1) muszak1Index = 0;
-  if (muszak2Index === -1) muszak2Index = 0;
+    const unnepInput = document.getElementById("unnep").value.split(";").map(s => s.trim()).filter(s => s);
+    const pihenoInput = document.getElementById("piheno").value.split(";").map(s => s.trim()).filter(s => s);
+    const ledolgozasInput = document.getElementById("ledolgozas").value.split(";").map(s => s.trim()).filter(s => s);
 
-  let csv = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;komment\n";
+    let muszak1Index = muszak1Ciklus.indexOf(muszak1Kezd);
+    let muszak2Index = muszak2Ciklus.indexOf(muszak2Kezd);
+    if (muszak1Index === -1) muszak1Index = 0;
+    if (muszak2Index === -1) muszak2Index = 0;
 
-  for (let honap = 1; honap <= 12; honap++) {
-    const napok = new Date(ev, honap, 0).getDate();
-    for (let nap = 1; nap <= napok; nap++) {
-      const datum = new Date(ev, honap - 1, nap);
-      let napIndex = datum.getDay();
-      if (napIndex === 0) napIndex = 7;
+    let csv = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;komment\n";
 
-      if (napIndex === 1 && (honap !== 1 || nap !== 1)) {
-        muszak1Index = (muszak1Index + 1) % muszak1Ciklus.length;
-        muszak2Index = (muszak2Index + 1) % muszak2Ciklus.length;
+    for (let honap = 1; honap <= 12; honap++) {
+      const napok = new Date(ev, honap, 0).getDate();
+      for (let nap = 1; nap <= napok; nap++) {
+        const datum = new Date(ev, honap - 1, nap);
+        let napIndex = datum.getDay();
+        if (napIndex === 0) napIndex = 7;
+
+        if (napIndex === 1 && (honap !== 1 || nap !== 1)) {
+          muszak1Index = (muszak1Index + 1) % muszak1Ciklus.length;
+          muszak2Index = (muszak2Index + 1) % muszak2Ciklus.length;
+        }
+
+        const key = ("0" + honap).slice(-2) + "." + ("0" + nap).slice(-2);
+        csv += [
+          honap, nap, napIndex,
+          muszak1Ciklus[muszak1Index],
+          muszak2Ciklus[muszak2Index],
+          unnepInput.includes(key),
+          pihenoInput.includes(key),
+          ledolgozasInput.includes(key),
+          false, false, ""
+        ].join(";") + "\n";
       }
-
-      const key = ("0" + honap).slice(-2) + "." + ("0" + nap).slice(-2);
-      csv += [
-        honap, nap, napIndex,
-        muszak1Ciklus[muszak1Index],
-        muszak2Ciklus[muszak2Index],
-        unnepInput.includes(key),
-        pihenoInput.includes(key),
-        ledolgozasInput.includes(key),
-        false, false, ""
-      ].join(";") + "\n";
     }
-  }
 
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${ev}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  alert("✅ CSV sikeresen generálva és letöltve!");
-}
-</script>
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${ev}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert("✅ CSV sikeresen generálva és letöltve!");
+  }
+  </script>
 
 </body>
 </html>
