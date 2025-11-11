@@ -22,6 +22,7 @@ body {
   flex:0 0 320px;
   max-width:560px;
   border:1px solid #ccc;
+  border-radius:5px;
   padding:10px;
   box-sizing:border-box;
 }
@@ -58,7 +59,7 @@ input.muszak {
   position:absolute;
   top:0px;
   right:0px;
-  font-size:12px;
+  font-size:8px;
   z-index:10;
   display:block;
 }
@@ -71,6 +72,7 @@ input.muszak {
   background:white;
   padding:15px;
   border:2px solid #333;
+  border-radius:5px;
   z-index:1000;
   box-shadow:0 0 10px rgba(0,0,0,0.5);
   max-width:300px;
@@ -119,6 +121,10 @@ input.muszak {
   font-weight:bold;
   opacity:0.6;
   font-size:16px;
+}
+.month td:not(:empty):hover {
+  background-color: #e0f0ff;
+  transition: background-color 0.2s ease;
 }
 </style>
 </head>
@@ -228,10 +234,9 @@ function renderCalendar() {
         <td class="${classes.join(' ')}" data-index="${data.indexOf(day)}">
           <div style="position: relative;">
             <div style="font-weight:bold;">${day.nap}</div>
-            <input class="muszak" type="text"
-              value="${muszakNevek[day.muszak1] || day.muszak1}/${muszakNevek[day.muszak2] || day.muszak2}" 
-              data-index="${data.indexOf(day)}"
-              style="width:50px;text-align:center;font-size:12px;">
+            <div class="muszak-display" style="font-size:12px; margin-top:2px;">
+  ${muszakNevek[day.muszak1] || day.muszak1}/${muszakNevek[day.muszak2] || day.muszak2}
+</div>
             ${day.komment.trim() !== '' ? '<span class="comment-icon">✏️</span>' : ''}
           </div>
         </td>
@@ -273,7 +278,7 @@ function renderCalendar() {
   document.getElementById('yearLabel').innerText = detectedYear;
 
   // Muszak input szerkesztés
-  document.querySelectorAll('.muszak').forEach(input => {
+  /*document.querySelectorAll('.muszak').forEach(input => {
     input.addEventListener('focus', e => {
       const idx = parseInt(e.target.dataset.index);
       e.target.value = `${data[idx].muszak1}/${data[idx].muszak2}`;
@@ -287,7 +292,7 @@ function renderCalendar() {
       data[idx].muszak2 = m2;
       e.target.value = `${muszakNevek[m1] || m1}/${muszakNevek[m2] || m2}`;
     });
-  });
+  });*/
 
   // Popup események
   document.querySelectorAll('#calendar td').forEach(td => {
@@ -296,7 +301,7 @@ function renderCalendar() {
       if(idx === undefined) return;
       const day = data[idx];
 
-      document.getElementById('popupTitle').innerText = `Nap: ${day.nap}.${honapNevek[day.honap]}`;
+      document.getElementById('popupTitle').innerText = `Nap: ${honapNevek[day.honap]} ${day.nap}.`;
       document.getElementById('editMuszak1').value = day.muszak1;
       document.getElementById('editMuszak2').value = day.muszak2;
       document.getElementById('editSzabadsag').checked = day.szabadsag;
