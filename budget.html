@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>Bérkalkulátor</title>
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding-top: 50px;
+  }
+
+  .container {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 25px 40px;
+    width: 380px;
+    box-sizing: border-box;
+  }
+
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 10px;
+    color: #444;
+    font-weight: 500;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+  }
+
+  button {
+    width: 100%;
+    background-color: #0078d7;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  button:hover {
+    background-color: #005fa3;
+  }
+
+  #eredmeny {
+    margin-top: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #eee;
+  }
+
+  #eredmeny p {
+    margin: 5px 0;
+    color: #333;
+  }
+
+  /* Szebb fájlfeltöltő stílus */
+  .file-upload {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px dashed #0078d7;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f0f6ff;
+    cursor: pointer;
+    transition: background 0.2s ease, border 0.2s ease;
+  }
+
+  .file-upload:hover {
+    background: #e6f0ff;
+    border-color: #005fa3;
+  }
+
+  .file-upload input[type="file"] {
+    display: none;
+  }
+
+  .file-upload span {
+    color: #0078d7;
+    font-weight: 500;
+  }
+
+  #fileName {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #333;
+  }
+
+  h2 {
+    color: #444;
+    margin-top: 25px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bérkalkulátor</h1>
+
+    <!-- Szebb fájlfeltöltés -->
+    <label class="file-upload">
+      <input type="file" id="csvFile" accept=".csv">
+      <span>📁 Válassz CSV fájlt</span>
+      <div id="fileName">Nincs kiválasztva fájl</div>
+    </label>
+
+    <label>Hónap: <input type="number" id="honap" min="1" max="12" value="1"></label>
+    <label>Alapbér: <input type="number" id="alapber" value="437000"></label>
+    <label>Seniority bónusz (%):
+      <select id="senioritas">
+        <option value="0">0%</option>
+        <option value="5">5%</option>
+        <option value="10">10%</option>
+        <option value="15">15%</option>
+      </select>
+    </label>
+    <label>Rezsitámogatás: <input type="number" id="rezsi" value="30000"></label>
+    <button onclick="szamit()">Számol</button>
+
+    <h2>Eredmények</h2>
+    <div id="eredmeny"></div>
+    <button onclick="exportCSV()">CSV mentése</button>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+let csvData = [];
+
+document.getElementById('csvFile').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    const fileNameDisplay = document.getElementById('fileName');
+    if (file) {
+        fileNameDisplay.textContent = `📄 ${file.name}`;
+        Papa.parse(file, {
+            header: true,
+            delimiter: ';',
+            skipEmptyLines: true,
+            complete: function(results) {
+                csvData = results.data;
+                alert('✅ CSV betöltve!');
+            }
+        });
+    } else {
+        fileNameDisplay.textContent = 'Nincs kiválasztva fájl';
+    }
+});
+
+function szamit(){
+    const honap = parseInt(document.getElementById('honap').value);
+    const alapber = parseFloat(document.getElementById('alapber').value);
+    const senioritas = parseFloat(document.getElementById('senioritas').value);
+    const rezsi = parseFloat(document.getElementById('rezsi').value);
+
+    let delelottOrak = 0;
+    let delutanOrak = 0;
+    let ejszakaOrak = 0;
+    let tulora = 0;
+    let menetrendSzerintiIdo = 0;
+
+    csvData.forEach(row => {
+        if(parseInt(row['honap']) === honap){
+            const napIndex = parseInt(row['napIndex']);
+            const unnep = (row['unnep'] || '').toLowerCase() === 'true';
+            const piheno = (row['piheno'] || '').toLowerCase() === 'true';
+            const ledolgozas = (row['ledolgozas'] || '').toLowerCase() === 'true';
+
+            if((napIndex !== 6 && napIndex !== 7 && !unnep && !piheno) || ledolgozas){
+                menetrendSzerintiIdo += 8;
+            }
+
+            if((row['ledolgozott'] || '').toLowerCase() === 'true'){
+                const ora = parseFloat(row['ledolgozottOra']) || 0;
+                tulora += parseFloat(row['tulora']) || 0;
+
+                if(row['muszak1'] === '1' || row['muszak1'] === '2'){
+                    delelottOrak += ora;
+                } else if(row['muszak1'] === '3'){
+                    delutanOrak += ora;
+                } else if(row['muszak1'] === '4'){
+                    ejszakaOrak += ora;
+                }
+            }
+        }
+    });
+
+    if(menetrendSzerintiIdo === 0){
+        alert('Nem található munkanap az adott hónapban!');
+        return;
+    }
+
+    const negyedEvBonusz = 0;
+
+    const fizetes = 0.665 * (
+        ((delelottOrak + delutanOrak + ejszakaOrak) * alapber / menetrendSzerintiIdo)
+        + (tulora * alapber / menetrendSzerintiIdo)
+        + (0.2 * delutanOrak * alapber / 174)
+        + (0.4 * ejszakaOrak * alapber / 174)
+        + negyedEvBonusz
+        + (senioritas / 100 * alapber)
+        + rezsi
+    );
+
+    const eredmenyDiv = document.getElementById('eredmeny');
+    eredmenyDiv.innerHTML = `
+        <p><strong>Menetrend szerinti idő:</strong> ${menetrendSzerintiIdo} óra</p>
+        <p><strong>Nettó kereset:</strong> ${fizetes.toFixed(0)} Ft</p>
+        <p><strong>Délelőttös órák:</strong> ${delelottOrak} óra</p>
+        <p><strong>Délutános órák:</strong> ${delutanOrak} óra</p>
+        <p><strong>Éjszakás órák:</strong> ${ejszakaOrak} óra</p>
+        <p><strong>Túlóra:</strong> ${tulora} óra</p>
+    `;
+
+    window.eredmenyCSV = {
+        netto: fizetes.toFixed(0),
+        de: delelottOrak,
+        du: delutanOrak,
+        ej: ejszakaOrak,
+        tulora: tulora
+    };
+}
+
+function exportCSV(){
+    if(!window.eredmenyCSV) return alert('Előbb számolj!');
+
+    const now = new Date();
+    const ev = now.getFullYear();
+    const honap = String(now.getMonth() + 1).padStart(2, '0');
+    const nap = String(now.getDate()).padStart(2, '0');
+    const ora = String(now.getHours()).padStart(2, '0');
+    const perc = String(now.getMinutes()).padStart(2, '0');
+    const datumIdo = `${ev}-${honap}-${nap}_${ora}-${perc}`;
+
+    const csvContent = "data:text/csv;charset=utf-8," 
+        + "netto;de;du;ej;tulora\n" 
+        + `${window.eredmenyCSV.netto};${window.eredmenyCSV.de};${window.eredmenyCSV.du};${window.eredmenyCSV.ej};${window.eredmenyCSV.tulora}`;
+
+    const fileName = `fizetes_${datumIdo}.csv`;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+</body>
+</html>
