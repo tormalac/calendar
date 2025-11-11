@@ -18,6 +18,18 @@ body {
   gap:20px;
   margin-top:20px;
   justify-content:flex-start;
+  min-height:200px;
+}
+#calendarPlaceholder {
+  color:#aaa;
+  text-align:center;
+  width:100%;
+  padding:80px 0;
+  font-size:18px;
+  font-style:italic;
+  border: 2px dashed #ccc;
+  border-radius:5px;
+  background-color:#fff;
 }
 .month {
   flex:0 0 320px;
@@ -45,7 +57,7 @@ body {
 .piheno { background-color:#ffeb99; }
 .unnep { background-color:#f88; }
 button {
-  margin:10px 0;
+  margin:10px 5px 10px 0;
   padding:8px 12px;
   cursor:pointer;
   font-size:16px;
@@ -91,7 +103,6 @@ input.muszak {
   background:rgba(0,0,0,0.3);
   z-index:900;
 }
-
 /* --- Jelmagyarázat --- */
 #legend {
   display:flex;
@@ -114,7 +125,6 @@ input.muszak {
 .color-box.ledolgozas { background-color:#99ccff; }
 .color-box.szabadsag { background-color:#ffff99; }
 .color-box.tappenz { background-color:#cc99ff; }
-
 /* --- Évjelölés --- */
 #yearLabel {
   position:absolute;
@@ -141,11 +151,12 @@ input.muszak {
   <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
 </div>
 
-<div id="calendar"></div>
+<div id="calendar">
+  <div id="calendarPlaceholder">Naptár betöltése...</div>
+</div>
 
 <!-- Jelmagyarázat helye -->
 <div id="legend"></div>
-
 <div id="yearLabel"></div>
 
 <!-- Popup -->
@@ -208,6 +219,10 @@ const honapNevek = ['', 'Január','Február','Március','Április','Május','Jú
 const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
 
 function renderCalendar() {
+  // Placeholder eltávolítása
+  const placeholder = document.getElementById('calendarPlaceholder');
+  if (placeholder) placeholder.remove();
+
   const months = [...new Set(data.map(d => d.honap))];
   let html = '';
 
@@ -279,23 +294,6 @@ function renderCalendar() {
     if (match) detectedYear = match[1];
   }
   document.getElementById('yearLabel').innerText = detectedYear;
-
-  // Muszak input szerkesztés
-  /*document.querySelectorAll('.muszak').forEach(input => {
-    input.addEventListener('focus', e => {
-      const idx = parseInt(e.target.dataset.index);
-      e.target.value = `${data[idx].muszak1}/${data[idx].muszak2}`;
-    });
-    input.addEventListener('blur', e => {
-      const idx = parseInt(e.target.dataset.index);
-      let [m1,m2] = e.target.value.split('/').map(x => parseInt(x.trim()));
-      if (![1,2,3,4].includes(m1)) m1 = data[idx].muszak1;
-      if (![1,2,3,4].includes(m2)) m2 = data[idx].muszak2;
-      data[idx].muszak1 = m1;
-      data[idx].muszak2 = m2;
-      e.target.value = `${muszakNevek[m1] || m1}/${muszakNevek[m2] || m2}`;
-    });
-  });*/
 
   // Popup események
   document.querySelectorAll('#calendar td').forEach(td => {
