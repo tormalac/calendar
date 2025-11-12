@@ -148,7 +148,10 @@ input.muszak {
 <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
   <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
   <input type="file" id="csvFile" accept=".csv" />
+  <button id="loadFromCloudBtn">☁️ Betöltés Firestore-ból</button>
   <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
+  <button id="saveFirestoreBtn" style="display:none;">☁️ Mentés Firestore-ba</button>
+
 </div>
 
 <div id="calendar">
@@ -181,6 +184,7 @@ input.muszak {
 <script>
 const fileInput = document.getElementById('csvFile');
 const selectBtn = document.getElementById('selectFileBtn');
+const saveBtn = document.getElementById('saveCsvBtn');
 let data = [];
 
 selectBtn.addEventListener('click', () => fileInput.click());
@@ -214,6 +218,43 @@ fileInput.addEventListener('change', (e) => {
     }
   });
 });
+
+async function loadCsvFromFirestore(docId) {
+  const docRef = doc(db, "naptarak", docId);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const csvText = docSnap.data().csv;
+    
+    // Parse CSV ugyanúgy, mint a helyi file-nál
+    const results = Papa.parse(csvText, {
+      header: true,
+      delimiter: ';',
+      skipEmptyLines: true
+    });
+
+    data = results.data.map(d => ({
+      honap: parseInt(d.honap),
+      nap: parseInt(d.nap),
+      napIndex: parseInt(d.napIndex),
+      muszak1: parseInt(d.muszak1),
+      muszak2: parseInt(d.muszak2),
+      unnep: d.unnep === 'true',
+      piheno: d.piheno === 'true',
+      ledolgozas: d.ledolgozas === 'true',
+      szabadsag: d.szabadsag === 'true',
+      tappenz: d.tappenz === 'true',
+      ledolgozott: d.ledolgozott === 'true',
+      ledolgozottOra: d.ledolgozottOra ? parseInt(d.ledolgozottOra) : 8,
+      tulora: d.tulora ? parseInt(d.tulora) : 0,
+      komment: d.komment || ''
+    }));
+
+    renderCalendar();  // Naptár frissítése
+  } else {
+    alert("Nincs ilyen naptár a Firestore-ban!");
+  }
+}
 
 const honapNevek = ['', 'Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
 const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
@@ -286,6 +327,18 @@ function renderCalendar() {
     saveBtn.style.display = 'inline-block';
     saveBtn.onclick = exportTableToCSV;
   }
+if (data && data.length > 0) {
+  document.getElementById('saveCsvBtn').style.display = 'inline-block';
+  document.getElementById('saveCsvBtn').onclick = exportTableToCSV;
+
+  document.getElementById('saveFirestoreBtn').style.display = 'inline-block';
+  document.getElementById('saveFirestoreBtn').onclick = () => exportTableToFirestore("myCalendarDoc");
+} else {
+  document.getElementById('saveCsvBtn').style.display = 'none';
+  document.getElementById('saveFirestoreBtn').style.display = 'none';
+}
+
+document.getElementById('loadFromCloudBtn').onclick = () => loadCsvFromFirestore("myCalendarDoc");
 
   // Év alul
   let detectedYear = new Date().getFullYear();
@@ -344,10 +397,37 @@ function renderCalendar() {
   });
 }
 
-// Mentés CSV-be
-function exportTableToCSV() {
+async function exportTableToFirestore(docId) {
+  if (!data || data.length === 0) {
+    alert("Nincs betöltve naptár, nem lehet menteni!");
+    return;
+  }
+
   const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
   let csv = header;
+  data.forEach(d => {
+    const kommentEscaped = `"${(d.komment || '').replace(/"/g,'""')}"`;
+    csv += `${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};${kommentEscaped}\n`;
+  });
+
+  try {
+    await setDoc(doc(db, "naptarak", docId), { csv });
+    alert("Naptár mentve Firestore-ba!");
+  } catch (err) {
+    console.error(err);
+    alert("Hiba történt a mentés során.");
+  }
+}
+
+function exportTableToCSV() {
+  if (!data || data.length === 0) {
+    alert("Nincs betöltve naptár!");
+    return;
+  }
+
+  const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
+  let csv = header;
+
   data.forEach(d => {
     const kommentEscaped = `"${(d.komment || '').replace(/"/g,'""')}"`;
     csv += `${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};${kommentEscaped}\n`;
@@ -357,14 +437,123 @@ function exportTableToCSV() {
   const pad = n => n.toString().padStart(2,'0');
   const fileName = `naptar_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.csv`;
 
-  const blob = new Blob([csv], { type:'text/csv' });
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
+
   const a = document.createElement('a');
   a.href = url;
   a.download = fileName;
+  document.body.appendChild(a); // hozzáadjuk a DOM-hoz
   a.click();
+  document.body.removeChild(a); // majd eltávolítjuk
   URL.revokeObjectURL(url);
 }
+
+// Gomb esemény hozzárendelése
+document.getElementById('saveCsvBtn').addEventListener('click', exportTableToCSV);
+
+async function exportTableToFirestore(docId) {
+  if (!data || data.length === 0) {
+    alert("Nincs betöltve naptár, nem lehet menteni!");
+    return;
+  }
+
+  const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
+  let csv = header;
+
+  data.forEach(d => {
+    const kommentEscaped = `"${(d.komment || '').replace(/"/g,'""')}"`;
+    csv += `${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};${kommentEscaped}\n`;
+  });
+
+  try {
+    await setDoc(doc(db, "naptarak", docId), { csv });
+    alert("Naptár mentve Firestore-ba!");
+  } catch (err) {
+    console.error(err);
+    alert("Hiba történt a mentés során.");
+  }
+}
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+// --- Firebase config ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDFK6o6sJnFJImBhkX_ZfQq6fXldLZt7vA",
+  authDomain: "calendarformeapp.firebaseapp.com",
+  projectId: "calendarformeapp",
+  storageBucket: "calendarformeapp.firebasestorage.app",
+  messagingSenderId: "421913143205",
+  appId: "1:421913143205:web:24dc04f3c768f99356aa4c"
+};
+
+// --- Init Firebase ---
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// --- HTML elemek ---
+const loginContainer = document.createElement('div');
+loginContainer.innerHTML = `
+  <div id="authBox" style="margin-bottom:15px; padding:10px; border:1px solid #ccc; background:#fff;">
+    <h3>🔐 Bejelentkezés</h3>
+    <input type="email" id="email" placeholder="Email" style="padding:5px;"><br>
+    <input type="password" id="password" placeholder="Jelszó" style="padding:5px; margin-top:5px;"><br>
+    <button id="loginBtn">Bejelentkezés</button>
+    <button id="registerBtn">Regisztráció</button>
+    <button id="logoutBtn" style="display:none;">Kijelentkezés</button>
+    <p id="loginStatus"></p>
+  </div>
+`;
+document.body.prepend(loginContainer);
+
+// --- Login / Register / Logout ---
+document.getElementById("loginBtn").onclick = async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (err) {
+    alert("Hiba a bejelentkezéskor: " + err.message);
+  }
+};
+
+document.getElementById("registerBtn").onclick = async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    alert("Sikeres regisztráció! Most már be vagy jelentkezve.");
+  } catch (err) {
+    alert("Regisztrációs hiba: " + err.message);
+  }
+};
+
+document.getElementById("logoutBtn").onclick = async () => {
+  await signOut(auth);
+};
+
+// --- Auth állapotfigyelő ---
+onAuthStateChanged(auth, (user) => {
+  const status = document.getElementById("loginStatus");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (user) {
+    status.textContent = "✅ Bejelentkezve: " + user.email;
+    logoutBtn.style.display = "inline-block";
+    document.getElementById("saveFirestoreBtn").disabled = false;
+  } else {
+    status.textContent = "❌ Nincs bejelentkezve";
+    logoutBtn.style.display = "none";
+    document.getElementById("saveFirestoreBtn").disabled = true;
+  }
+});
+
+// --- Export függvények elérhetővé tétele ---
+window.db = db;
 </script>
 </body>
 </html>
