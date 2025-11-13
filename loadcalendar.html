@@ -337,6 +337,16 @@ onAuthStateChanged(auth, user => {
   }
 });
 
+//---Mentés gomb láthatósága---
+function updateSaveButtonVisibility() {
+    const saveCsvBtn = document.getElementById('saveCsvBtn');
+    if (data && data.length > 0) {
+        saveCsvBtn.style.display = 'inline-block';
+    } else {
+        saveCsvBtn.style.display = 'none';
+    }
+}
+
 // --- CSV megnyitása---
 const fileInput = document.getElementById('csvFile');
 document.getElementById('selectFileBtn').onclick = () => fileInput.click();
@@ -357,6 +367,7 @@ fileInput.onchange = e => {
   tulora:+d.tulora,
   komment:d.komment || ''
 }));
+    updateSaveButtonVisibility();
     renderCalendarFS();
   }});
 };
@@ -393,8 +404,39 @@ loadBtn.onclick = async () => {
       tulora:+d.tulora,
       komment:d.komment || ''
     }));
+    updateSaveButtonVisibility();
     renderCalendarFS();
   } else alert("Nincs mentett naptár!");
+};
+
+// --- CSV mentés ---
+const saveCsvBtn = document.getElementById('saveCsvBtn');
+
+saveCsvBtn.onclick = () => {
+    if(!data.length) { alert("Nincs menteni való adat!"); return; }
+
+    let csv = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
+    data.forEach(d => {
+        csv += `${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};"${(d.komment||'').replace(/"/g,'""')}"\n`;
+    });
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hour = String(now.getHours()).padStart(2, '0');
+    const minute = String(now.getMinutes()).padStart(2, '0');
+
+    const filename = `naptar_${year}-${month}-${day}_${hour}-${minute}.csv`;
+
+    // Létrehozunk egy letöltés linket
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
 };
 
 // --- Naptár kirajzolás ---
