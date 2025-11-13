@@ -12,6 +12,38 @@ body {
   min-height: 100vh;
   padding-bottom: 60px;
 }
+
+/* 🔹 Bejelentkezés panel jobb felső sarokban */
+#authBox {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-size: 14px;
+  z-index: 100;
+}
+#authBox input {
+  width: 160px;
+  margin: 2px 0;
+  font-size: 13px;
+  padding: 3px;
+}
+#authBox button {
+  font-size: 13px;
+  margin: 3px 2px;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+#authBox p {
+  margin: 5px 0 0 0;
+  font-size: 13px;
+}
+
+/* --- Naptár stílusok --- */
 #calendar {
   display:flex;
   flex-wrap:wrap;
@@ -41,7 +73,6 @@ body {
   background: #fff;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
-.month table { width:100%; border-collapse:collapse; }
 .month th, .month td {
   border:1px solid #333;
   padding:5px;
@@ -50,94 +81,152 @@ body {
   position:relative;
   cursor:pointer;
 }
+.month td div {
+  line-height: 1.2;
+}
+.month td div:nth-child(2) {
+  font-size: 11px;
+  color: #444;
+  opacity: 0.9;
+}
 .ledolgozott { background-color:#d3d3d3 !important; }
 .szabadsag { background-color:#ffff99 !important; }
 .tappenz { background-color:#cc99ff; }
 .ledolgozas { background-color:#99ccff; }
 .piheno { background-color:#ffeb99; }
 .unnep { background-color:#f88; }
-button {
-  margin:10px 5px 10px 0;
-  padding:8px 12px;
-  cursor:pointer;
-  font-size:16px;
+
+/* --- Nap szerkesztő popup --- */
+#overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  display: none;
+  z-index: 999;
+  transition: opacity 0.2s ease-in-out;
 }
-#csvFile { display:none; }
-input.muszak {
-  width:55px;
-  text-align:center;
-  font-size:14px;
-  padding:1px;
-  box-sizing:border-box;
+
+#dayEditor {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  background: linear-gradient(180deg, #ffffff, #f9f9fb);
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px 24px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  display: none;
+  z-index: 1000;
+  width: 340px;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  animation: fadeIn 0.25s ease-out;
 }
-.comment-icon {
-  position:absolute;
-  top:0px;
-  right:0px;
-  font-size:8px;
-  z-index:10;
-  display:block;
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.98); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
-#dayEditPopup {
-  display:none;
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  background:white;
-  padding:15px;
-  border:2px solid #333;
-  border-radius:5px;
-  z-index:1000;
-  box-shadow:0 0 10px rgba(0,0,0,0.5);
-  max-width:300px;
+
+#dayEditor h3 {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 18px;
+  color: #222;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
 }
-#dayEditPopup label { display:block; margin:5px 0; }
-#popupOverlay {
-  display:none;
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.3);
-  z-index:900;
+
+#dayEditor label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+  color: #333;
 }
-/* --- Jelmagyarázat --- */
-#legend {
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:12px 24px;
-  margin-top:20px;
-  margin-bottom:10px;
-  font-size:15px;
-  border-top:1px solid #ccc;
-  padding-top:10px;
+
+#dayEditor select,
+#dayEditor input[type="number"],
+#dayEditor textarea {
+  width: 100%;
+  padding: 6px 8px;
+  margin-top: 3px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
 }
-.legend-item { display:flex; align-items:center; gap:6px; }
-.color-box {
-  width:20px; height:20px; border:1px solid #555;
-  display:inline-block; vertical-align:middle;
+#dayEditor select:focus,
+#dayEditor input:focus,
+#dayEditor textarea:focus {
+  border-color: #0078d7;
+  outline: none;
 }
-.color-box.unnep { background-color:#f88; }
-.color-box.piheno { background-color:#ffeb99; }
-.color-box.ledolgozas { background-color:#99ccff; }
-.color-box.szabadsag { background-color:#ffff99; }
-.color-box.tappenz { background-color:#cc99ff; }
-/* --- Évjelölés --- */
-#yearLabel {
-  position:absolute;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  font-weight:bold;
-  opacity:0.6;
-  font-size:16px;
+
+#statusCheckboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 4px;
 }
-.month td:not(:empty):hover {
-  background-color: #e0f0ff;
-  transition: background-color 0.2s ease;
+#statusCheckboxes label {
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+#dayEditor textarea {
+  resize: none;
+  height: 60px;
+  font-size: 13px;
+}
+
+#dayEditorButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+#dayEditorButtons button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#cancelEdit {
+  background: #e5e5e5;
+  color: #333;
+}
+#cancelEdit:hover {
+  background: #dcdcdc;
+}
+
+#saveEdit {
+  background: #0078d7;
+  color: white;
+}
+#saveEdit:hover {
+  background: #006ac3;
+}
+#saveEdit:active {
+  transform: scale(0.98);
+}
+.commentIcon {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 12px;
+  color: #0078d7;
+  cursor: pointer;
 }
 </style>
 </head>
@@ -147,340 +236,41 @@ input.muszak {
 
 <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
   <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
-  <input type="file" id="csvFile" accept=".csv" />
-  <button id="loadFromCloudBtn">☁️ Betöltés Firestore-ból</button>
+  <input type="file" id="csvFile" accept=".csv" style="display:none;">
+  <button id="loadFromCloudBtn" disabled>☁️ Betöltés Firestore-ból</button>
   <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
-  <button id="saveFirestoreBtn" style="display:none;">☁️ Mentés Firestore-ba</button>
-
+  <button id="saveFirestoreBtn" disabled>☁️ Mentés Firestore-ba</button>
 </div>
 
-<div id="calendar">
-  <div id="calendarPlaceholder">Naptár betöltése...</div>
+<div id="calendar"><div id="calendarPlaceholder">Naptár betöltése...</div></div>
+<div id="calendarLegend" style="display:none; margin-top:20px; padding:10px; background:#fff; border:1px solid #ccc; border-radius:5px; max-width:580px; font-size:14px;">
+  <strong>Jelmagyarázat:</strong>
+  <span style="background:#d3d3d3; padding:2px 6px; border-radius:3px; margin-left:5px;">Ledolgozott</span>
+  <span style="background:#99ccff; padding:2px 6px; border-radius:3px; margin-left:5px;">Ledolgozás</span>
+  <span style="background:#ffff99; padding:2px 6px; border-radius:3px; margin-left:5px;">Szabadság</span>
+  <span style="background:#cc99ff; padding:2px 6px; border-radius:3px; margin-left:5px;">Táppénz</span>
+  <span style="background:#ffeb99; padding:2px 6px; border-radius:3px; margin-left:5px;">Pihenő</span>
+  <span style="background:#f88; padding:2px 6px; border-radius:3px; margin-left:5px;">Ünnep</span>
 </div>
 
-<!-- Jelmagyarázat helye -->
-<div id="legend"></div>
-<div id="yearLabel"></div>
-
-<!-- Popup -->
-<div id="popupOverlay"></div>
-<div id="dayEditPopup">
-  <h3 id="popupTitle"></h3>
-  <label>Műszakom: <input type="number" id="editMuszak1" min="1" max="4"></label>
-  <label>Párom műszakja: <input type="number" id="editMuszak2" min="1" max="4"></label>
-  <label><input type="checkbox" id="editSzabadsag"> Szabadság</label>
-  <label><input type="checkbox" id="editTappenz"> Táppénz</label>
-  <label><input type="checkbox" id="editPiheno"> Pihenőnap</label>
-  <label><input type="checkbox" id="editLedolgozas"> Ledolgozás</label>
-  <label><input type="checkbox" id="editLedolgozott"> Ledolgoztam</label>
-  <label>Ledolgozott órák: <input type="number" id="editLedolgozottOra" min="0" max="24" value="8"></label>
-  <label>Túlóra órák: <input type="number" id="editTulora" min="0" max="24" value="0"></label>
-  <label><textarea id="editComment" rows="3" style="width:100%"></textarea> Komment</label>
-  <button id="saveDayEditBtn">Mentés</button>
-  <button id="closeDayEditBtn">Mégse</button>
+<!-- Bejelentkezés panel -->
+<div id="authBox">
+  <h4>🔐 Belépés</h4>
+  <input type="email" id="email" placeholder="Email"><br>
+  <input type="password" id="password" placeholder="Jelszó"><br>
+  <button id="loginBtn">Bejel.</button>
+  <button id="registerBtn">Regisztr.</button>
+  <button id="logoutBtn" style="display:none;">Kilépés</button>
+  <p id="loginStatus">❌ Nincs bejelentkezve</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script>
-const fileInput = document.getElementById('csvFile');
-const selectBtn = document.getElementById('selectFileBtn');
-const saveBtn = document.getElementById('saveCsvBtn');
-let data = [];
-
-selectBtn.addEventListener('click', () => fileInput.click());
-
-fileInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  Papa.parse(file, {
-    header: true,
-    delimiter: ';',
-    skipEmptyLines: true,
-    complete: function(results) {
-      data = results.data.map(d => ({
-        honap: parseInt(d.honap),
-        nap: parseInt(d.nap),
-        napIndex: parseInt(d.napIndex),
-        muszak1: parseInt(d.muszak1),
-        muszak2: parseInt(d.muszak2),
-        unnep: d.unnep === 'true',
-        piheno: d.piheno === 'true',
-        ledolgozas: d.ledolgozas === 'true',
-        szabadsag: d.szabadsag === 'true',
-        tappenz: d.tappenz === 'true',
-        ledolgozott: d.ledolgozott === 'true',
-        ledolgozottOra: d.ledolgozottOra ? parseInt(d.ledolgozottOra) : 8,
-        tulora: d.tulora ? parseInt(d.tulora) : 0,
-        komment: d.komment || ''
-      }));
-      renderCalendar();
-    }
-  });
-});
-
-async function loadCsvFromFirestore(docId) {
-  const docRef = doc(db, "naptarak", docId);
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    const csvText = docSnap.data().csv;
-    
-    // Parse CSV ugyanúgy, mint a helyi file-nál
-    const results = Papa.parse(csvText, {
-      header: true,
-      delimiter: ';',
-      skipEmptyLines: true
-    });
-
-    data = results.data.map(d => ({
-      honap: parseInt(d.honap),
-      nap: parseInt(d.nap),
-      napIndex: parseInt(d.napIndex),
-      muszak1: parseInt(d.muszak1),
-      muszak2: parseInt(d.muszak2),
-      unnep: d.unnep === 'true',
-      piheno: d.piheno === 'true',
-      ledolgozas: d.ledolgozas === 'true',
-      szabadsag: d.szabadsag === 'true',
-      tappenz: d.tappenz === 'true',
-      ledolgozott: d.ledolgozott === 'true',
-      ledolgozottOra: d.ledolgozottOra ? parseInt(d.ledolgozottOra) : 8,
-      tulora: d.tulora ? parseInt(d.tulora) : 0,
-      komment: d.komment || ''
-    }));
-
-    renderCalendar();  // Naptár frissítése
-  } else {
-    alert("Nincs ilyen naptár a Firestore-ban!");
-  }
-}
-
-const honapNevek = ['', 'Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
-const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
-
-function renderCalendar() {
-  // Placeholder eltávolítása
-  const placeholder = document.getElementById('calendarPlaceholder');
-  if (placeholder) placeholder.remove();
-
-  const months = [...new Set(data.map(d => d.honap))];
-  let html = '';
-
-  months.forEach(month => {
-    html += '<div class="month">';
-    html += `<h2>${honapNevek[month]}</h2>`;
-    html += '<table><tr><th>H</th><th>K</th><th>Sze</th><th>Cs</th><th>P</th><th>Szo</th><th>V</th></tr>';
-
-    const monthData = data.filter(d => d.honap === month);
-    let currentWeek = [];
-
-    for (let i = 0; i < monthData.length; i++) {
-      const day = monthData[i];
-      const classes = [];
-      if (day.ledolgozott) classes.push('ledolgozott');
-      if (day.szabadsag) classes.push('szabadsag');
-      if (day.tappenz) classes.push('tappenz');
-      if (day.ledolgozas) classes.push('ledolgozas');
-      if (day.piheno) classes.push('piheno');
-      if (day.unnep) classes.push('unnep');
-
-      if (day.nap === 1) {
-        for (let j = 1; j < day.napIndex; j++) currentWeek.push('<td></td>');
-      }
-
-      currentWeek.push(`
-        <td class="${classes.join(' ')}" data-index="${data.indexOf(day)}">
-          <div style="position: relative;">
-            <div style="font-weight:bold;">${day.nap}</div>
-            <div class="muszak-display" style="font-size:12px; margin-top:2px;">
-  ${muszakNevek[day.muszak1] || day.muszak1}/${muszakNevek[day.muszak2] || day.muszak2}
-</div>
-            ${day.komment.trim() !== '' ? '<span class="comment-icon">✏️</span>' : ''}
-          </div>
-        </td>
-      `);
-
-      if (day.napIndex === 7 || i === monthData.length - 1) {
-        html += '<tr>' + currentWeek.join('') + '</tr>';
-        currentWeek = [];
-      }
-    }
-
-    html += '</table></div>';
-  });
-
-  document.getElementById('calendar').innerHTML = html;
-
-  // Jelmagyarázat
-  document.getElementById('legend').innerHTML = `
-    <h3>🗓️ Jelmagyarázat</h3>
-    <div class="legend-item"><span class="color-box unnep"></span> Ünnepnap</div>
-    <div class="legend-item"><span class="color-box piheno"></span> Pihenőnap</div>
-    <div class="legend-item"><span class="color-box ledolgozas"></span> Ledolgozás</div>
-    <div class="legend-item"><span class="color-box szabadsag"></span> Szabadság</div>
-    <div class="legend-item"><span class="color-box tappenz"></span> Táppénz</div>
-  `;
-
-  const saveBtn = document.getElementById('saveCsvBtn');
-  if (saveBtn) {
-    saveBtn.style.display = 'inline-block';
-    saveBtn.onclick = exportTableToCSV;
-  }
-if (data && data.length > 0) {
-  document.getElementById('saveCsvBtn').style.display = 'inline-block';
-  document.getElementById('saveCsvBtn').onclick = exportTableToCSV;
-
-  document.getElementById('saveFirestoreBtn').style.display = 'inline-block';
-  document.getElementById('saveFirestoreBtn').onclick = () => exportTableToFirestore("myCalendarDoc");
-} else {
-  document.getElementById('saveCsvBtn').style.display = 'none';
-  document.getElementById('saveFirestoreBtn').style.display = 'none';
-}
-
-document.getElementById('loadFromCloudBtn').onclick = () => loadCsvFromFirestore("myCalendarDoc");
-
-  // Év alul
-  let detectedYear = new Date().getFullYear();
-  if (fileInput.files.length > 0) {
-    const match = fileInput.files[0].name.match(/(20\d{2})/);
-    if (match) detectedYear = match[1];
-  }
-  document.getElementById('yearLabel').innerText = detectedYear;
-
-  // Popup események
-  document.querySelectorAll('#calendar td').forEach(td => {
-    td.addEventListener('click', () => {
-      const idx = td.dataset.index;
-      if(idx === undefined) return;
-      const day = data[idx];
-
-      document.getElementById('popupTitle').innerText = `Nap: ${honapNevek[day.honap]} ${day.nap}.`;
-      document.getElementById('editMuszak1').value = day.muszak1;
-      document.getElementById('editMuszak2').value = day.muszak2;
-      document.getElementById('editSzabadsag').checked = day.szabadsag;
-      document.getElementById('editTappenz').checked = day.tappenz;
-      document.getElementById('editPiheno').checked = day.piheno;
-      document.getElementById('editLedolgozas').checked = day.ledolgozas;
-      document.getElementById('editLedolgozott').checked = day.ledolgozott;
-      document.getElementById('editLedolgozottOra').value = day.ledolgozottOra;
-      document.getElementById('editTulora').value = day.tulora;
-      document.getElementById('editComment').value = day.komment;
-
-      document.getElementById('popupOverlay').style.display = 'block';
-      document.getElementById('dayEditPopup').style.display = 'block';
-
-      document.getElementById('saveDayEditBtn').onclick = () => {
-        day.muszak1 = parseInt(document.getElementById('editMuszak1').value);
-        day.muszak2 = parseInt(document.getElementById('editMuszak2').value);
-        day.szabadsag = document.getElementById('editSzabadsag').checked;
-        day.tappenz = document.getElementById('editTappenz').checked;
-        day.piheno = document.getElementById('editPiheno').checked;
-        day.ledolgozas = document.getElementById('editLedolgozas').checked;
-        day.ledolgozott = document.getElementById('editLedolgozott').checked;
-        day.ledolgozottOra = parseInt(document.getElementById('editLedolgozottOra').value);
-        day.tulora = parseInt(document.getElementById('editTulora').value);
-        day.komment = document.getElementById('editComment').value;
-
-        closePopup();
-        renderCalendar();
-      };
-
-      document.getElementById('closeDayEditBtn').onclick = closePopup;
-      document.getElementById('popupOverlay').onclick = closePopup;
-
-      function closePopup() {
-        document.getElementById('popupOverlay').style.display = 'none';
-        document.getElementById('dayEditPopup').style.display = 'none';
-      }
-    });
-  });
-}
-
-async function exportTableToFirestore(docId) {
-  if (!data || data.length === 0) {
-    alert("Nincs betöltve naptár, nem lehet menteni!");
-    return;
-  }
-
-  const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
-  let csv = header;
-  data.forEach(d => {
-    const kommentEscaped = `"${(d.komment || '').replace(/"/g,'""')}"`;
-    csv += `${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};${kommentEscaped}\n`;
-  });
-
-  try {
-    await setDoc(doc(db, "naptarak", docId), { csv });
-    alert("Naptár mentve Firestore-ba!");
-  } catch (err) {
-    console.error(err);
-    alert("Hiba történt a mentés során.");
-  }
-}
-
-function exportTableToCSV() {
-  if (!data || data.length === 0) {
-    alert("Nincs betöltve naptár!");
-    return;
-  }
-
-  const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
-  let csv = header;
-
-  data.forEach(d => {
-    const kommentEscaped = `"${(d.komment || '').replace(/"/g,'""')}"`;
-    csv += `${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};${kommentEscaped}\n`;
-  });
-
-  const now = new Date();
-  const pad = n => n.toString().padStart(2,'0');
-  const fileName = `naptar_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.csv`;
-
-  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a); // hozzáadjuk a DOM-hoz
-  a.click();
-  document.body.removeChild(a); // majd eltávolítjuk
-  URL.revokeObjectURL(url);
-}
-
-// Gomb esemény hozzárendelése
-document.getElementById('saveCsvBtn').addEventListener('click', exportTableToCSV);
-
-async function exportTableToFirestore(docId) {
-  if (!data || data.length === 0) {
-    alert("Nincs betöltve naptár, nem lehet menteni!");
-    return;
-  }
-
-  const header = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
-  let csv = header;
-
-  data.forEach(d => {
-    const kommentEscaped = `"${(d.komment || '').replace(/"/g,'""')}"`;
-    csv += `${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};${kommentEscaped}\n`;
-  });
-
-  try {
-    await setDoc(doc(db, "naptarak", docId), { csv });
-    alert("Naptár mentve Firestore-ba!");
-  } catch (err) {
-    console.error(err);
-    alert("Hiba történt a mentés során.");
-  }
-}
-</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
-// --- Firebase config ---
+// --- Firebase konfiguráció ---
 const firebaseConfig = {
   apiKey: "AIzaSyDFK6o6sJnFJImBhkX_ZfQq6fXldLZt7vA",
   authDomain: "calendarformeapp.firebaseapp.com",
@@ -489,71 +279,282 @@ const firebaseConfig = {
   messagingSenderId: "421913143205",
   appId: "1:421913143205:web:24dc04f3c768f99356aa4c"
 };
-
-// --- Init Firebase ---
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// --- HTML elemek ---
-const loginContainer = document.createElement('div');
-loginContainer.innerHTML = `
-  <div id="authBox" style="margin-bottom:15px; padding:10px; border:1px solid #ccc; background:#fff;">
-    <h3>🔐 Bejelentkezés</h3>
-    <input type="email" id="email" placeholder="Email" style="padding:5px;"><br>
-    <input type="password" id="password" placeholder="Jelszó" style="padding:5px; margin-top:5px;"><br>
-    <button id="loginBtn">Bejelentkezés</button>
-    <button id="registerBtn">Regisztráció</button>
-    <button id="logoutBtn" style="display:none;">Kijelentkezés</button>
-    <p id="loginStatus"></p>
-  </div>
-`;
-document.body.prepend(loginContainer);
+// --- Globális változók ---
+let data = [];
+const honapNevek = ['', 'Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
+const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
 
-// --- Login / Register / Logout ---
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (err) {
-    alert("Hiba a bejelentkezéskor: " + err.message);
-  }
+// --- Auth állapot figyelése ---
+const emailInput = document.getElementById('email');
+const passInput = document.getElementById('password');
+const loginStatus = document.getElementById('loginStatus');
+const logoutBtn = document.getElementById('logoutBtn');
+const loadBtn = document.getElementById('loadFromCloudBtn');
+const saveBtn = document.getElementById('saveFirestoreBtn');
+
+document.getElementById('loginBtn').onclick = async () => {
+  try { await signInWithEmailAndPassword(auth, emailInput.value, passInput.value); } 
+  catch(e){ alert("Hiba: "+e.message); }
 };
-
-document.getElementById("registerBtn").onclick = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    alert("Sikeres regisztráció! Most már be vagy jelentkezve.");
-  } catch (err) {
-    alert("Regisztrációs hiba: " + err.message);
-  }
+document.getElementById('registerBtn').onclick = async () => {
+  try { await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value); alert("✅ Regisztráció sikeres"); } 
+  catch(e){ alert("Hiba: "+e.message); }
 };
+logoutBtn.onclick = async () => { await signOut(auth); };
 
-document.getElementById("logoutBtn").onclick = async () => {
-  await signOut(auth);
-};
-
-// --- Auth állapotfigyelő ---
-onAuthStateChanged(auth, (user) => {
-  const status = document.getElementById("loginStatus");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  if (user) {
-    status.textContent = "✅ Bejelentkezve: " + user.email;
+onAuthStateChanged(auth, user => {
+  if(user){
+    loginStatus.textContent = "👤 "+user.email;
     logoutBtn.style.display = "inline-block";
-    document.getElementById("saveFirestoreBtn").disabled = false;
-  } else {
-    status.textContent = "❌ Nincs bejelentkezve";
+    loadBtn.disabled = false;
+    saveBtn.disabled = false;
+  }else{
+    loginStatus.textContent = "🚫 Nincs bejelentkezve";
     logoutBtn.style.display = "none";
-    document.getElementById("saveFirestoreBtn").disabled = true;
+    loadBtn.disabled = true;
+    saveBtn.disabled = true;
   }
 });
 
-// --- Export függvények elérhetővé tétele ---
-window.db = db;
+// --- CSV megnyitása---
+const fileInput = document.getElementById('csvFile');
+document.getElementById('selectFileBtn').onclick = () => fileInput.click();
+fileInput.onchange = e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  Papa.parse(file, { header:true, delimiter:';', complete: (results) => {
+  data = results.data.map(d => ({
+  honap:+d.honap, nap:+d.nap, napIndex:+d.napIndex,
+  muszak1:+d.muszak1, muszak2:+d.muszak2,
+  unnep:d.unnep === 'true',
+  szabadsag:d.szabadsag === 'true',
+  tappenz:d.tappenz === 'true',
+  piheno:d.piheno === 'true',
+  ledolgozas:d.ledolgozas === 'true',
+  ledolgozott:d.ledolgozott === 'true',
+  ledolgozottOra:+d.ledolgozottOra,
+  tulora:+d.tulora,
+  komment:d.komment || ''
+}));
+    renderCalendarFS();
+  }});
+};
+
+// --- Firestore mentés ---
+saveBtn.onclick = async () => {
+  if(!auth.currentUser){ alert("Jelentkezz be!"); return; }
+  if(!data.length){ alert("Nincs adat!"); return; }
+  let csv="honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
+  data.forEach(d=>{
+    csv+=`${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};"${(d.komment||'').replace(/"/g,'""')}"\n`;
+  });
+  try{ await setDoc(doc(db,"naptarak",auth.currentUser.uid),{csv}); alert("✅ Mentve!"); }
+  catch(e){ alert("Mentési hiba: "+e.message); }
+};
+
+// --- Firestore betöltés ---
+loadBtn.onclick = async () => {
+  if(!auth.currentUser){ alert("Jelentkezz be!"); return; }
+  const snap = await getDoc(doc(db,"naptarak",auth.currentUser.uid));
+  if(snap.exists()){
+    const csvText = snap.data().csv;
+    const results = Papa.parse(csvText,{header:true,delimiter:';'});
+    data = results.data.map(d => ({
+      honap:+d.honap, nap:+d.nap, napIndex:+d.napIndex,
+      muszak1:+d.muszak1, muszak2:+d.muszak2,
+      unnep:d.unnep === 'true',
+      szabadsag:d.szabadsag === 'true',
+      tappenz:d.tappenz === 'true',
+      piheno:d.piheno === 'true',
+      ledolgozas:d.ledolgozas === 'true',
+      ledolgozott:d.ledolgozott === 'true',
+      ledolgozottOra:+d.ledolgozottOra,
+      tulora:+d.tulora,
+      komment:d.komment || ''
+    }));
+    renderCalendarFS();
+  } else alert("Nincs mentett naptár!");
+};
+
+// --- Naptár kirajzolás ---
+function renderCalendarFS() {
+  const cal = document.getElementById('calendar');
+  cal.innerHTML = '';
+  if (!data.length) {
+    cal.innerHTML = '<div id="calendarPlaceholder">Naptár betöltése...</div>';
+    return;
+  }
+
+  for (let honap = 1; honap <= 12; honap++) {
+    const monthData = data.filter(d => d.honap === honap);
+    if (!monthData.length) continue;
+
+    const monthDiv = document.createElement('div');
+    monthDiv.className = 'month';
+    monthDiv.innerHTML = `<h2>${honapNevek[honap]}</h2>`;
+
+    const tbl = document.createElement('table');
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['H','K','Sze','Cs','P','Szo','V'].forEach(d => {
+      const th = document.createElement('th');
+      th.textContent = d;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    tbl.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    let currentRow = document.createElement('tr');
+
+    //Üres cellák az első nap előtt
+    const firstDay = monthData[0];
+    for (let i = 1; i < firstDay.napIndex; i++) {
+      currentRow.appendChild(document.createElement('td'));
+    }
+
+    monthData.forEach((day, idx) => {
+      const td = document.createElement('td');
+
+      const napDiv = document.createElement('div');
+      napDiv.textContent = day.nap;
+      napDiv.style.fontWeight = 'bold';
+
+      const muszakDiv = document.createElement('div');
+      muszakDiv.style.fontSize = '12px';
+      muszakDiv.style.color = '#333';
+      const m1 = muszakNevek[day.muszak1] || (day.muszak1 ? day.muszak1 : '');
+      const m2 = muszakNevek[day.muszak2] || (day.muszak2 ? day.muszak2 : '');
+      muszakDiv.textContent = `${m1 || ''}${m1 && m2 ? '/' : ''}${m2 || ''}`;
+      if(day.komment && day.komment.trim() !== '') {
+      const icon = document.createElement('span');
+      icon.className = 'commentIcon';
+      icon.innerHTML = '✏️'; // ceruza emoji
+      icon.title = day.komment; // hoverkor megjelenik a komment
+      td.appendChild(icon);
+      }
+
+      td.appendChild(napDiv);
+      td.appendChild(muszakDiv);
+
+      if (day.unnep) td.classList.add('unnep'); 
+      if (day.szabadsag) td.classList.add('szabadsag');
+      if (day.piheno) td.classList.add('piheno');
+      if (day.ledolgozas) td.classList.add('ledolgozas');
+      if (day.tappenz) td.classList.add('tappenz');
+      if (day.ledolgozott) td.classList.add('ledolgozott');
+
+      td.onclick = () => openDayEditor(day);
+      currentRow.appendChild(td);
+
+      if (day.napIndex === 7) {
+        tbody.appendChild(currentRow);
+        currentRow = document.createElement('tr');
+      }
+    });
+    if(currentRow.children.length) tbody.appendChild(currentRow);
+    tbl.appendChild(tbody);
+    monthDiv.appendChild(tbl);
+    cal.appendChild(monthDiv);
+    if(data && data.length > 0){
+        document.getElementById('calendarLegend').style.display = 'block';
+    } else {
+        document.getElementById('calendarLegend').style.display = 'none';
+    }
+  }
+}
+
+// --- Nap szerkesztő popup ---
+let editingDay = null;
+const overlay = document.createElement('div'); overlay.id='overlay';
+const dayEditor = document.createElement('div'); dayEditor.id='dayEditor';
+overlay.appendChild(dayEditor);
+document.body.appendChild(overlay);
+
+dayEditor.innerHTML = `
+<h3><span id="dayDate"></span> szerkesztése</h3>
+<label for="muszak1Select">Saját műszak:</label>
+<select id="muszak1Select">
+  <option value="1">DE</option>
+  <option value="2">DE</option>
+  <option value="3">DU</option>
+  <option value="4">ÉJ</option>
+</select>
+<label for="muszak2Select">Párod műszaka:</label>
+<select id="muszak2Select">
+  <option value="2">DE</option>
+  <option value="3">DU</option>
+  <option value="4">ÉJ</option>
+</select>
+<label for="ledolgozottOra">Ledolgozott órák:</label>
+<input type="number" id="ledolgozottOra" min="0" value="0">
+<label for="tulora">Túlóra órák:</label>
+<input type="number" id="tulora" min="0" value="0">
+<label>Státuszok:</label>
+<div id="statusCheckboxes">
+  <label><input type="checkbox" id="ledolgozott"> Ledolgozott</label>
+  <label><input type="checkbox" id="ledolgozas"> Ledolgozás</label>
+  <label><input type="checkbox" id="szabadsag"> Szabadság</label>
+  <label><input type="checkbox" id="tappenz"> Táppénz</label>
+  <label><input type="checkbox" id="piheno"> Pihenő</label>
+  <label><input type="checkbox" id="unnep"> Ünnep</label>
+</div>
+<label for="komment">Komment:</label>
+<textarea id="komment"></textarea>
+<div id="dayEditorButtons">
+  <button id="cancelEdit">Mégse</button>
+  <button id="saveEdit">Mentés</button>
+</div>
+`;
+
+const ledolgozottOraInput = document.getElementById('ledolgozottOra');
+const tuloraInput = document.getElementById('tulora');
+const kommentInput = document.getElementById('komment');
+const statusInputs = {
+  ledolgozott: document.getElementById('ledolgozott'),
+  ledolgozas: document.getElementById('ledolgozas'),
+  szabadsag: document.getElementById('szabadsag'),
+  tappenz: document.getElementById('tappenz'),
+  piheno: document.getElementById('piheno'),
+  unnep: document.getElementById('unnep')
+};
+
+document.getElementById('cancelEdit').onclick = () => { 
+  overlay.style.display='none'; 
+  dayEditor.style.display='none';
+};
+document.getElementById('saveEdit').onclick = () => {
+  if(!editingDay) return;
+  editingDay.muszak1 = muszak1Select.value ? +muszak1Select.value : 0;
+  editingDay.muszak2 = muszak2Select.value ? +muszak2Select.value : 0;
+  editingDay.ledolgozottOra = +ledolgozottOraInput.value || 0;
+  editingDay.tulora = +tuloraInput.value || 0;
+  editingDay.komment = kommentInput.value || '';
+  Object.keys(statusInputs).forEach(k => editingDay[k] = statusInputs[k].checked);
+  overlay.style.display='none';
+  dayEditor.style.display='none';
+  renderCalendarFS();
+};
+
+function openDayEditor(day){
+  editingDay = day;
+
+  const dayDateSpan = document.getElementById('dayDate');
+  dayDateSpan.textContent = `${day.honap.toString().padStart(2,'0')}.${day.nap.toString().padStart(2,'0')}.`;
+
+  muszak1Select.value = day.muszak1 || '';
+  muszak2Select.value = day.muszak2 || '';
+  ledolgozottOraInput.value = day.ledolgozottOra || 0;
+  tuloraInput.value = day.tulora || 0;
+  kommentInput.value = day.komment || '';
+  Object.keys(statusInputs).forEach(k => statusInputs[k].checked = !!day[k]);
+  overlay.style.display='block';
+  dayEditor.style.display='block';
+}
 </script>
 </body>
 </html>
