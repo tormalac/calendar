@@ -96,6 +96,23 @@ body {
 .piheno { background-color:#ffeb99; }
 .unnep { background-color:#f88; }
 
+/* ---Mainmenü---*/
+#fileUploadContainer button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
+  background: #0078d7;
+  color: white;
+}
+#fileUploadContainer button:disabled {
+    background-color: gray;
+    color: #ccc;
+    cursor: not-allowed;  /* mutató jelezze, hogy nem kattintható */
+}
 /* --- Nap szerkesztő popup --- */
 #overlay {
   position: fixed;
@@ -237,9 +254,9 @@ body {
 <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
   <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
   <input type="file" id="csvFile" accept=".csv" style="display:none;">
-  <button id="loadFromCloudBtn" disabled>☁️ Betöltés Firestore-ból</button>
+  <button id="loadFromCloudBtn" disabled>⬇️ Betöltés Firestore-ból</button>
+  <button id="saveFirestoreBtn" disabled>⬆️ Mentés Firestore-ba</button>
   <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
-  <button id="saveFirestoreBtn" disabled>☁️ Mentés Firestore-ba</button>
 </div>
 
 <div id="calendar"><div id="calendarPlaceholder">Naptár betöltése...</div></div>
