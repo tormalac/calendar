@@ -14,7 +14,7 @@ body {
 }
 
 /* 🔹 Bejelentkezés panel jobb felső sarokban */
-#authBox {
+/*#authBox {
   position: fixed;
   top: 10px;
   right: 10px;
@@ -25,22 +25,50 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   font-size: 14px;
   z-index: 100;
+}*/
+#authBox {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: row;      
+  align-items: center;      
+  gap: 8px;                
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-size: 14px;
+  z-index: 100;
+}
+#authBox h4 {
+  white-space: nowrap;
 }
 #authBox input {
   width: 160px;
   margin: 2px 0;
   font-size: 13px;
   padding: 3px;
+  white-space: nowrap;
 }
 #authBox button {
-  font-size: 13px;
   margin: 3px 2px;
-  padding: 3px 6px;
   cursor: pointer;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
 }
 #authBox p {
   margin: 5px 0 0 0;
   font-size: 13px;
+}
+#authBox button:hover {
+  background: #dcdcdc;
 }
 
 /* --- Naptár stílusok --- */
@@ -74,7 +102,7 @@ body {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 .month th, .month td {
-  border:1px solid #333;
+  border: none;
   padding:5px;
   text-align:center;
   width:14.28%;
@@ -88,6 +116,15 @@ body {
   font-size: 11px;
   color: #444;
   opacity: 0.9;
+}
+.month td:not(:empty) {
+    border-radius: 3px;
+    padding: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+.month td:not(:empty):hover {
+    background-color: #cfe8ff !important;
 }
 .ledolgozott { background-color:#d3d3d3 !important; }
 .szabadsag { background-color:#ffff99 !important; }
@@ -109,9 +146,15 @@ body {
   color: white;
 }
 #fileUploadContainer button:disabled {
-    background-color: gray;
-    color: #ccc;
-    cursor: not-allowed;  /* mutató jelezze, hogy nem kattintható */
+    background-color: #b0b0b0;
+    color: #eee;
+    cursor: not-allowed;
+}
+#fileUploadContainer button:hover {
+    background: #006ac3;
+}
+#fileUploadContainer button:disabled:hover {
+    background-color: #b0b0b0 !important;
 }
 /* --- Nap szerkesztő popup --- */
 #overlay {
@@ -275,8 +318,8 @@ body {
   <h4>🔐 Belépés</h4>
   <input type="email" id="email" placeholder="Email"><br>
   <input type="password" id="password" placeholder="Jelszó"><br>
-  <button id="loginBtn">Bejel.</button>
-  <button id="registerBtn">Regisztr.</button>
+  <button id="loginBtn">Bejelentkezés</button>
+  <button id="registerBtn">Regisztráció</button>
   <button id="logoutBtn" style="display:none;">Kilépés</button>
   <p id="loginStatus">❌ Nincs bejelentkezve</p>
 </div>
