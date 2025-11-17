@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -92,6 +93,51 @@ body {
 }
 #fileUploadContainer button:disabled:hover {
     background-color: #b0b0b0 !important;
+}
+/* ---Naptár legend --- */
+#calendarLegend {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  max-width: 680px;
+  font-size: 14px;
+}
+
+#calendarLegend span {
+  margin: 5px 10px 5px 0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  #calendarLegend {
+    justify-content: center; /* Igazítja a legendát középre */
+    padding: 10px;
+  }
+
+  #calendarLegend span {
+    margin: 5px 10px 5px 0;
+    font-size: 12px; /* Csökkentsük a betűméretet */
+    white-space: nowrap; /* Megakadályozza, hogy a szöveg törjön */
+  }
+}
+
+@media (max-width: 480px) {
+  #calendarLegend {
+    flex-direction: column; /* Mobil nézetben függőlegesen rendezi el az elemeket */
+    align-items: flex-start; /* Balra igazítja a legendát */
+  }
+
+  #calendarLegend span {
+    margin: 5px 0;
+    font-size: 12px;
+  }
 }
 /* --- Naptár stílusok --- */
 #calendar {
@@ -314,7 +360,7 @@ body {
 </div>
 
 <div id="calendar"><div id="calendarPlaceholder">Naptár betöltése...</div></div>
-<div id="calendarLegend" style="display:none; margin-top:20px; padding:10px; background:#fff; border:1px solid #ccc; border-radius:5px; max-width:680px; font-size:14px;">
+<div id="calendarLegend" style="display:none;">
   <strong>Jelmagyarázat:</strong>
   <span style="background:#d3d3d3; padding:2px 6px; border-radius:3px; margin-left:5px;">Ledolgozott</span>
   <span style="background:#99ccff; padding:2px 6px; border-radius:3px; margin-left:5px;">Ledolgozás</span>
