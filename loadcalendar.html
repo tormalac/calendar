@@ -12,10 +12,17 @@ body {
   min-height: 100vh;
   padding-bottom: 60px;
 }
-
-/* 🔹 Bejelentkezés panel jobb felső sarokban */
+#topBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
 /*#authBox {
-  position: fixed;
+  display: flex;
+  justify-content: flex-end;
   top: 10px;
   right: 10px;
   background: #fff;
@@ -69,23 +76,6 @@ body {
 }
 #authBox button:hover {
   background: #dcdcdc;
-}
-@media (max-width: 650px) {
-  #authBox {
-    position: static;         /* ne legyen a jobb felső sarokhoz rögzítve */
-    margin-bottom: 10px;      /* helyet hagy a gombok felett */
-    width: 100%;
-    box-sizing: border-box;
-
-    display: flex;
-    flex-direction: column;   /* egymás alá teszi az elemeket mobilon */
-    gap: 6px;
-  }
-
-  #authBox input,
-  #authBox button {
-    width: 100%;              /* szép, könnyen használható mobil nézet */
-  }
 }
 
 /* --- Naptár stílusok --- */
@@ -310,13 +300,25 @@ body {
 <body>
 
 <h1>Naptár szerkesztő</h1>
-
+<div id="topBar">
+<!-- Fájl feltöltések -->
 <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
   <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
   <input type="file" id="csvFile" accept=".csv" style="display:none;">
   <button id="loadFromCloudBtn" disabled>⬇️ Betöltés Firestore-ból</button>
   <button id="saveFirestoreBtn" disabled>⬆️ Mentés Firestore-ba</button>
   <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
+</div>
+<!-- Bejelentkezés panel -->
+<div id="authBox">
+  <h4>🔐 Belépés</h4>
+  <input type="email" id="email" placeholder="Email"><br>
+  <input type="password" id="password" placeholder="Jelszó"><br>
+  <button id="loginBtn">Bejelentkezés</button>
+  <button id="registerBtn">Regisztráció</button>
+  <button id="logoutBtn" style="display:none;">Kilépés</button>
+  <p id="loginStatus">❌ Nincs bejelentkezve</p>
+</div>
 </div>
 
 <div id="calendar"><div id="calendarPlaceholder">Naptár betöltése...</div></div>
@@ -328,17 +330,6 @@ body {
   <span style="background:#cc99ff; padding:2px 6px; border-radius:3px; margin-left:5px;">Táppénz</span>
   <span style="background:#ffeb99; padding:2px 6px; border-radius:3px; margin-left:5px;">Pihenő</span>
   <span style="background:#f88; padding:2px 6px; border-radius:3px; margin-left:5px;">Ünnep</span>
-</div>
-
-<!-- Bejelentkezés panel -->
-<div id="authBox">
-  <h4>🔐 Belépés</h4>
-  <input type="email" id="email" placeholder="Email"><br>
-  <input type="password" id="password" placeholder="Jelszó"><br>
-  <button id="loginBtn">Bejelentkezés</button>
-  <button id="registerBtn">Regisztráció</button>
-  <button id="logoutBtn" style="display:none;">Kilépés</button>
-  <p id="loginStatus">❌ Nincs bejelentkezve</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
