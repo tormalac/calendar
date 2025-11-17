@@ -12,6 +12,11 @@ body {
   min-height: 100vh;
 }
 #topBar {
+  display: flex;
+  justify-content: space-between; /* balra-jobbra rendezés */
+  align-items: center; /* középre igazítás függőlegesen */
+  padding: 0 1rem;
+  flex-wrap: wrap; /* ha nagyon szűk a képernyő, sorba törhetnek az elemek */
   position: fixed;
   top: 0;
   left: 0;
@@ -21,9 +26,7 @@ body {
   z-index: 1000;
 }
 #topBar h1 {
-  position: absolute;
-  top: 0px;
-  left: 20px;
+  font-size: 24px;
 }
 #authBox {
   display: flex;
@@ -95,7 +98,7 @@ body {
   display:flex;
   flex-wrap:wrap;
   gap:20px;
-  margin-top: 160px;
+  margin-top: 100px;
   justify-content:flex-start;
   min-height:200px;
 }
@@ -290,6 +293,14 @@ body {
 
 <div id="topBar">
 <h1>Naptár szerkesztő</h1>
+<!-- Fájl feltöltések -->
+<div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
+  <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
+  <input type="file" id="csvFile" accept=".csv" style="display:none;">
+  <button id="loadFromCloudBtn" disabled>⬇️ Betöltés Firestore-ból</button>
+  <button id="saveFirestoreBtn" disabled>⬆️ Mentés Firestore-ba</button>
+  <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
+</div>
 <!-- Bejelentkezés panel -->
 <div id="authBox">
   <h4>🔐 Belépés</h4>
@@ -299,14 +310,6 @@ body {
   <button id="registerBtn">Regisztráció</button>
   <button id="logoutBtn" style="display:none;">Kilépés</button>
   <p id="loginStatus">❌ Nincs bejelentkezve</p>
-</div>
-<!-- Fájl feltöltések -->
-<div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
-  <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
-  <input type="file" id="csvFile" accept=".csv" style="display:none;">
-  <button id="loadFromCloudBtn" disabled>⬇️ Betöltés Firestore-ból</button>
-  <button id="saveFirestoreBtn" disabled>⬆️ Mentés Firestore-ba</button>
-  <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
 </div>
 </div>
 
