@@ -70,6 +70,23 @@ body {
 #authBox button:hover {
   background: #dcdcdc;
 }
+@media (max-width: 650px) {
+  #authBox {
+    position: static;         /* ne legyen a jobb felső sarokhoz rögzítve */
+    margin-bottom: 10px;      /* helyet hagy a gombok felett */
+    width: 100%;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;   /* egymás alá teszi az elemeket mobilon */
+    gap: 6px;
+  }
+
+  #authBox input,
+  #authBox button {
+    width: 100%;              /* szép, könnyen használható mobil nézet */
+  }
+}
 
 /* --- Naptár stílusok --- */
 #calendar {
