@@ -391,8 +391,28 @@ const auth = getAuth(app);
 
 // --- Globális változók ---
 let data = [];
+// oldal betöltésekor
+const saved = localStorage.getItem('calendarData');
+if (saved) {
+  try {
+    // Ha van mentett adat, próbáld meg betölteni
+    data = JSON.parse(saved);
+  } catch (e) {
+    // Ha hiba történik a parse során, csak üres tömböt használj
+    console.error('Hiba történt az adatok betöltésekor:', e);
+    data = [];
+  }
+}
 const honapNevek = ['', 'Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
 const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
+
+renderCalendarFS();
+updateSaveButtonVisibility();
+
+// --- Mentés localStorage-be ---
+function saveData() {
+  localStorage.setItem('calendarData', JSON.stringify(data));
+}
 
 // --- Auth állapot figyelése ---
 const emailInput = document.getElementById('email');
@@ -457,6 +477,7 @@ fileInput.onchange = e => {
   komment:d.komment || ''
 }));
     updateSaveButtonVisibility();
+    saveData();
     renderCalendarFS();
   }});
 };
@@ -494,6 +515,7 @@ loadBtn.onclick = async () => {
       komment:d.komment || ''
     }));
     updateSaveButtonVisibility();
+    saveData();
     renderCalendarFS();
   } else alert("Nincs mentett naptár!");
 };
@@ -685,6 +707,7 @@ document.getElementById('saveEdit').onclick = () => {
   Object.keys(statusInputs).forEach(k => editingDay[k] = statusInputs[k].checked);
   overlay.style.display='none';
   dayEditor.style.display='none';
+  saveData();
   renderCalendarFS();
 };
 
