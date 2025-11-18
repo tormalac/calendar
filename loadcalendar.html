@@ -14,6 +14,7 @@ body {
 #topBar {
   display: flex;
   position: fixed;
+  flex-direction: row;
   top: 0;
   left: 0;
   width: 100%;
@@ -21,6 +22,11 @@ body {
   background: #fff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   z-index: 1000;
+}
+@media (max-width: 600px) {
+  #topBar {
+    flex-direction: column;   /* mobilon egymás alá kerülnek */
+  }
 }
 #topBar h1 {
   display: inline;
