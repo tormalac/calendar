@@ -17,30 +17,26 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  padding: 0px 20px;
+  padding: 5px 20px;
   background: #fff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   z-index: 1000;
 }
 #topBar h1 {
+  display: inline;
   font-size: 24px;
 }
-#topRow {
-  display: block;
-}
 #authBox {
-  padding-left: 20px;
   display: flex;
-  justify-content: flex-end;      
-  align-items: center;      
-  gap: 8px;                
-  background: #fff;
+  justify-content: space-between;
+  align-items: center;   
+  gap: 4px;
   font-size: 14px;
   z-index: 100;
 }
 #authBox h2 {
-  display: block;
-  width: 100%;
+  font-size: 14px;
+  white-space: nowrap;
 }
 #authBox input {
   width: 160px;
@@ -50,9 +46,8 @@ body {
   white-space: nowrap;
 }
 #authBox button {
-  margin: 3px 2px;
   cursor: pointer;
-  padding: 6px 14px;
+  padding: 6px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -69,10 +64,16 @@ body {
 }
 /* ---Mainmenü---*/
 #fileUploadContainer {
-  padding-bottom: 10px;
+  margin: 0px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;   
+  gap: 4px;
+  font-size: 14px;
+  z-index: 100;
 }
 #fileUploadContainer button {
-  padding: 6px 14px;
+  padding: 6px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -447,19 +448,17 @@ body {
 <body>
 
 <div id="topBar">
- <div id="topRow">
  <h1>Naptár szerkesztő</h1>
 <!-- Fájl feltöltések -->
-  <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
+ <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
   <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
   <input type="file" id="csvFile" accept=".csv" style="display:none;">
   <button id="loadFromCloudBtn" disabled>⬇️ Betöltés Firestore-ból</button>
   <button id="saveFirestoreBtn" disabled>⬆️ Mentés Firestore-ba</button>
   <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
-  </div>
  </div>
 <!-- Bejelentkezés panel -->
-  <div id="authBox">
+ <div id="authBox">
   <h2>🔐 Belépés</h2>
   <input type="email" id="email" placeholder="Email"><br>
   <input type="password" id="password" placeholder="Jelszó"><br>
@@ -467,7 +466,7 @@ body {
   <button id="registerBtn">Regisztráció</button>
   <button id="logoutBtn" style="display:none;">Kilépés</button>
   <p id="loginStatus">❌ Nincs bejelentkezve</p>
-  </div>
+ </div>
 </div>
 
 <!-- Sidebar -->
