@@ -14,7 +14,8 @@ body {
 #topBar {
   display: flex;
   position: fixed;
-  flex-direction: row;
+  flex-direction: column;
+  align-items: stretch;
   top: 0;
   left: 0;
   width: 100%;
@@ -23,20 +24,16 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   z-index: 1000;
 }
-@media (max-width: 600px) {
-  #topBar {
-    flex-direction: column;   /* mobilon egymás alá kerülnek */
-  }
-}
 #topBar h1 {
   display: inline;
   font-size: 24px;
 }
 #authBox {
+  position: fixed;
+  top: 10px;
+  right: 80px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;   
-  gap: 4px;
+  gap: 6px;
   font-size: 14px;
   z-index: 100;
 }
@@ -46,6 +43,7 @@ body {
 }
 #authBox input {
   width: 160px;
+  height: 18px;
   margin: 2px 0;
   font-size: 13px;
   padding: 3px;
@@ -53,7 +51,7 @@ body {
 }
 #authBox button {
   cursor: pointer;
-  padding: 6px;
+  padding: 6px 12px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -69,18 +67,13 @@ body {
   background: #dcdcdc;
 }
 /* ---Mainmenü---*/
-#fileUploadContainer {
-  margin: 0px 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;   
-  gap: 4px;
+#fileUploadContainer {  
   font-size: 14px;
   z-index: 100;
 }
 #fileUploadContainer button {
-  display: inline-block;
-  padding: 6px;
+  white-space: nowrap;
+  padding: 6px 12px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -456,14 +449,6 @@ body {
 
 <div id="topBar">
  <h1>Naptár szerkesztő</h1>
-<!-- Fájl feltöltések -->
- <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
-  <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
-  <input type="file" id="csvFile" accept=".csv" style="display:none;">
-  <button id="loadFromCloudBtn" disabled>⬇️ Betöltés Firestore-ból</button>
-  <button id="saveFirestoreBtn" disabled>⬆️ Mentés Firestore-ba</button>
-  <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
- </div>
 <!-- Bejelentkezés panel -->
  <div id="authBox">
   <h2>🔐 Belépés</h2>
@@ -473,6 +458,14 @@ body {
   <button id="registerBtn">Regisztráció</button>
   <button id="logoutBtn" style="display:none;">Kilépés</button>
   <p id="loginStatus">❌ Nincs bejelentkezve</p>
+ </div>
+<!-- Fájl feltöltések -->
+ <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
+  <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
+  <input type="file" id="csvFile" accept=".csv" style="display:none;">
+  <button id="loadFromCloudBtn" disabled>⬇️ Betöltés Firestore-ból</button>
+  <button id="saveFirestoreBtn" disabled>⬆️ Mentés Firestore-ba</button>
+  <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
  </div>
 </div>
 
