@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -14,14 +13,11 @@ body {
 }
 #topBar {
   display: flex;
-  justify-content: space-between; /* balra-jobbra rendezés */
-  align-items: center; /* középre igazítás függőlegesen */
-  padding: 0 1rem;
-  flex-wrap: wrap; /* ha nagyon szűk a képernyő, sorba törhetnek az elemek */
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
+  padding: 0px 20px;
   background: #fff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   z-index: 1000;
@@ -29,19 +25,22 @@ body {
 #topBar h1 {
   font-size: 24px;
 }
+#topRow {
+  display: block;
+}
 #authBox {
+  padding-left: 20px;
   display: flex;
-  flex-direction: row;
   justify-content: flex-end;      
   align-items: center;      
   gap: 8px;                
   background: #fff;
-  padding: 8px;
   font-size: 14px;
   z-index: 100;
 }
-#authBox h4 {
-  white-space: nowrap;
+#authBox h2 {
+  display: block;
+  width: 100%;
 }
 #authBox input {
   width: 160px;
@@ -70,7 +69,7 @@ body {
 }
 /* ---Mainmenü---*/
 #fileUploadContainer {
-  padding: 20px;
+  padding-bottom: 10px;
 }
 #fileUploadContainer button {
   padding: 6px 14px;
@@ -333,31 +332,170 @@ body {
   color: #0078d7;
   cursor: pointer;
 }
+#settingsButton {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  background: #f5f7fa;
+  border: none;
+  font-size: 36px;
+  cursor: pointer;
+  z-index: 2000;
+}
+
+#settingsButton:hover {
+  transform: scale(1.1);
+}
+
+#settingsButton:active {
+  transform: scale(0.95);
+}
+#settingsSidebar {
+  position: fixed;
+  top: 0;
+  right: -320px;   /* Kezdés: teljesen kívül */
+  width: 300px;
+  height: 100%;
+  background: #fdfdfd;
+  box-shadow: -3px 0 8px rgba(0,0,0,0.25);
+  border-left: 1px solid #ccc;
+  padding: 20px;
+  z-index: 2500;
+  transition: right 0.35s ease;
+}
+#settingsSidebar.open {
+  right: 0;        /* Becsúszik */
+}
+
+/* Bezáró gomb */
+#closeSidebar {
+  display: block;
+  margin-bottom: 20px;
+  padding: 8px 12px;
+  background: #e5e5e5;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+}
+#closeSidebar:hover {
+  background: #d4d4d4;
+}
+#settingsSidebar h2 {
+  margin: 60px 0px 0px 0px;
+  text-align: center;
+  font-size: 20px;
+  color: #222;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
+}
+#settingsSidebar h3 {
+  font-size: 18px;
+  font-weight: normal;
+}
+
+#settingsSidebar label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+  color: #333;
+}
+
+#settingsSidebar select,
+#settingsSidebar input,
+#settingsSidebar textarea {
+  width: 100%;
+  padding: 6px 8px;
+  margin-top: 3px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+#settingsSidebar select:focus,
+#settingsSidebar input:focus,
+#settingsSidebar textarea:focus {
+  border-color: #0078d7;
+  outline: none;
+}
+
+#settingsSidebar textarea {
+  resize: none;
+  height: 60px;
+  font-size: 13px;
+}
+
+#settingsSidebar button {
+  margin: 12px 0px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
+}
+#settingsSidebar button:hover {
+  background: #dcdcdc;
+}
 </style>
 </head>
 <body>
 
 <div id="topBar">
-<h1>Naptár szerkesztő</h1>
+ <div id="topRow">
+ <h1>Naptár szerkesztő</h1>
 <!-- Fájl feltöltések -->
-<div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
+  <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
   <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
   <input type="file" id="csvFile" accept=".csv" style="display:none;">
   <button id="loadFromCloudBtn" disabled>⬇️ Betöltés Firestore-ból</button>
   <button id="saveFirestoreBtn" disabled>⬆️ Mentés Firestore-ba</button>
   <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
-</div>
+  </div>
+ </div>
 <!-- Bejelentkezés panel -->
-<div id="authBox">
-  <h4>🔐 Belépés</h4>
+  <div id="authBox">
+  <h2>🔐 Belépés</h2>
   <input type="email" id="email" placeholder="Email"><br>
   <input type="password" id="password" placeholder="Jelszó"><br>
   <button id="loginBtn">Bejelentkezés</button>
   <button id="registerBtn">Regisztráció</button>
   <button id="logoutBtn" style="display:none;">Kilépés</button>
   <p id="loginStatus">❌ Nincs bejelentkezve</p>
+  </div>
 </div>
+
+<!-- Sidebar -->
+<button id="settingsButton">⚙️</button>
+
+<div id="settingsSidebar">
+<h2>További szerkesztés</h2>
+<button id="closeSidebar">✖ Bezárás</button>
+<h3>Műszakok újragenerálása</h3>
+
+<label>Kezdő dátum (hónap.nap):</label>
+<input type="text" id="startDate" placeholder="pl. 10.11">
+<label>Saját műszak:</label>
+<select id="startShift1">
+  <option value="1">DE</option>
+  <option value="2">DE</option>
+  <option value="3">DU</option>
+  <option value="4">ÉJ</option>
+</select>
+<label>Párod műszaka:</label>
+<select id="startShift2">
+  <option value="2">DE</option>
+  <option value="3">DU</option>
+  <option value="4">ÉJ</option>
+</select>
+<button id="generateShifts">Műszakok generálása</button>
 </div>
+
 
 <div id="calendar"><div id="calendarPlaceholder">Naptár betöltése...</div></div>
 <div id="calendarLegend" style="display:none;">
@@ -406,6 +544,32 @@ if (saved) {
 const honapNevek = ['', 'Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
 const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
 
+// Sidebar elemek
+const settingsButton = document.getElementById("settingsButton");
+const settingsSidebar = document.getElementById("settingsSidebar");
+const closeSidebar = document.getElementById("closeSidebar");
+
+// Fogaskerék → Sidebar megnyitása
+settingsButton.onclick = () => {
+  settingsSidebar.classList.add("open");
+};
+
+// Bezárás gomb → Sidebar bezárása
+closeSidebar.onclick = () => {
+  settingsSidebar.classList.remove("open");
+};
+
+// Kattintás a sidebaron kívül → Bezárás
+document.addEventListener("click", (e) => {
+  if (
+    settingsSidebar.classList.contains("open") &&
+    !settingsSidebar.contains(e.target) &&
+    e.target !== settingsButton
+  ) {
+    settingsSidebar.classList.remove("open");
+  }
+});
+
 renderCalendarFS();
 updateSaveButtonVisibility();
 
@@ -413,6 +577,7 @@ updateSaveButtonVisibility();
 function saveData() {
   localStorage.setItem('calendarData', JSON.stringify(data));
 }
+// --- Műszak újraszámláló ---
 
 // --- Auth állapot figyelése ---
 const emailInput = document.getElementById('email');
@@ -637,6 +802,55 @@ function renderCalendarFS() {
     }
   }
 }
+
+// --- Műszak újragenerálás ---
+document.getElementById('generateShifts').addEventListener('click', () => {
+    const startDateStr = document.getElementById('startDate').value; // pl. "10.11"
+    const [startMonth, startDay] = startDateStr.split('.').map(Number);
+
+    const myShiftStart = parseInt(document.getElementById('startShift1').value);
+    const partnerShiftStart = parseInt(document.getElementById('startShift2').value);
+
+    const myShiftOrder = [1,2,4,3];
+    const partnerShiftOrder = [2,4,3];
+
+    // Megkeressük a kezdő napot a data tömbben
+    let startIndex = data.findIndex(d => d.honap === startMonth && d.nap === startDay);
+    if(startIndex === -1){
+        alert('A kezdő dátum nem található a naptárban!');
+        return;
+    }
+
+    // Megállapítjuk a kezdő shift indexet a sorrendekben
+    let myShiftIndex = myShiftOrder.indexOf(myShiftStart);
+    if(myShiftIndex === -1) myShiftIndex = 0;
+
+    let partnerShiftIndex = partnerShiftOrder.indexOf(partnerShiftStart);
+    if(partnerShiftIndex === -1) partnerShiftIndex = 0;
+
+    let currentMyShift = myShiftOrder[myShiftIndex];
+    let currentPartnerShift = partnerShiftOrder[partnerShiftIndex];
+
+    for(let i = startIndex; i < data.length; i++){
+        data[i].muszak1 = currentMyShift;
+        data[i].muszak2 = currentPartnerShift;
+
+        // Ha vasárnap, váltunk a következő műszakra
+        if(data[i].napIndex === 7){
+            myShiftIndex = (myShiftIndex + 1) % myShiftOrder.length;
+            partnerShiftIndex = (partnerShiftIndex + 1) % partnerShiftOrder.length;
+
+            currentMyShift = myShiftOrder[myShiftIndex];
+            currentPartnerShift = partnerShiftOrder[partnerShiftIndex];
+        }
+    }
+    updateSaveButtonVisibility();
+    saveData();
+    renderCalendarFS();
+
+    alert('Műszakok újragenerálva!');
+    console.log(data); // teszteléshez
+});
 
 // --- Nap szerkesztő popup ---
 let editingDay = null;
