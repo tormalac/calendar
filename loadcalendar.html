@@ -350,42 +350,34 @@ body {
   color: #0078d7;
   cursor: pointer;
 }
-#settingsButton {
-  position: fixed;
-  right: 40px;
-  bottom: 30px;
-  background: #f5f7fa;
-  border: none;
-  font-size: 36px;
-  cursor: pointer;
-  z-index: 2000;
-}
 
-#settingsButton:hover {
-  transform: scale(1.1);
-}
-
-#settingsButton:active {
-  transform: scale(0.95);
+#sidebarEdge {
+    position: fixed;
+    right: 0px;
+    top: 116px;
+    width: 40px;       /* kattintható felület szélessége */
+    height: 100vh;
+    cursor: pointer;
+    z-index: 1499;     /* egyel alacsonyabb mint a sidebar */
+    background: transparent; 
 }
 #settingsSidebar {
   position: fixed;
-  top: 0;
-  right: -320px;   /* Kezdés: teljesen kívül */
+  top: 116px;
+  right: -340px;   /* Kezdés: teljesen kívül */
   width: 300px;
   height: 100%;
   background: #fdfdfd;
   box-shadow: -3px 0 8px rgba(0,0,0,0.25);
   border-left: 1px solid #ccc;
-  padding: 20px;
-  z-index: 2500;
+  padding: 20px 40px;
+  z-index: 500;
   transition: right 0.35s ease;
+  overflow: hidden; 
 }
 #settingsSidebar.open {
-  right: 0;        /* Becsúszik */
+  right: 0;
 }
-
-/* Bezáró gomb */
 #closeSidebar {
   display: block;
   margin-bottom: 20px;
@@ -489,7 +481,7 @@ body {
 
 <!-- Sidebar -->
 <button id="settingsButton">⚙️</button>
-
+<div id="sidebarEdge"></div>
 <div id="settingsSidebar">
 <h2>További szerkesztés</h2>
 <button id="closeSidebar">✖ Bezárás</button>
@@ -562,29 +554,30 @@ const honapNevek = ['', 'Január','Február','Március','Április','Május','Jú
 const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
 
 // Sidebar elemek
-const settingsButton = document.getElementById("settingsButton");
 const settingsSidebar = document.getElementById("settingsSidebar");
+const sidebarEdge = document.getElementById("sidebarEdge");
 const closeSidebar = document.getElementById("closeSidebar");
 
-// Fogaskerék → Sidebar megnyitása
-settingsButton.onclick = () => {
-  settingsSidebar.classList.add("open");
+// --- A keskeny élre kattintva nyílik ki ---
+sidebarEdge.onclick = () => {
+    settingsSidebar.classList.add("open");
 };
 
-// Bezárás gomb → Sidebar bezárása
-closeSidebar.onclick = () => {
-  settingsSidebar.classList.remove("open");
-};
-
-// Kattintás a sidebaron kívül → Bezárás
-document.addEventListener("click", (e) => {
-  if (
-    settingsSidebar.classList.contains("open") &&
-    !settingsSidebar.contains(e.target) &&
-    e.target !== settingsButton
-  ) {
+// --- Sidebar bezárása, ha a bezárás gombra kattintasz ---
+closeSidebar.onclick = (e) => {
+    e.stopPropagation();
     settingsSidebar.classList.remove("open");
-  }
+};
+
+// --- Sidebaron kívülre kattintva csukódik ---
+document.addEventListener("click", (e) => {
+    if (
+        settingsSidebar.classList.contains("open") &&
+        !settingsSidebar.contains(e.target) &&
+        e.target !== sidebarEdge
+    ) {
+        settingsSidebar.classList.remove("open");
+    }
 });
 
 renderCalendarFS();
