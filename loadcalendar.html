@@ -29,46 +29,59 @@ body {
   font-size: 24px;
 }
 #authBox {
-  position: fixed;
-  top: 10px;
-  right: 80px;
-  display: flex;
-  align-items: center; 
-  gap: 6px;
-  font-size: 14px;
-  z-index: 100;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
+    position: fixed;
+    top: 10px;
+    right: 40px;
+    z-index: 2000;
+    font-size: 14px;
 }
-#authBox h2 {
-  font-size: 14px;
-  white-space: nowrap;
+#authStatusButton {
+    background: #fff;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap;
 }
-#authBox input {
-  width: 160px;
-  height: 18px;
-  margin: 2px 0;
-  font-size: 13px;
-  padding: 3px;
-  white-space: nowrap;
+#authDropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 220px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+    padding: 10px;
+    display: none;
+    animation: fadeIn 0.15s ease-out;
 }
-#authBox button {
-  cursor: pointer;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 14px;
-  transition: background 0.2s, transform 0.1s;
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-#authBox p {
-  margin: 5px 0 0 0;
-  font-size: 13px;
+
+#authDropdown input {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 4px 0;
+    padding: 6px;
+    font-size: 14px;
 }
-#authBox button:hover {
-  background: #dcdcdc;
+
+#authDropdown button {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px;
+    margin-top: 4px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#authDropdown button:hover {
+    background: #eee;
 }
 /* ---Mainmenü---*/
 #fileUploadContainer {  
@@ -339,8 +352,8 @@ body {
 }
 #settingsButton {
   position: fixed;
-  right: 20px;
-  bottom: 20px;
+  right: 40px;
+  bottom: 30px;
   background: #f5f7fa;
   border: none;
   font-size: 36px;
@@ -455,14 +468,15 @@ body {
  <h1>Naptár szerkesztő</h1>
 <!-- Bejelentkezés panel -->
  <div id="authBox">
-  <h2>🔐 Belépés</h2>
-  <input type="email" id="email" placeholder="Email"><br>
-  <input type="password" id="password" placeholder="Jelszó"><br>
-  <button id="loginBtn">Bejelentkezés</button>
-  <button id="registerBtn">Regisztráció</button>
-  <button id="logoutBtn" style="display:none;">Kilépés</button>
-  <p id="loginStatus">❌ Nincs bejelentkezve</p>
- </div>
+    <div id="authStatusButton">❌ Nincs bejelentkezve</div>
+    <div id="authDropdown">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Jelszó">
+        <button id="loginBtn">Bejelentkezés</button>
+        <button id="registerBtn">Regisztráció</button>
+        <button id="logoutBtn" style="display:none;">Kilépés</button>
+    </div>
+</div>
 <!-- Fájl feltöltések -->
  <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
   <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
@@ -600,18 +614,34 @@ document.getElementById('registerBtn').onclick = async () => {
 };
 logoutBtn.onclick = async () => { await signOut(auth); };
 
+const authStatusButton = document.getElementById("authStatusButton");
+const authDropdown = document.getElementById("authDropdown");
+
+// --- Dropdown nyitása/csukása ---
+authStatusButton.onclick = () => {
+    authDropdown.style.display =
+        authDropdown.style.display === "block" ? "none" : "block";
+};
+
+// Külső kattintásra zárja
+document.addEventListener("click", e => {
+    if (!authBox.contains(e.target)) {
+        authDropdown.style.display = "none";
+    }
+});
+
 onAuthStateChanged(auth, user => {
-  if(user){
-    loginStatus.textContent = "👤 "+user.email;
-    logoutBtn.style.display = "inline-block";
-    loadBtn.disabled = false;
-    saveBtn.disabled = false;
-  }else{
-    loginStatus.textContent = "🚫 Nincs bejelentkezve";
-    logoutBtn.style.display = "none";
-    loadBtn.disabled = true;
-    saveBtn.disabled = true;
-  }
+    if (user) {
+        authStatusButton.textContent = "👤 " + user.email;
+        logoutBtn.style.display = "block";
+        loadBtn.disabled = false;
+        saveBtn.disabled = false;
+    } else {
+        authStatusButton.textContent = "❌ Nincs bejelentkezve";
+        logoutBtn.style.display = "none";
+        loadBtn.disabled = true;
+        saveBtn.disabled = true;
+    }
 });
 
 //---Mentés gomb láthatósága---
