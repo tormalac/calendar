@@ -103,6 +103,37 @@ body {
   padding: 10px;
   overflow-y: auto;
 }
+/*EditorTools*/
+#editorToolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+}
+
+#editorToolbar input {
+  padding: 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  flex: 0 0 200px;
+}
+
+#editorToolbar button {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+#editorToolbar button:hover {
+  background: #eee;
+}
 /* Editor */
 #editor {
   flex: 1;
@@ -117,10 +148,7 @@ body {
   resize: none;
   margin-bottom: 5px;
 }
-#editor button {
-  width: 150px;         /* ne legyen teljes szélesség */
-  align-self: flex-start; /* balra igazítás */
-}</style>
+</style>
 </head>
 <body>
   <div id="topBar">
@@ -140,15 +168,20 @@ body {
 <!-- Left sidebar -->
   <div id="mainContent">
   <div id="sidebar">
-    <h3>Fájlok</h3>
+    <h3>📁Fájlok</h3>
     <ul id="fileList"></ul>
   </div>
 <!-- Editor -->
   <div id="editor">
-    <textarea id="fileContent"></textarea>
-    <button id="saveBtn">Mentés a gépre</button>
+
+  <div id="editorToolbar">
     <input type="text" id="fileName" placeholder="Fájl neve">
-    <button id="saveFirestoreBtn">Mentés Firestore-ba</button>
+    <button id="saveBtn">💾 Mentés a gépre</button>
+    <button id="saveFirestoreBtn">🔥 Mentés Firestore-ba</button>
+  </div>
+
+  <textarea id="fileContent"></textarea>
+
   </div>
 </div>
 <script type="module">
