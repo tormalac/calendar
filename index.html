@@ -1,286 +1,88 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-<meta charset="UTF-8">
-<title>Webes TXT Szerkesztő</title>
-<style>
-html, body {
-  height: 100%;
-  margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-body {
-  display: flex;
-  flex-direction: column;
-}
-#topBar {
-  height: 60px; /* fix magasság */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  position: fixed;
-  width: 100%;
-  z-index: 1000;
-}
-#topBar h1 {
-  display: inline;
-  font-size: 24px;
-}
-#authBox {
-    position: fixed;
-    top: 10px;
-    right: 40px;
-    z-index: 2000;
-    font-size: 14px;
-}
-#authStatusButton {
-    background: #fff;
-    padding: 6px 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    cursor: pointer;
-    white-space: nowrap;
-}
-#authDropdown {
-    position: absolute;
-    top: 40px;
-    right: 0;
-    width: 220px;
-    min-width: 220px;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
-    padding: 10px;
+  <meta charset="UTF-8">
+  <title>Munkaidő naptár és bérkalkulátor</title>
+  <style>
+    /* Alap stílus */
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0078d7, #66a6ff);
+      color: #333;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-    /* >>> UGRÁST MEGOLDÓ TECHNIKÁK <<< */
-    opacity: 0;            /* láthatatlan */
-    visibility: hidden;    /* de helye már megvan */
-    transform: translateY(-4px);
-    transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+    /* Központi kártya */
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      padding: 40px 50px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      animation: fadeIn 0.8s ease-in-out;
+    }
 
-    overflow: hidden;
-    pointer-events: none;  /* ne legyen kattintható csukva */
-}
-#authDropdown.open {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    pointer-events: auto; /* kattintható */
-}
-#authDropdown input,
-#authDropdown button {
-    width: 100%;
-    box-sizing: border-box; /* <<< ez kell a fix elrendezéshez */
-    margin: 4px 0;
-    padding: 6px;
-    font-size: 14px;
-    border-radius: 5px;
-}
-#authDropdown input {
-    border: 1px solid #ccc;
-}
-#authDropdown button {
-    border: none;
-    cursor: pointer;
-}
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-#authDropdown button:hover {
-    background: #eee;
-}
-#mainContent {
-  display: flex;
-  flex: 1;           
-  margin-top: 60px;      
-  height: calc(100vh - 60px); 
-}
-#sidebar {
-  width: 200px;
-  border-right: 1px solid #ccc;
-  padding: 10px;
-  overflow-y: auto;
-}
-/* Editor */
-#editor {
-  flex: 1;
-  display: flex;
-  flex-direction: column; 
-  padding: 10px;
-}
-#editor textarea {
-  flex: 1;                  
-  width: 100%;              
-  box-sizing: border-box;   
-  resize: none;
-  margin-bottom: 5px;
-}
-#editor button {
-  width: 150px;         /* ne legyen teljes szélesség */
-  align-self: flex-start; /* balra igazítás */
-}</style>
+    /* Cím */
+    h1 {
+      color: #0078d7;
+      font-size: 22px;
+      margin-bottom: 25px;
+    }
+
+    /* Gombok */
+    button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
+      background-color: #0078d7;
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+      transform: scale(1.02);
+    }
+
+    /* Lábléc */
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #666;
+    }
+
+  </style>
 </head>
 <body>
-  <div id="topBar">
- <h1>Jegyzet szerkesztő</h1>
-<!-- Bejelentkezés panel -->
-   <div id="authBox">
-    <div id="authStatusButton">❌ Nincs bejelentkezve</div>
-    <div id="authDropdown">
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Jelszó">
-        <button id="loginBtn">Bejelentkezés</button>
-        <button id="registerBtn">Regisztráció</button>
-        <button id="logoutBtn" style="display:none;">Kilépés</button>
-    </div>
+
+  <div class="container">
+    <h1>Üdvözöllek a munkaidő naptáradban</h1>
+
+    <button onclick="window.location.href='newcalendar.html'">📅 Új munkaidő naptár létrehozása</button>
+    <button onclick="window.location.href='loadcalendar.html'">✏️ Munkaidő naptár szerkesztése</button>
+    <button onclick="window.location.href='budget.html'">💰 Bérkalkulátor</button>
+    <button onclick="window.location.href='texteditor.html'">📝 Jegyzeteim</button>
+
+    <footer>© 2025 Munkaidő Kalkulátor</footer>
   </div>
-  </div>
-<!-- Left sidebar -->
-  <div id="mainContent">
-  <div id="sidebar">
-    <h3>Fájlok</h3>
-    <ul id="fileList"></ul>
-  </div>
-<!-- Editor -->
-  <div id="editor">
-    <textarea id="fileContent"></textarea>
-    <button id="saveBtn">Mentés a gépre</button>
-    <input type="text" id="fileName" placeholder="Fájl neve">
-    <button id="saveFirestoreBtn">Mentés Firestore-ba</button>
-  </div>
-</div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
-// --- Firebase konfiguráció ---
-const firebaseConfig = {
-  apiKey: "AIzaSyDFK6o6sJnFJImBhkX_ZfQq6fXldLZt7vA",
-  authDomain: "calendarformeapp.firebaseapp.com",
-  projectId: "calendarformeapp",
-  storageBucket: "calendarformeapp.firebasestorage.app",
-  messagingSenderId: "421913143205",
-  appId: "1:421913143205:web:24dc04f3c768f99356aa4c"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-const authBox = document.getElementById("authBox");
-const fileList = document.getElementById("fileList");
-const fileContent = document.getElementById("fileContent");
-let currentFileId = null;
-
-// --- Auth állapot figyelése ---
-const emailInput = document.getElementById('email');
-const passInput = document.getElementById('password');
-const logoutBtn = document.getElementById('logoutBtn');
-
-document.getElementById('loginBtn').onclick = async () => {
-  try { await signInWithEmailAndPassword(auth, emailInput.value, passInput.value); } 
-  catch(e){ alert("Hiba: "+e.message); }
-};
-document.getElementById('registerBtn').onclick = async () => {
-  try { await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value); alert("✅ Regisztráció sikeres"); } 
-  catch(e){ alert("Hiba: "+e.message); }
-};
-logoutBtn.onclick = async () => { await signOut(auth); };
-
-const authStatusButton = document.getElementById("authStatusButton");
-const authDropdown = document.getElementById("authDropdown");
-
-// --- Dropdown nyitása/csukása ---
-authStatusButton.onclick = () => {
-    authDropdown.classList.toggle("open");
-};
-
-document.addEventListener("click", (e) => {
-    if (!authBox.contains(e.target)) {
-        authDropdown.classList.remove("open");
-    }
-});
-
-onAuthStateChanged(auth, user => {
-    if (user) {
-        authStatusButton.textContent = "👤 " + user.email;
-        logoutBtn.style.display = "block";
-
-        loadFiles(); // csak ha be van jelentkezve
-    } else {
-        authStatusButton.textContent = "❌ Nincs bejelentkezve";
-        logoutBtn.style.display = "none";
-
-        fileList.innerHTML = "";  // sidebar törlése
-        fileContent.value = "";    // editor törlése
-    }
-});
-// Fájlok mentése Store-ba
-const saveFirestoreBtn = document.getElementById("saveFirestoreBtn");
-const fileNameInput = document.getElementById("fileName");
-
-saveFirestoreBtn.onclick = async () => {
-  const fileName = fileNameInput.value.trim();
-  if (!fileName) { alert("Adj meg egy fájlnevet!"); return; }
-
-  if (!auth.currentUser) { alert("Előbb jelentkezz be!"); return; }
-
-  try {
-    await setDoc(doc(db, "files", fileName), {
-      content: fileContent.value,
-      owner: auth.currentUser.email
-    });
-    alert("✅ Fájl mentve Firestore-ba!");
-    loadFiles(); // frissíti a listát
-  } catch(e) {
-    alert("Hiba a mentésnél: " + e.message);
-  }
-};
-
-    // Fájlok listázása
-import { query, where } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-
-async function loadFiles() {
-  fileList.innerHTML = "";
-  if (!auth.currentUser) return;
-
-  const q = query(
-    collection(db, "files"),
-    where("owner", "==", auth.currentUser.email)
-  );
-
-  const querySnapshot = await getDocs(q);
-  querySnapshot.forEach(docSnap => {
-    const li = document.createElement("li");
-    li.textContent = docSnap.id;
-    li.style.cursor = "pointer";
-    li.onclick = () => openFile(docSnap.id);
-    fileList.appendChild(li);
-  });
-}
-
-async function openFile(fileId) {
-  currentFileId = fileId; // hogy a mentés gomb is tudja a nevet
-  const docSnap = await getDoc(doc(db, "files", fileId));
-  if (docSnap.exists()) {
-    fileContent.value = docSnap.data().content || "";
-  } else {
-    alert("A fájl nem található Firestore-ban!");
-  }
-}
-    // Mentés a gépre
-    document.getElementById("saveBtn").onclick = () => {
-      const blob = new Blob([fileContent.value], { type: "text/plain;charset=utf-8" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = currentFileId ? currentFileId + ".txt" : "file.txt";
-      a.click();
-      URL.revokeObjectURL(a.href);
-    };
-
-    loadFiles();
-  </script>
 </body>
 </html>
