@@ -130,6 +130,17 @@ body {
   padding: 8px;
   background: #fff;
   border-bottom: 1px solid #ccc;
+  overflow-x: auto;      /* vízszintes görgetés engedélyezve */
+  white-space: nowrap;   /* a gombok ne törjenek sorra */
+}
+
+#editorToolbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+#editorToolbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
 }
 
 #editorToolbar input {
@@ -203,6 +214,7 @@ body {
   <div id="editor">
 
   <div id="editorToolbar">
+    <div id="toolbarHandle" title="Húzd ide!"></div>
     <input type="text" id="fileName" placeholder="Fájl neve">
     <button id="newBtn">📄 Új jegyzet</button>
     <button id="openLocalBtn">📂 Megnyitás gépről</button>
@@ -302,6 +314,7 @@ onAuthStateChanged(auth, user => {
         fileContent.value = "";    // editor törlése
     }
 });
+
 // Fájlok mentése Store-ba
 saveFirestoreBtn.onclick = async () => {
   const newName = fileNameInput.value.trim();
