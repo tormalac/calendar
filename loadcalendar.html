@@ -481,7 +481,7 @@ body {
   <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
   <input type="file" id="csvFile" accept=".csv" style="display:none;">
   <button id="loadFromCloudBtn" disabled>⬇️ Betöltés Firestore-ból</button>
-  <button id="saveFirestoreBtn" disabled>⬆️ Mentés Firestore-ba</button>
+  <button id="saveFirestoreBtn" disabled>🔥 Mentés Firestore-ba</button>
   <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
  </div>
 </div>
@@ -540,7 +540,6 @@ const firebaseConfig = {
   appId: "1:421913143205:web:24dc04f3c768f99356aa4c"
 };
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const auth = getAuth(app);
 
 // --- Globális változók ---
