@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
-<title>Webes TXT Szerkesztő</title>
+<title>Jegyzetek</title>
 <style>
 html, body {
   height: 100%;
@@ -103,6 +103,25 @@ body {
   padding: 10px;
   overflow-y: auto;
 }
+
+/*Fájlok*/
+#fileList li {
+  list-style: none;
+  margin: 6px 0;
+  padding: 10px 12px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s, transform 0.1s;
+  user-select: none; /* véletlen kijelölés megakadályozása */
+}
+
+#fileList li:hover,
+#fileList li:active {
+  background: #e0e0ff;
+}
+
 /*EditorTools*/
 #editorToolbar {
   display: flex;
@@ -147,6 +166,15 @@ body {
   box-sizing: border-box;   
   resize: none;
   margin-bottom: 5px;
+
+  background-color: #fffde7;
+  padding: 20px;             
+  border: 1px solid #ccc;   
+  border-radius: 5px;       
+  font-size: 16px;            
+  line-height: 1.5;         
+  color: #333;         
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 </style>
 </head>
@@ -168,7 +196,7 @@ body {
 <!-- Left sidebar -->
   <div id="mainContent">
   <div id="sidebar">
-    <h3>📁Fájlok</h3>
+    <h3>📁Firestore jegyzetek</h3>
     <ul id="fileList"></ul>
   </div>
 <!-- Editor -->
@@ -176,18 +204,41 @@ body {
 
   <div id="editorToolbar">
     <input type="text" id="fileName" placeholder="Fájl neve">
-    <button id="saveFirestoreBtn">🔥 Mentés Firestore-ba</button>
+    <button id="newBtn">📄 Új jegyzet</button>
+    <button id="openLocalBtn">📂 Megnyitás gépről</button>
     <button id="saveBtn">💾 Mentés a gépre</button>
+    <button id="saveFirestoreBtn">🔥 Mentés Firestore-ba</button>
+    <button id="duplicateBtn">📑 Duplikálás</button>
+    <button id="deleteBtn">🗑️ Törlés Firestore-ból</button>
   </div>
 
+  <input type="file" id="openLocalFile" accept=".txt" style="display:none;">
   <textarea id="fileContent"></textarea>
 
   </div>
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+import { 
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+import { 
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut 
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
 // --- Firebase konfiguráció ---
 const firebaseConfig = {
@@ -205,6 +256,7 @@ const auth = getAuth(app);
 const authBox = document.getElementById("authBox");
 const fileList = document.getElementById("fileList");
 const fileContent = document.getElementById("fileContent");
+const fileNameInput = document.getElementById("fileName");
 let currentFileId = null;
 
 // --- Auth állapot figyelése ---
@@ -251,32 +303,42 @@ onAuthStateChanged(auth, user => {
     }
 });
 // Fájlok mentése Store-ba
-const saveFirestoreBtn = document.getElementById("saveFirestoreBtn");
-const fileNameInput = document.getElementById("fileName");
-
 saveFirestoreBtn.onclick = async () => {
-  const fileName = fileNameInput.value.trim();
-  if (!fileName) { alert("Adj meg egy fájlnevet!"); return; }
+  const newName = fileNameInput.value.trim();
+  if (!newName) { 
+    alert("Adj meg egy fájlnevet!"); 
+    return; 
+  }
 
-  if (!auth.currentUser) { alert("Előbb jelentkezz be!"); return; }
+  if (!auth.currentUser) {
+    alert("Előbb jelentkezz be!");
+    return;
+  }
 
   try {
-    await setDoc(doc(db, "files", fileName), {
+    // Új fájl mentése
+    await setDoc(doc(db, "files", newName), {
       content: fileContent.value,
       owner: auth.currentUser.email
     });
-    alert("✅ Fájl mentve Firestore-ba!");
-    loadFiles(); // frissíti a listát
-  } catch(e) {
+
+    // Ha a név változott → töröljük a régi fájlt
+    if (currentFileId && currentFileId !== newName) {
+      await deleteDoc(doc(db, "files", currentFileId));
+    }
+
+    currentFileId = newName; 
+    alert("Mentve!");
+    loadFiles();
+
+  } catch (e) {
     alert("Hiba a mentésnél: " + e.message);
   }
 };
 
-    // Fájlok listázása
-import { query, where } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-
+// Fájlok listázása
 async function loadFiles() {
-  fileList.innerHTML = "";
+  fileList.innerHTML = "";  // lista ürítése
   if (!auth.currentUser) return;
 
   const q = query(
@@ -285,17 +347,24 @@ async function loadFiles() {
   );
 
   const querySnapshot = await getDocs(q);
+
   querySnapshot.forEach(docSnap => {
     const li = document.createElement("li");
     li.textContent = docSnap.id;
     li.style.cursor = "pointer";
+
+    // kattintás a fájl megnyitásához
     li.onclick = () => openFile(docSnap.id);
+
     fileList.appendChild(li);
   });
 }
 
+// Fájl megynyitása Store-ból
 async function openFile(fileId) {
-  currentFileId = fileId; // hogy a mentés gomb is tudja a nevet
+  currentFileId = fileId;
+  fileNameInput.value = fileId;   // << név beállítása
+
   const docSnap = await getDoc(doc(db, "files", fileId));
   if (docSnap.exists()) {
     fileContent.value = docSnap.data().content || "";
@@ -303,18 +372,138 @@ async function openFile(fileId) {
     alert("A fájl nem található Firestore-ban!");
   }
 }
-    // Mentés a gépre
-    document.getElementById("saveBtn").onclick = () => {
-      const blob = new Blob([fileContent.value], { type: "text/plain;charset=utf-8" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = currentFileId ? currentFileId + ".txt" : "file.txt";
-      a.click();
-      URL.revokeObjectURL(a.href);
-    };
+
+// Mentés a gépre
+document.getElementById("saveBtn").onclick = () => {
+  const text = fileContent.value.trim();
+
+  // Ha a tartalom üres → figyelmeztetés
+  if (text === "") {
+    alert("⚠️ A jegyzet üres, nem lehet menteni!");
+    return;
+  }
+
+  const name = fileNameInput.value.trim() || "uj_jegyzet";
+
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name + ".txt";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+// Új jegyzet
+const newBtn = document.getElementById("newBtn");
+
+newBtn.onclick = () => {
+  currentFileId = null;       // nincs megnyitott fájl
+  fileNameInput.value = "";   // fájlnév törlése
+  fileContent.value = "";     // tartalom törlése
+
+  fileContent.focus();        // kurzor a szövegmezőbe
+};
+
+// Megnyitás gépről
+const openLocalBtn = document.getElementById("openLocalBtn");
+const openLocalFile = document.getElementById("openLocalFile");
+
+openLocalBtn.onclick = () => {
+  openLocalFile.click();  // rejtett fájlkezelő megnyitása
+};
+
+openLocalFile.onchange = () => {
+  const file = openLocalFile.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    fileContent.value = reader.result; // szöveg beírása
+    const plainName = file.name.replace(/\.[^/.]+$/, ""); // levágjuk a .txt-t
+    fileNameInput.value = plainName;   // fájlnév beírása
+    currentFileId = null;              // ne írja felül a firestore fájlokat
+  };
+
+  reader.readAsText(file, "UTF-8");
+};
+
+// Fájl duplikálása
+duplicateBtn.onclick = async () => {
+  if (!currentFileId) {
+    alert("Előbb nyiss meg egy jegyzetet!");
+    return;
+  }
+
+  const originalDocRef = doc(db, "files", currentFileId);
+  const originalDoc = await getDoc(originalDocRef);
+  if (!originalDoc.exists()) {
+    alert("A fájl nem található!");
+    return;
+  }
+
+  let newName = currentFileId + "_másolat";
+  let i = 1;
+
+  // Ellenőrizzük létezést gyorsabban
+  const allFilesSnapshot = await getDocs(query(collection(db, "files"), where("owner", "==", auth.currentUser.email)));
+  const existingNames = new Set(allFilesSnapshot.docs.map(d => d.id));
+
+  while (existingNames.has(newName)) {
+    newName = currentFileId + `_másolat${i}`;
+    i++;
+  }
+
+  try {
+    await setDoc(doc(db, "files", newName), {
+      content: originalDoc.data().content,
+      owner: auth.currentUser.email
+    });
+
+    currentFileId = newName;         // mostantól az új jegyzet aktív
+    fileNameInput.value = newName;   // fájlnév frissítése az inputban
+    alert(`Jegyzet duplikálva: ${newName}`);
+    loadFiles();                     // lista frissítése
+  } catch (err) {
+    alert("Hiba a duplikálásnál: " + err.message);
+  }
+};
+ 
+// Fájl törlése Store-ból
+const deleteBtn = document.getElementById("deleteBtn");
+
+deleteBtn.onclick = async () => {
+  if (!currentFileId) {
+    alert("Nincs megnyitott fájl!");
+    return;
+  }
+
+  if (!auth.currentUser) {
+    alert("Előbb jelentkezz be!");
+    return;
+  }
+
+  const confirmed = confirm(`Biztosan törlöd ezt a fájlt?\n\n${currentFileId}`);
+  if (!confirmed) return;
+
+  try {
+    await deleteDoc(doc(db, "files", currentFileId));
+    
+    alert("🗑️ Fájl törölve!");
+
+    // törlés után ürítjük a mezőket
+    currentFileId = null;
+    fileNameInput.value = "";
+    fileContent.value = "";
+
+    loadFiles(); // frissítés
+  } 
+  catch (e) {
+    alert("Hiba törlés közben: " + e.message);
+  }
+};
 
     loadFiles();
   </script>
 </body>
 </html>
-
