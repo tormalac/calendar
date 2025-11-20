@@ -98,7 +98,7 @@ body {
   height: calc(100vh - 60px); 
 }
 #sidebar {
-  width: 200px;
+  width: 300px;
   border-right: 1px solid #ccc;
   padding: 10px;
   overflow-y: auto;
@@ -139,11 +139,13 @@ body {
 #editorToolbar button,
 #editorToolbar input {
   flex: 0 0 auto;      /* ne nyúljanak a szülőhöz */
-}#editorToolbar::-webkit-scrollbar {
+}
+  
+::-webkit-scrollbar {
   height: 6px;
 }
 
-#editorToolbar::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background-color: rgba(0,0,0,0.2);
   border-radius: 3px;
 }
@@ -526,6 +528,7 @@ deleteBtn.onclick = async () => {
   </script>
 </body>
 </html>
+
 
 
 
