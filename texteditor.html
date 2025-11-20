@@ -130,11 +130,15 @@ body {
   padding: 8px;
   background: #fff;
   border-bottom: 1px solid #ccc;
-  overflow-x: auto;      /* vízszintes görgetés engedélyezve */
-  white-space: nowrap;   /* a gombok ne törjenek sorra */
+  height: 50px;
+  overflow-x: auto;     /* vízszintes görgetés engedélyezése */
+  white-space: nowrap;  /* gombok egy sorban maradnak */
 }
 
-#editorToolbar::-webkit-scrollbar {
+#editorToolbar button,
+#editorToolbar input {
+  flex: 0 0 auto;      /* ne nyúljanak a szülőhöz */
+}#editorToolbar::-webkit-scrollbar {
   height: 6px;
 }
 
@@ -148,7 +152,7 @@ body {
   font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  flex: 0 0 200px;
+  flex: 0 0 auto;
 }
 
 #editorToolbar button {
