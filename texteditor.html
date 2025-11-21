@@ -554,7 +554,8 @@ duplicateBtn.onclick = async () => {
   try {
     await setDoc(doc(db, "files", newName), {
       content: originalDoc.data().content,
-      owner: auth.currentUser.email
+      owner: auth.currentUser.email,
+      timestamp: Date.now()
     });
 
     currentFileId = newName;         // mostantól az új jegyzet aktív
