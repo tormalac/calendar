@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -276,7 +277,8 @@ import {
   deleteDoc,
   query,
   where,
-  orderBy
+  orderBy,
+  Timestamp
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
 import { 
@@ -555,7 +557,7 @@ duplicateBtn.onclick = async () => {
     await setDoc(doc(db, "files", newName), {
       content: originalDoc.data().content,
       owner: auth.currentUser.email,
-      timestamp: Date.now()
+      timestamp: Timestamp.fromDate(new Date())
     });
 
     currentFileId = newName;         // mostantól az új jegyzet aktív
