@@ -540,6 +540,7 @@ const firebaseConfig = {
   appId: "1:421913143205:web:24dc04f3c768f99356aa4c"
 };
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const auth = getAuth(app);
 
 // --- Globális változók ---
@@ -685,7 +686,13 @@ saveBtn.onclick = async () => {
   data.forEach(d=>{
     csv+=`${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};"${(d.komment||'').replace(/"/g,'""')}"\n`;
   });
-  try{ await setDoc(doc(db,"naptarak",auth.currentUser.uid),{csv}); alert("✅ Mentve!"); }
+  try{ await setDoc(doc(db,"naptarak",auth.currentUser.uid),{
+   csv,
+   owner: auth.currentUser.uid,
+   timestamp: new Date()
+  });
+  alert("✅ Mentve!");
+  }
   catch(e){ alert("Mentési hiba: "+e.message); }
 };
 
