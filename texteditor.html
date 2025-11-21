@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -98,17 +99,38 @@ body {
   height: calc(100vh - 60px); 
 }
 #sidebar {
-  width: 300px;
+  width: 224px;
   border-right: 1px solid #ccc;
   padding: 10px;
   overflow-y: auto;
 }
+#sidebar h4{
+  margin-left: 2px;
+  margin-right: 2px;
+  display: inline;
+  font-size: 12px;
+  font-weight: normal;
+}
+#sidebar button {
+  padding: 2px 6px;
+  border: none;
+  cursor: pointer;
+  border-radius: 2px;
+}
+#sidebar button:hover {
+  background: #e0e0ff;
+}
 
 /*Fájlok*/
+#fileList {
+  padding-left: 0;
+  margin-left: 0;
+}
+
 #fileList li {
   list-style: none;
-  margin: 6px 0;
-  padding: 10px 12px;
+  margin: 4px 2px;;
+  padding: 8px 12px;
   background: #f0f0f0;
   border-radius: 2px;
   cursor: pointer;
@@ -216,7 +238,11 @@ body {
   <div id="mainContent">
   <div id="sidebar">
     <h3>📁Firestore jegyzetek</h3>
+    <h4>Rendezés:</h4>
+    <button id="sortTimeBtn">⏱️ Időrend</button>
+    <button id="sortNameBtn">🔤 ABC</button>
     <ul id="fileList"></ul>
+    <div id="noteCount" style="margin-top:10px; font-size:14px; opacity:0.7;"></div>
   </div>
 <!-- Editor -->
   <div id="editor">
@@ -249,7 +275,8 @@ import {
   setDoc,
   deleteDoc,
   query,
-  where
+  where,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
 import { 
@@ -323,6 +350,11 @@ onAuthStateChanged(auth, user => {
     }
 });
 
+// Globális változók
+let cachedFiles = [];
+let sortNameAsc = true;
+let sortTimeAsc = false; 
+
 // Fájlok mentése Store-ba
 saveFirestoreBtn.onclick = async () => {
   const newName = fileNameInput.value.trim();
@@ -340,7 +372,8 @@ saveFirestoreBtn.onclick = async () => {
     // Új fájl mentése
     await setDoc(doc(db, "files", newName), {
       content: fileContent.value,
-      owner: auth.currentUser.email
+      owner: auth.currentUser.email,
+      timestamp: new Date()
     });
 
     // Ha a név változott → töröljük a régi fájlt
@@ -357,29 +390,72 @@ saveFirestoreBtn.onclick = async () => {
   }
 };
 
-// Fájlok listázása
+// Fájlok betöltése Cache-be
 async function loadFiles() {
   fileList.innerHTML = "";  // lista ürítése
   if (!auth.currentUser) return;
 
   const q = query(
     collection(db, "files"),
-    where("owner", "==", auth.currentUser.email)
+    where("owner", "==", auth.currentUser.email),
+    orderBy("timestamp", "desc")
   );
 
   const querySnapshot = await getDocs(q);
 
-  querySnapshot.forEach(docSnap => {
+  cachedFiles = querySnapshot.docs.map(docSnap => ({
+    id: docSnap.id,
+    ...docSnap.data()
+  }));
+
+  renderList(cachedFiles);
+
+  // jegyzetek száma
+  document.getElementById("noteCount").textContent =
+    "Jegyzetek száma: " + cachedFiles.length;
+}
+
+// Lista létrehozása
+function renderList(list) {
+  fileList.innerHTML = "";
+
+  list.forEach(item => {
     const li = document.createElement("li");
-    li.textContent = docSnap.id;
-    li.style.cursor = "pointer";
-
-    // kattintás a fájl megnyitásához
-    li.onclick = () => openFile(docSnap.id);
-
+    li.textContent = item.id;
+    li.onclick = () => openFile(item.id);
     fileList.appendChild(li);
   });
 }
+
+// ABC szerinti rendezés
+document.getElementById("sortNameBtn").onclick = () => {
+  
+  // irány fordítása
+  sortNameAsc = !sortNameAsc;
+
+  const sorted = [...cachedFiles].sort((a, b) =>
+    sortNameAsc
+      ? a.id.localeCompare(b.id, "hu")   // A → Z
+      : b.id.localeCompare(a.id, "hu")   // Z → A
+  );
+
+  renderList(sorted);
+};
+
+// Időrend szerinti rendezés
+document.getElementById("sortTimeBtn").onclick = () => {
+
+  // irány fordítása
+  sortTimeAsc = !sortTimeAsc;
+
+  const sorted = [...cachedFiles].sort((a, b) =>
+    sortTimeAsc
+      ? a.timestamp?.toMillis() - b.timestamp?.toMillis()  // régebbi → újabb
+      : b.timestamp?.toMillis() - a.timestamp?.toMillis()  // újabb → régebbi
+  );
+
+  renderList(sorted);
+};
 
 // Fájl megynyitása Store-ból
 async function openFile(fileId) {
