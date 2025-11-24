@@ -952,7 +952,7 @@ document.getElementById('saveEdit').onclick = () => {
   if(!editingDay) return;
   editingDay.muszak1 = muszak1Select.value ? +muszak1Select.value : 0;
   editingDay.muszak2 = muszak2Select.value ? +muszak2Select.value : 0;
-  editingDay.ledolgozottOra = +ledolgozottOraInput.value || 0;
+  editingDay.ledolgozottOra = +ledolgozottOraInput.value || 8;
   editingDay.tulora = +tuloraInput.value || 0;
   editingDay.komment = kommentInput.value || '';
   Object.keys(statusInputs).forEach(k => editingDay[k] = statusInputs[k].checked);
