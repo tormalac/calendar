@@ -970,7 +970,7 @@ function openDayEditor(day){
 
   muszak1Select.value = day.muszak1 || '';
   muszak2Select.value = day.muszak2 || '';
-  ledolgozottOraInput.value = (day.ledolgozottOra !== undefined ? day.ledolgozottOra : 8);
+  ledolgozottOraInput.value = day.ledolgozottOra ?? 8;
   tuloraInput.value = day.tulora || 0;
   kommentInput.value = day.komment || '';
   Object.keys(statusInputs).forEach(k => statusInputs[k].checked = !!day[k]);
