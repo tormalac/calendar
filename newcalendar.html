@@ -90,6 +90,11 @@
       <input type="number" id="ev" value="2026" min="2020" max="2100">
 
       <label>Te kezdő műszak (1–4):</label>
+      <select id="muszak1Rend">
+        <option value="1,2,4,3">Délelőtt, Délelőtt, Éjszaka, Délután</option>
+        <option value="2,4,3">Délelőtt, Éjszaka, Délután</option>
+        <option value="2,3,4">Délelőtt, Délután, Éjszaka</option>
+      </select>
       <select id="muszak1Kezd">
         <option value="1">1</option>
         <option value="2">2</option>
@@ -98,6 +103,11 @@
       </select>
 
       <label>Asszony kezdő műszak (2–4):</label>
+      <select id="muszak2Rend">
+        <option value="1,2,4,3">Délelőtt, Délelőtt, Éjszaka, Délután</option>
+        <option value="2,4,3">Délelőtt, Éjszaka, Délután</option>
+        <option value="2,3,4">Délelőtt, Délután, Éjszaka</option>
+      </select>
       <select id="muszak2Kezd">
         <option value="2">2</option>
         <option value="3">3</option>
@@ -126,8 +136,8 @@
     const muszak1Kezd = parseInt(document.getElementById("muszak1Kezd").value);
     const muszak2Kezd = parseInt(document.getElementById("muszak2Kezd").value);
 
-    const muszak1Ciklus = [1, 2, 4, 3];
-    const muszak2Ciklus = [2, 4, 3];
+    const muszak1Ciklus = document.getElementById("muszak1Rend").value.split(",").map(Number);
+    const muszak2Ciklus = document.getElementById("muszak2Rend").value.split(",").map(Number);
 
     const unnepInput = document.getElementById("unnep").value.split(";").map(s => s.trim()).filter(s => s);
     const pihenoInput = document.getElementById("piheno").value.split(";").map(s => s.trim()).filter(s => s);
