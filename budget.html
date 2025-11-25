@@ -140,6 +140,7 @@
       </select>
     </label>
     <label>Rezsitámogatás: <input type="number" id="rezsi" value="30000"></label>
+    <label>Egyéb járandóságok: <input type="number" id="egyeb" value="0"></label>
     <button onclick="szamit()">Számol</button>
 
     <h2>Eredmények</h2>
@@ -175,12 +176,14 @@ function szamit(){
     const alapber = parseFloat(document.getElementById('alapber').value);
     const senioritas = parseFloat(document.getElementById('senioritas').value);
     const rezsi = parseFloat(document.getElementById('rezsi').value);
+    const egyeb = parseFloat(document.getElementById('egyeb').value);
 
     let delelottOrak = 0;
     let delutanOrak = 0;
     let ejszakaOrak = 0;
     let tulora = 0;
     let menetrendSzerintiIdo = 0;
+    let szabadnapok = 0; 
 
     csvData.forEach(row => {
         if(parseInt(row['honap']) === honap){
@@ -188,6 +191,8 @@ function szamit(){
             const unnep = (row['unnep'] || '').toLowerCase() === 'true';
             const piheno = (row['piheno'] || '').toLowerCase() === 'true';
             const ledolgozas = (row['ledolgozas'] || '').toLowerCase() === 'true';
+            const ledolgozott = (row['ledolgozott'] || '').toLowerCase() === 'true';
+            const szabadsag = (row['szabadsag'] || '').toLowerCase() === 'true';
 
             if((napIndex !== 6 && napIndex !== 7 && !unnep && !piheno) || ledolgozas){
                 menetrendSzerintiIdo += 8;
@@ -205,6 +210,9 @@ function szamit(){
                     ejszakaOrak += ora;
                 }
             }
+            if(szabadsag) {
+                szabadnapok++;
+            }
         }
     });
 
@@ -213,16 +221,15 @@ function szamit(){
         return;
     }
 
-    const negyedEvBonusz = 0;
-
     const fizetes = 0.665 * (
         ((delelottOrak + delutanOrak + ejszakaOrak) * alapber / menetrendSzerintiIdo)
         + (tulora * alapber / menetrendSzerintiIdo)
         + (0.2 * delutanOrak * alapber / 174)
         + (0.4 * ejszakaOrak * alapber / 174)
-        + negyedEvBonusz
+        + (1 * 8 * szabadnapok * alapber / menetrendSzerintiIdo)
         + (senioritas / 100 * alapber)
         + rezsi
+        + egyeb
     );
 
     const eredmenyDiv = document.getElementById('eredmeny');
@@ -232,6 +239,7 @@ function szamit(){
         <p><strong>Délelőttös órák:</strong> ${delelottOrak} óra</p>
         <p><strong>Délutános órák:</strong> ${delutanOrak} óra</p>
         <p><strong>Éjszakás órák:</strong> ${ejszakaOrak} óra</p>
+        <p><strong>Szabadnapok:</strong> ${szabadnapok} nap</p>
         <p><strong>Túlóra:</strong> ${tulora} óra</p>
     `;
 
@@ -240,7 +248,8 @@ function szamit(){
         de: delelottOrak,
         du: delutanOrak,
         ej: ejszakaOrak,
-        tulora: tulora
+        tulora: tulora,
+        szabadnapok: szabadnapok
     };
 }
 
@@ -256,8 +265,8 @@ function exportCSV(){
     const datumIdo = `${ev}-${honap}-${nap}_${ora}-${perc}`;
 
     const csvContent = "data:text/csv;charset=utf-8," 
-        + "netto;de;du;ej;tulora\n" 
-        + `${window.eredmenyCSV.netto};${window.eredmenyCSV.de};${window.eredmenyCSV.du};${window.eredmenyCSV.ej};${window.eredmenyCSV.tulora}`;
+        + "netto;de;du;ej;tulora;szabadnapok\n" 
+        + `${window.eredmenyCSV.netto};${window.eredmenyCSV.de};${window.eredmenyCSV.du};${window.eredmenyCSV.ej};${window.eredmenyCSV.tulora};${window.eredmenyCSV.szabadnapok}`;
 
     const fileName = `fizetes_${datumIdo}.csv`;
 
