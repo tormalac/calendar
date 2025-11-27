@@ -503,11 +503,23 @@ body {
   <option value="3">DU</option>
   <option value="4">ÉJ</option>
 </select>
+<label>Saját műszak sorrend:</label>
+<select id="myShiftOrder">
+  <option value="1,2,4,3">DE, DE, ÉJ, DU</option>
+  <option value="2,4,3">DE, ÉJ, DU</option>
+  <option value="2,3,4">DE, DU, ÉJ</option>
+</select>
 <label>Párod műszaka:</label>
 <select id="startShift2">
   <option value="2">DE</option>
   <option value="3">DU</option>
   <option value="4">ÉJ</option>
+</select>
+<label>Párod műszak sorrend:</label>
+<select id="partnerShiftOrder">
+  <option value="1,2,4,3">DE, DE, ÉJ, DU</option>
+  <option value="2,4,3">DE, ÉJ, DU</option>
+  <option value="2,3,4">DE, DU, ÉJ</option>
 </select>
 <button id="generateShifts">Műszakok generálása</button>
 </div>
@@ -848,8 +860,8 @@ document.getElementById('generateShifts').addEventListener('click', () => {
     const myShiftStart = parseInt(document.getElementById('startShift1').value);
     const partnerShiftStart = parseInt(document.getElementById('startShift2').value);
 
-    const myShiftOrder = [1,2,4,3];
-    const partnerShiftOrder = [2,4,3];
+    const myShiftOrder = document.getElementById("myShiftOrder").value.split(',').map(Number);
+    const partnerShiftOrder = document.getElementById("partnerShiftOrder").value.split(',').map(Number);
 
     // Megkeressük a kezdő napot a data tömbben
     let startIndex = data.findIndex(d => d.honap === startMonth && d.nap === startDay);
