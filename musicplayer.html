@@ -19,16 +19,95 @@ body { display: flex; flex-direction: column; }
 #mainContent { display: flex; flex: 1; margin-top: 60px; height: calc(100vh - 60px); flex-direction: column; align-items: flex-start; padding: 10px; }
 #musicToolbar { background: #1e1e1e; padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 600px; margin: auto; color: white; font-family: Arial, sans-serif; }
 #musicToolbar .top { display: flex; gap: 8px; align-items: center; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; }
-#musicToolbar input { flex: 1; min-width: 120px; padding: 8px 10px; background: #333; border: 1px solid #444; border-radius: 8px; color: white; }
+#musicToolbar input, .album-select { flex: 1; min-width: 120px; padding: 8px 10px; background: #333; border: 1px solid #444; border-radius: 8px; color: white; }
+.album-select { max-width: 200px; }
 .icon-btn { padding: 8px 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.2s; }
 .icon-btn:hover { background: #3d3d3d; }
 .icon-btn.danger { background: #5a1e1e; border-color: #7a2b2b; }
 .icon-btn.danger:hover { background: #7a2b2b; }
 .player-box { background: #2b2b2b; padding: 10px; border-radius: 12px; }
 #player { width: 100%; height: 36px; filter: invert(85%) hue-rotate(180deg); }
-.album { margin-bottom: 20px; padding: 10px; background: #f4f4f4; border-radius: 8px; }
-.song { display: flex; gap: 10px; align-items: center; margin: 5px 0; }
-.song button, .song select { cursor: pointer; }
+.album {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: #f8f8f8;
+    border-radius: 6px; /* kisebb lekerekítés */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.album h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+    color: #222;
+}
+.song {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    margin: 6px 0;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.song.playing {
+    background: #d0f0ff;
+}
+
+.song .song-info {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.song .song-actions {
+    display: flex;
+    gap: 8px;
+    min-width: 250px; /* hogy a gombok elférjenek */
+    justify-content: flex-end;
+}
+
+.song select {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #222;
+    border-radius: 4px;
+    padding: 4px 6px;
+    cursor: pointer;
+}
+
+.song button {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background: #eee;
+    color: #222;
+    transition: 0.2s;
+}
+.song button:hover {
+    background: #ddd;
+}
+.song button.danger {
+    background: #fdd;
+    border-color: #faa;
+}
+.song button.danger:hover {
+    background: #fbb;
+}
+/* Lejátszóban album select design */
+#musicToolbar select#albumSelect {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #2a2a2a;
+    color: white;
+    min-width: 140px;
+}
 </style>
 </head>
 <body>
@@ -51,12 +130,15 @@ body { display: flex; flex-direction: column; }
   <div id="albumsContainer"></div>
   <div id="musicToolbar">
     <div class="top">
-        <input type="text" id="fileName" placeholder="Zene címe">
-        <button id="openLocalBtn" class="icon-btn">📂</button>
-        <button id="saveBtn" class="icon-btn">💾</button>
-        <button id="saveFirestoreBtn" class="icon-btn">🌥️</button>
-        <button id="duplicateBtn" class="icon-btn">📑</button>
-        <button id="deleteBtn" class="icon-btn danger">🗑️</button>
+    <input type="text" id="fileName" placeholder="Zene címe">
+    <select id="albumSelect" class="album-select">
+        <option disabled selected>Album választása</option>
+    </select>
+    <button id="newAlbumBtn" class="icon-btn">➕</button>
+    <button id="openLocalBtn" class="icon-btn">📂</button>
+    <button id="saveBtn" class="icon-btn">💾</button>
+    <button id="saveFirestoreBtn" class="icon-btn">🌥️</button>
+    <button id="deleteBtn" class="icon-btn danger">🗑️</button>
     </div>
     <div class="player-box">
         <audio id="player" controls></audio>
@@ -132,6 +214,7 @@ const fileNameInput = document.getElementById('fileName');
 let selectedFile = null;          // A helyi fájl, amit épp kiválasztott a felhasználó
 let selectedFileDocId = null;     // Firestore dokumentum ID-ja a kiválasztott zenének
 let selectedFilePublicId = null;  // Cloudinary public_id-ja a kiválasztott zenének
+let currentSongId = null;
 
 // Zenék lekérdezése album szerint
 async function fetchSongs() {
@@ -146,6 +229,26 @@ async function fetchSongs() {
     const songs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return songs;
 }
+
+// Album kiválasztása
+function updateAlbumSelect(songs) {
+    const select = document.getElementById('albumSelect');
+    const albums = Array.from(new Set(songs.map(s => s.album || "Alap Album")));
+    select.innerHTML = `<option disabled selected>Album választása</option>` +
+        albums.map(a => `<option value="${a}">${a}</option>`).join('');
+}
+
+// Új album
+document.getElementById('newAlbumBtn').onclick = () => {
+    const newAlbum = prompt("Új album neve:");
+    if(!newAlbum) return;
+    const select = document.getElementById('albumSelect');
+    const option = document.createElement('option');
+    option.value = newAlbum;
+    option.textContent = newAlbum;
+    select.appendChild(option);
+    select.value = newAlbum;
+};
 
 // Fájlok kirajzolása
 async function renderSongs() {
@@ -166,67 +269,83 @@ async function renderSongs() {
         albums[albumName].push(song);
     });
 
+    const allAlbumNames = Object.keys(albums); // összes album név tömbként
+
     for (const albumName in albums) {
         const albumDiv = document.createElement("div");
         albumDiv.className = "album";
         albumDiv.innerHTML = `<h3>${albumName}</h3>`;
+    albums[albumName].forEach(song => {
+    const songDiv = document.createElement("div");
+    songDiv.className = "song";
 
-        albums[albumName].forEach(song => {
-            const songDiv = document.createElement("div");
-            songDiv.className = "song";
-            songDiv.innerHTML = `
-                <span>${song.name}</span>
-                <button class="playBtn">▶️</button>
-                <button class="deleteBtn">🗑️</button>
-            `;
+    if (currentSongId === song.id) {
+    songDiv.classList.add("playing");
+}   
 
-            // Lejátszás
-            songDiv.querySelector(".playBtn").onclick = () => {
-                player.src = song.url;
-                player.play();
-                selectedFileDocId = song.id;
-                selectedFilePublicId = song.public_id;
-            };
+    songDiv.innerHTML = `
+        <div class="song-info">${song.name}</div>
+        <div class="song-actions">
+            <select>
+                ${allAlbumNames.map(a => `<option value="${a}" ${a === song.album ? 'selected' : ''}>${a}</option>`).join('')}
+            </select>
+            <button class="playBtn">▶️</button>
+            <button class="deleteBtn">🗑️</button>
+        </div>
+    `;
 
-            // Törlés
-            // Törlés (Firestore + Cloudinary)
-songDiv.querySelector(".deleteBtn").onclick = async () => {
-    if (!confirm(`Biztos törlöd: ${song.name}?`)) return;
-
-    try {
-        // 1) Cloudinary törlés
-        if (song.public_id) {
-            await fetch(`https://music-backend-jq1s.onrender.com/delete/${song.public_id}`, {
-                method: 'DELETE'
-            });
-        }
-
-        // 2) Firestore törlés
-        await deleteDoc(doc(db, "songs", song.id));
-
-        // 3) UI frissítés
-        if (player.src === song.url) {
-            player.src = "";
-            fileNameInput.value = "";
-            selectedFile = null;
-            selectedFileDocId = null;
-            selectedFilePublicId = null;
-        }
-
-        alert(`${song.name} törölve!`);
+    // Albumválasztó esemény
+    const albumChangeSelect = songDiv.querySelector('select');
+    albumChangeSelect.onchange = async e => {
+        await updateDoc(doc(db, "songs", song.id), { album: e.target.value });
         renderSongs();
+    };
 
-    } catch (err) {
-        console.error(err);
-        alert("Hiba a törlés során!");
-    }
-};
+    // Lejátszás
+    songDiv.querySelector(".playBtn").onclick = () => {
+        player.src = song.url;
+        player.play();
+        currentSongId = song.id;
+        selectedFileDocId = song.id;
+        selectedFilePublicId = song.public_id;
+        fileNameInput.value = song.name;
+        renderSongs();
+    };
 
-            albumDiv.appendChild(songDiv);
-        });
+    // Törlés
+    songDiv.querySelector(".deleteBtn").onclick = async () => {
+        if (!confirm(`Biztos törlöd: ${song.name}?`)) return;
+        try {
+            if (song.public_id) {
+                await fetch(`https://music-backend-jq1s.onrender.com/delete/${song.public_id}`, {
+                    method: 'DELETE'
+                });
+            }
+            await deleteDoc(doc(db, "songs", song.id));
+
+            if (player.src === song.url) {
+                player.src = "";
+                fileNameInput.value = "";
+                selectedFile = null;
+                selectedFileDocId = null;
+                selectedFilePublicId = null;
+            }
+
+            alert(`${song.name} törölve!`);
+            renderSongs();
+        } catch (err) {
+            console.error(err);
+            alert("Hiba a törlés során!");
+        }
+    };
+
+    albumDiv.appendChild(songDiv);
+});
 
         container.appendChild(albumDiv);
     }
+
+    updateAlbumSelect(songs);
 }
 
 // Fájl kiválasztás
@@ -260,6 +379,7 @@ document.getElementById('saveFirestoreBtn').addEventListener('click', async () =
     if(!auth.currentUser){ alert("Be kell jelentkezned a mentéshez!"); return; }
 
     let name = fileNameInput.value.trim() || selectedFile.name.replace('.mp3','');
+    let albumName = document.getElementById('albumSelect').value || "Alap Album";
 
     const formData = new FormData();
     formData.append('file', selectedFile);
@@ -281,7 +401,7 @@ document.getElementById('saveFirestoreBtn').addEventListener('click', async () =
            name: name,
            url: data.url,
            public_id: data.public_id,
-           album: "Alap Album", // ide később dinamikusan lehet albumot választani
+           album: albumName,
            uploadedAt: serverTimestamp(),
            owner: auth.currentUser.uid
         });
@@ -297,52 +417,6 @@ document.getElementById('saveFirestoreBtn').addEventListener('click', async () =
     }
 
     renderSongs();
-});
-
-// Duplikálás FS + C
-document.getElementById('duplicateBtn').addEventListener('click', async () => {
-    if (!selectedFileDocId) {
-        alert('Nincs kiválasztva fájl!');
-        return;
-    }
-
-    try {
-        const docSnap = await getDoc(doc(db, "songs", selectedFileDocId));
-        if (!docSnap.exists()) return;
-
-        const originalData = docSnap.data();
-
-        // 1) Letöltjük a fájlt a Cloudinary URL-ről
-        const response = await fetch(originalData.url);
-        const blob = await response.blob();
-        const file = new File([blob], originalData.name + "_copy.mp3", { type: "audio/mp3" });
-
-        // 2) Feltöltjük újra a backendre → Cloudinary-ba
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const uploadRes = await fetch("https://music-backend-jq1s.onrender.com/duplicate", {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await uploadRes.json();
-
-        // 3) Mentés Firestore-ba
-        await addDoc(collection(db, "songs"), {
-            name: originalData.name + " (másolat)",
-            url: data.url,
-            public_id: data.public_id,
-            uploadedAt: serverTimestamp(),
-            owner: auth.currentUser.uid
-        });
-
-        alert("Fájl duplikálva!");
-
-    } catch (err) {
-        console.error(err);
-        alert("Hiba a duplikálás során!");
-    }
 });
 
 // Törlés Firestore + Cloudinary
