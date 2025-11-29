@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>Zenelejátszó</title>
+<style>
+html, body { height: 100%; margin: 0; font-family: sans-serif; }
+body { display: flex; flex-direction: column; }
+#topBar { height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); position: fixed; width: 100%; z-index: 1000; }
+#topBar h1 { font-size: 24px; }
+#authBox { position: fixed; top: 10px; right: 40px; z-index: 2000; font-size: 14px; }
+#authStatusButton { background: #fff; padding: 6px 12px; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; }
+#authDropdown { position: absolute; top: 40px; right: 0; width: 220px; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 10px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: 0.15s; pointer-events: none; }
+#authDropdown.open { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+#authDropdown input, #authDropdown button { width: 100%; margin: 4px 0; padding: 6px; border-radius: 5px; box-sizing: border-box; }
+#authDropdown input { border: 1px solid #ccc; }
+#authDropdown button { border: none; cursor: pointer; }
+#authDropdown button:hover { background: #eee; }
+#mainContent { display: flex; flex: 1; margin-top: 60px; height: calc(100vh - 60px); flex-direction: column; align-items: flex-start; padding: 10px; }
+#musicToolbar { background: #1e1e1e; padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; max-width: 600px; margin: auto; color: white; font-family: Arial, sans-serif; }
+#musicToolbar .top { display: flex; gap: 8px; align-items: center; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; }
+#musicToolbar input { flex: 1; min-width: 120px; padding: 8px 10px; background: #333; border: 1px solid #444; border-radius: 8px; color: white; }
+.icon-btn { padding: 8px 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.2s; }
+.icon-btn:hover { background: #3d3d3d; }
+.icon-btn.danger { background: #5a1e1e; border-color: #7a2b2b; }
+.icon-btn.danger:hover { background: #7a2b2b; }
+.player-box { background: #2b2b2b; padding: 10px; border-radius: 12px; }
+#player { width: 100%; height: 36px; filter: invert(85%) hue-rotate(180deg); }
+.album { margin-bottom: 20px; padding: 10px; background: #f4f4f4; border-radius: 8px; }
+.song { display: flex; gap: 10px; align-items: center; margin: 5px 0; }
+.song button, .song select { cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="topBar">
+<h1>Zenelejátszó</h1>
+<div id="authBox">
+  <div id="authStatusButton">❌ Nincs bejelentkezve</div>
+  <div id="authDropdown">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Jelszó">
+    <button id="loginBtn">Bejelentkezés</button>
+    <button id="registerBtn">Regisztráció</button>
+    <button id="logoutBtn" style="display:none;">Kilépés</button>
+  </div>
+</div>
+</div>
+
+<div id="mainContent">
+  <div id="albumsContainer"></div>
+  <div id="musicToolbar">
+    <div class="top">
+        <input type="text" id="fileName" placeholder="Zene címe">
+        <button id="openLocalBtn" class="icon-btn">📂</button>
+        <button id="saveBtn" class="icon-btn">💾</button>
+        <button id="saveFirestoreBtn" class="icon-btn">🌥️</button>
+        <button id="duplicateBtn" class="icon-btn">📑</button>
+        <button id="deleteBtn" class="icon-btn danger">🗑️</button>
+    </div>
+    <div class="player-box">
+        <audio id="player" controls></audio>
+    </div>
+  </div>
+  <input type="file" id="fileInput" accept="audio/*" style="display:none;">
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  serverTimestamp,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  doc,
+  updateDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDFK6o6sJnFJImBhkX_ZfQq6fXldLZt7vA",
+  authDomain: "calendarformeapp.firebaseapp.com",
+  projectId: "calendarformeapp",
+  storageBucket: "calendarformeapp.firebasestorage.app",
+  messagingSenderId: "421913143205",
+  appId: "1:421913143205:web:24dc04f3c768f99356aa4c"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const authStatusButton = document.getElementById("authStatusButton");
+const authDropdown = document.getElementById("authDropdown");
+const emailInput = document.getElementById("email");
+const passInput = document.getElementById("password");
+const logoutBtn = document.getElementById("logoutBtn");
+
+authStatusButton.onclick = () => authDropdown.classList.toggle("open");
+document.addEventListener("click", e => { if(!authDropdown.contains(e.target) && e.target!==authStatusButton) authDropdown.classList.remove("open"); });
+
+document.getElementById('loginBtn').onclick = async () => {
+  try { await signInWithEmailAndPassword(auth, emailInput.value, passInput.value); }
+  catch(e){ alert("Hiba: "+e.message); }
+};
+document.getElementById('registerBtn').onclick = async () => {
+  try { await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value); alert("✅ Regisztráció sikeres"); }
+  catch(e){ alert("Hiba: "+e.message); }
+};
+logoutBtn.onclick = async () => { await signOut(auth); };
+
+onAuthStateChanged(auth, user => {
+  if(user){
+    authStatusButton.textContent = "👤 "+user.email;
+    logoutBtn.style.display = "block";
+    renderSongs();
+  } else {
+    authStatusButton.textContent = "❌ Nincs bejelentkezve";
+    logoutBtn.style.display = "none";
+    document.getElementById("albumsContainer").innerHTML = "";
+  }
+});
+
+// Globális változók
+const openBtn = document.getElementById('openLocalBtn');
+const fileInput = document.getElementById('fileInput');
+const player = document.getElementById('player');
+const fileNameInput = document.getElementById('fileName');
+let selectedFile = null;          // A helyi fájl, amit épp kiválasztott a felhasználó
+let selectedFileDocId = null;     // Firestore dokumentum ID-ja a kiválasztott zenének
+let selectedFilePublicId = null;  // Cloudinary public_id-ja a kiválasztott zenének
+
+// Zenék lekérdezése album szerint
+async function fetchSongs() {
+    if (!auth.currentUser) return []; // Ha nincs bejelentkezett user, üres tömb
+
+    const songsCol = collection(db, "songs");
+
+    // Egyszerű lekérdezés: csak a bejelentkezett user zenéi
+    const q = query(songsCol, where("owner", "==", auth.currentUser.uid));
+
+    const snapshot = await getDocs(q);
+    const songs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return songs;
+}
+
+// Fájlok kirajzolása
+async function renderSongs() {
+    const songs = await fetchSongs();
+    const container = document.getElementById("albumsContainer");
+    container.innerHTML = ""; // töröljük a régieket
+
+    if (songs.length === 0) {
+        container.innerHTML = "<p>Nincs még feltöltött zene.</p>";
+        return;
+    }
+
+    // Csoport albumok szerint
+    const albums = {};
+    songs.forEach(song => {
+        const albumName = song.album || "Alap Album"; // alapértelmezett album
+        if (!albums[albumName]) albums[albumName] = [];
+        albums[albumName].push(song);
+    });
+
+    for (const albumName in albums) {
+        const albumDiv = document.createElement("div");
+        albumDiv.className = "album";
+        albumDiv.innerHTML = `<h3>${albumName}</h3>`;
+
+        albums[albumName].forEach(song => {
+            const songDiv = document.createElement("div");
+            songDiv.className = "song";
+            songDiv.innerHTML = `
+                <span>${song.name}</span>
+                <button class="playBtn">▶️</button>
+                <button class="deleteBtn">🗑️</button>
+            `;
+
+            // Lejátszás
+            songDiv.querySelector(".playBtn").onclick = () => {
+                player.src = song.url;
+                player.play();
+                selectedFileDocId = song.id;
+                selectedFilePublicId = song.public_id;
+            };
+
+            // Törlés
+            // Törlés (Firestore + Cloudinary)
+songDiv.querySelector(".deleteBtn").onclick = async () => {
+    if (!confirm(`Biztos törlöd: ${song.name}?`)) return;
+
+    try {
+        // 1) Cloudinary törlés
+        if (song.public_id) {
+            await fetch(`https://music-backend-jq1s.onrender.com/delete/${song.public_id}`, {
+                method: 'DELETE'
+            });
+        }
+
+        // 2) Firestore törlés
+        await deleteDoc(doc(db, "songs", song.id));
+
+        // 3) UI frissítés
+        if (player.src === song.url) {
+            player.src = "";
+            fileNameInput.value = "";
+            selectedFile = null;
+            selectedFileDocId = null;
+            selectedFilePublicId = null;
+        }
+
+        alert(`${song.name} törölve!`);
+        renderSongs();
+
+    } catch (err) {
+        console.error(err);
+        alert("Hiba a törlés során!");
+    }
+};
+
+            albumDiv.appendChild(songDiv);
+        });
+
+        container.appendChild(albumDiv);
+    }
+}
+
+// Fájl kiválasztás
+openBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', e => {
+    selectedFile = e.target.files[0];
+    if(selectedFile){
+        player.src = URL.createObjectURL(selectedFile);
+        player.play();
+        if(!fileNameInput.value) fileNameInput.value = selectedFile.name.replace('.mp3','');
+    }
+});
+
+// Mentés gépre
+document.getElementById('saveBtn').addEventListener('click', () => {
+    if(!selectedFile){ alert("Először válassz ki egy zenét!"); return; }
+    let name = fileNameInput.value.trim() || selectedFile.name;
+    if(!name.endsWith('.mp3')) name += '.mp3';
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(selectedFile);
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+
+// Mentés Firestore + Cloudinary
+document.getElementById('saveFirestoreBtn').addEventListener('click', async () => {
+    if(!selectedFile){ alert("Először válassz ki egy zenét!"); return; }
+    if(!auth.currentUser){ alert("Be kell jelentkezned a mentéshez!"); return; }
+
+    let name = fileNameInput.value.trim() || selectedFile.name.replace('.mp3','');
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try{
+        const res = await fetch("https://music-backend-jq1s.onrender.com/upload", {
+            method: 'POST',
+            body: formData
+        });
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('Cloudinary hiba:', errorText);
+            throw new Error('Upload failed');
+        }
+        const data = await res.json();
+
+        // Firestore
+        const docRef = await addDoc(collection(db, "songs"), {
+           name: name,
+           url: data.url,
+           public_id: data.public_id,
+           album: "Alap Album", // ide később dinamikusan lehet albumot választani
+           uploadedAt: serverTimestamp(),
+           owner: auth.currentUser.uid
+        });
+
+        // Beállítjuk a globális változókat
+        selectedFileDocId = docRef.id;
+        selectedFilePublicId = data.public_id;
+
+        alert("Sikeresen feltöltve és mentve!");
+    } catch(err){
+        console.error(err);
+        alert("Hiba a feltöltés során!");
+    }
+
+    renderSongs();
+});
+
+// Duplikálás FS + C
+document.getElementById('duplicateBtn').addEventListener('click', async () => {
+    if (!selectedFileDocId) {
+        alert('Nincs kiválasztva fájl!');
+        return;
+    }
+
+    try {
+        const docSnap = await getDoc(doc(db, "songs", selectedFileDocId));
+        if (!docSnap.exists()) return;
+
+        const originalData = docSnap.data();
+
+        // 1) Letöltjük a fájlt a Cloudinary URL-ről
+        const response = await fetch(originalData.url);
+        const blob = await response.blob();
+        const file = new File([blob], originalData.name + "_copy.mp3", { type: "audio/mp3" });
+
+        // 2) Feltöltjük újra a backendre → Cloudinary-ba
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const uploadRes = await fetch("https://music-backend-jq1s.onrender.com/duplicate", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await uploadRes.json();
+
+        // 3) Mentés Firestore-ba
+        await addDoc(collection(db, "songs"), {
+            name: originalData.name + " (másolat)",
+            url: data.url,
+            public_id: data.public_id,
+            uploadedAt: serverTimestamp(),
+            owner: auth.currentUser.uid
+        });
+
+        alert("Fájl duplikálva!");
+
+    } catch (err) {
+        console.error(err);
+        alert("Hiba a duplikálás során!");
+    }
+});
+
+// Törlés Firestore + Cloudinary
+document.getElementById('deleteBtn').addEventListener('click', async () => {
+    if (!selectedFileDocId || !selectedFilePublicId) {
+        alert("Nincs kiválasztva fájl!");
+        return;
+    }
+
+    try {
+        // 1) Cloudinary törlés
+        await fetch(`https://music-backend-jq1s.onrender.com/delete/${selectedFilePublicId}`, {
+            method: 'DELETE'
+        });
+
+        // 2) Firestore törlés
+        await deleteDoc(doc(db, "songs", selectedFileDocId));
+
+        alert("Fájl törölve!");
+
+        // UI reset
+        player.src = "";
+        fileNameInput.value = "";
+        selectedFile = null;
+        selectedFileDocId = null;
+        selectedFilePublicId = null;
+
+    } catch (err) {
+        console.error(err);
+        alert("Hiba a törlés során!");
+    }
+
+    renderSongs();
+});
+
+</script>
+</body>
+</html>
