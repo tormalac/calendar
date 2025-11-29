@@ -353,6 +353,11 @@ openBtn.addEventListener('click', () => fileInput.click());
 
 fileInput.addEventListener('change', e => {
     selectedFile = e.target.files[0];
+
+    selectedFileDocId = null;
+    selectedFilePublicId = null;
+    currentSongId = null;
+
     if(selectedFile){
         player.src = URL.createObjectURL(selectedFile);
         player.play();
