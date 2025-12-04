@@ -20,7 +20,6 @@
     --static-text: #f5f5f5;
 }
 
-/* Alap oldal */
 body {
     margin: 0;
     background: var(--bg);
@@ -28,9 +27,6 @@ body {
     color: var(--text-dark);
 }
 
-/* ---------------------------------------- */
-/* FELSŐ MENÜ */
-/* ---------------------------------------- */
 nav {
     background: #ffffffcc;
     backdrop-filter: blur(10px);
@@ -61,16 +57,12 @@ nav button:hover {
     color: var(--accent);
 }
 
-/* ---------------------------------------- */
-/* KONTEJNER */
-/* ---------------------------------------- */
 #aboutWrapper {
     max-width: 900px;
     margin: 40px auto 20px;
     padding: 20px;
 }
 
-/* Fejléc */
 #aboutHeader {
     text-align: center;
     margin-bottom: 30px;
@@ -86,18 +78,12 @@ nav button:hover {
     color: var(--text-light);
 }
 
-/* ---------------------------------------- */
-/* KÁRTYÁK – GRID */
-/* ---------------------------------------- */
 .cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 24px;
 }
 
-/* ---------------------------------------- */
-/* KATTINTHATÓ KÁRTYÁK */
-/* ---------------------------------------- */
 .card.link {
     background: var(--card-bg);
     border-radius: var(--radius);
@@ -129,9 +115,6 @@ nav button:hover {
     color: var(--text-light);
 }
 
-/* ---------------------------------------- */
-/* STATIKUS KÁRTYÁK */
-/* ---------------------------------------- */
 .card.static {
     background: #f1f3f6;              /* világos, kellemes szürke */
     color: #444;                       /* sötétszürke szöveg */
@@ -156,9 +139,7 @@ nav button:hover {
 .card.static p {
     color: #555;                       /* középszürke szöveg */
 }
-/* ---------------------------------------- */
-/* LÁBLÉC */
-/* ---------------------------------------- */
+
 footer {
     text-align: center;
     margin: 50px 0;
@@ -182,7 +163,7 @@ footer {
 <div id="aboutWrapper">
 
     <div id="aboutHeader">
-        <h1>🎯 Mi ez az oldal?</h1>
+        <h1>Munkaidő naptár, jegyzetek és zene</h1>
         <p>Gyors és letisztult eszközök a mindennapok rendszerezéséhez — reklámok nélkül.</p>
     </div>
 
@@ -209,12 +190,11 @@ footer {
 
     <br><br>
 
-    <!-- STATIKUS, KÜLÖN RÉSZBEN -->
     <div class="cards">
         <div class="card static">
             <div class="icon">☁️</div>
             <h3>Felhő alapú mentés</h3>
-            <p>Bejelentkezés után minden Firestore-ban tárolódik.</p>
+            <p>Bejelentkezés után minden Firestore-ban és Cloudinary-ben tárolódik biztonságosan.</p>
         </div>
 
         <div class="card static">
