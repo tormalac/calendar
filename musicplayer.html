@@ -370,6 +370,8 @@ let currentSongId = null;
 let openAlbums = new Set();
 let albumSortMode = {};
 let lastPlayButton = null;
+let playlist = [];
+let currentIndex = 0;
 
 // Play gomb
 player.onplay = () => {
@@ -385,11 +387,38 @@ player.onpause = () => {
     }
 };
 
-player.onended = () => {
+/*player.onended = () => {
     if (lastPlayButton) {
         lastPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
     }
     updatePlayingHighlight();
+};*/
+
+player.onended = () => {
+    if (currentIndex + 1 < playlist.length) {
+        currentIndex++;
+        const nextSong = playlist[currentIndex];
+        player.src = nextSong.url;
+        player.play();
+        currentSongId = nextSong.id;
+        selectedFileDocId = nextSong.id;
+        selectedFilePublicId = nextSong.public_id;
+        fileNameInput.value = nextSong.name;
+
+        // Play gomb frissítése
+        if (lastPlayButton) lastPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+        const nextBtn = document.querySelector(`.song[data-id="${nextSong.id}"] .playBtn`);
+        if (nextBtn) {
+            nextBtn.innerHTML = '<span class="material-icons">pause</span>';
+            lastPlayButton = nextBtn;
+        }
+
+    } else {
+        // ha az album véget ért
+        currentSongId = null;
+        lastPlayButton = null;
+        updatePlayingHighlight();
+    }
 };
 
 // Kijelölés
@@ -599,7 +628,7 @@ header.querySelector(".sortSelect").addEventListener("change", (e) => {
             //Play pause gomb
             const playBtn = songDiv.querySelector(".playBtn");
 
-playBtn.onclick = (e) => {
+/*playBtn.onclick = (e) => {
     e.stopPropagation();
 
     // Ha ugyanazt a dalt nyomjuk, csak pause/play
@@ -629,8 +658,39 @@ playBtn.onclick = (e) => {
     }
 
     updatePlayingHighlight();
-};
+};*/
 
+playBtn.onclick = (e) => {
+    e.stopPropagation();
+
+    // Ha másik dal van kiválasztva, új playlist építése
+    if (currentSongId !== song.id) {
+        const albumName = song.album || "Alap Album";
+        // playlist: az összes dal ebben az albumban
+        playlist = songsInAlbum = [...albums[albumName]];
+        // rendezzük a playlistet az albumSortMode szerint
+        if (albumSortMode[albumName] === 'abc') {
+            playlist.sort((a, b) => a.name.localeCompare(b.name));
+        } else {
+            playlist.sort((a, b) => (b.uploadedAt?.seconds || 0) - (a.uploadedAt?.seconds || 0));
+        }
+
+        currentIndex = playlist.findIndex(s => s.id === song.id);
+        currentSongId = song.id;
+        selectedFileDocId = song.id;
+        selectedFilePublicId = song.public_id;
+        fileNameInput.value = song.name;
+        player.src = song.url;
+        player.play();
+        lastPlayButton = playBtn;
+    } else {
+        // ugyanaz a dal → toggle play/pause
+        if (player.paused) player.play();
+        else player.pause();
+    }
+
+    updatePlayingHighlight();
+};
 
 
             // Albumváltás
