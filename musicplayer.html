@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Zenelejátszó</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
 html, body { height: 100%; margin: 0; font-family: sans-serif; }
 body { display: flex; flex-direction: column; }
@@ -163,7 +164,7 @@ body { display: flex; flex-direction: column; }
     cursor: pointer;
 }
 
-.song button {
+/*.song button {
     padding: 6px 10px;
     border-radius: 4px;
     border: none;
@@ -174,7 +175,31 @@ body { display: flex; flex-direction: column; }
 }
 .song button:hover {
     background: #ddd;
+}*/
+
+.song button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: #eaeaea;
+    cursor: pointer;
+    transition: 0.2s;
 }
+
+.song button:hover {
+    background: #d5d5d5;
+}
+
+.material-icons {
+    font-size: 20px;
+    color: #333;
+}
+
 .song button.danger {
     background: #fdd;
     border-color: #faa;
@@ -344,6 +369,39 @@ let selectedFilePublicId = null;  // Cloudinary public_id-ja a kiválasztott zen
 let currentSongId = null;
 let openAlbums = new Set();
 let albumSortMode = {};
+let lastPlayButton = null;
+
+// Play gomb
+player.onplay = () => {
+    if (lastPlayButton) {
+        lastPlayButton.innerHTML = '<span class="material-icons">pause</span>';
+    }
+    updatePlayingHighlight();
+};
+
+player.onpause = () => {
+    if (lastPlayButton) {
+        lastPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+    }
+};
+
+player.onended = () => {
+    if (lastPlayButton) {
+        lastPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+    }
+    updatePlayingHighlight();
+};
+
+// Kijelölés
+function updatePlayingHighlight() {
+    document.querySelectorAll(".song").forEach(div => {
+        if (div.dataset.id === currentSongId) {
+            div.classList.add("playing");
+        } else {
+            div.classList.remove("playing");
+        }
+    });
+}
 
 // Zenék lekérdezése album szerint
 async function fetchSongs() {
@@ -520,20 +578,57 @@ header.querySelector(".sortSelect").addEventListener("change", (e) => {
         songsInAlbum.forEach(song => {
             const songDiv = document.createElement("div");
             songDiv.className = "song";
+
+            songDiv.dataset.id = song.id;
+
             if (currentSongId === song.id) songDiv.classList.add("playing");
 
             songDiv.innerHTML = `
-                <button class="playBtn">▶️</button>
+                <button class="playBtn"><span class="material-icons">play_arrow</span></button>
                 <div class="song-info" contenteditable="true" spellcheck="false" data-ms-editor="false">${song.name}</div>
                 <div class="song-actions">
                     <select>
                         ${allAlbumNames.map(a => `<option value="${a}" ${a === song.album ? 'selected' : ''}>${a}</option>`).join('')}
                     </select>
-                    <button class="deleteBtn">🗑️</button>
+                    <button class="deleteBtn"><span class="material-icons">delete</span></button>
                 </div>
             `;
 
             songDiv.addEventListener("click", e => e.stopPropagation());
+
+            //Play pause gomb
+            const playBtn = songDiv.querySelector(".playBtn");
+
+            playBtn.onclick = (e) => {
+                e.stopPropagation();
+
+    // másik play gomb ikonját visszaállítjuk
+    if (lastPlayButton && lastPlayButton !== playBtn) {
+        lastPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+    }
+
+    // play / pause logika
+    if (player.src === song.url && !player.paused) {
+        player.pause();
+        playBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
+    } else {
+        player.src = song.url;
+        player.play();
+        playBtn.innerHTML = '<span class="material-icons">pause</span>';
+    }
+
+    // beállítjuk az új "aktív" play gombot
+                
+                lastPlayButton = playBtn;
+                currentSongId = song.id;
+                selectedFileDocId = song.id;
+                selectedFilePublicId = song.public_id;
+                fileNameInput.value = song.name;
+
+                updatePlayingHighlight();
+                //renderSongs();
+            };
+
 
             // Albumváltás
             const albumSelect = songDiv.querySelector("select");
@@ -544,7 +639,7 @@ header.querySelector(".sortSelect").addEventListener("change", (e) => {
             };
 
             // Lejátszás
-            songDiv.querySelector(".playBtn").onclick = (e) => {
+            /*songDiv.querySelector(".playBtn").onclick = (e) => {
                 e.stopPropagation();
                 player.src = song.url;
                 player.play();
@@ -553,7 +648,7 @@ header.querySelector(".sortSelect").addEventListener("change", (e) => {
                 selectedFilePublicId = song.public_id;
                 fileNameInput.value = song.name;
                 renderSongs();
-            };
+            };*/
 
             // Átnevezés
             songDiv.querySelector(".song-info").addEventListener("blur", async (e) => {
