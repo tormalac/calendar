@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Munkaidő naptár – jegyzetek, bérkalkulátor, zene</title>
 
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" />
 <style>
 :root {
     --bg: #f5f7fa;
@@ -57,6 +58,13 @@ nav button:hover {
     color: var(--accent);
 }
 
+nav .material-symbols-rounded {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+    font-size: 20px;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
 #aboutWrapper {
     max-width: 900px;
     margin: 40px auto 20px;
@@ -76,6 +84,16 @@ nav button:hover {
 #aboutHeader p {
     font-size: 1.15rem;
     color: var(--text-light);
+}
+
+.material-symbols-rounded {
+    font-variation-settings: 
+        'FILL' 1, 
+        'wght' 400, 
+        'GRAD' 0, 
+        'opsz' 48;
+    font-size: 36px;
+    color: var(--accent);
 }
 
 .cards {
@@ -152,14 +170,23 @@ footer {
 
 <!-- MENÜ -->
 <nav>
-    <button onclick="location.href='newcalendar.html'">📅 Új naptár</button>
-    <button onclick="location.href='loadcalendar.html'">✏️ Szerkesztés</button>
-    <button onclick="location.href='budget.html'">💰 Bérkalkulátor</button>
-    <button onclick="location.href='texteditor.html'">📝 Jegyzetek</button>
-    <button onclick="location.href='musicplayer.html'">🎵 Zenelejátszó</button>
+    <button onclick="location.href='newcalendar.html'">
+        <span class="material-symbols-rounded">calendar_month</span> Új naptár
+    </button>
+    <button onclick="location.href='loadcalendar.html'">
+        <span class="material-symbols-rounded">edit</span> Naptár szerkesztése
+    </button>
+    <button onclick="location.href='budget.html'">
+        <span class="material-symbols-rounded">paid</span> Bérkalkulátor
+    </button>
+    <button onclick="location.href='texteditor.html'">
+        <span class="material-symbols-rounded">note</span> Jegyzetek
+    </button>
+    <button onclick="location.href='musicplayer.html'">
+        <span class="material-symbols-rounded">music_note</span> Zenelejátszó
+    </button>
 </nav>
 
-<!-- TARTALOM -->
 <div id="aboutWrapper">
 
     <div id="aboutHeader">
@@ -170,19 +197,19 @@ footer {
     <!-- INTERAKTÍV KÁRTYÁK -->
     <div class="cards">
         <a href="loadcalendar.html" class="card link">
-            <div class="icon">📅</div>
+            <div class="icon"><span class="material-symbols-rounded">calendar_month</span></div>
             <h3>Naptár & események</h3>
             <p>Átlátható havi nézet és könnyű eseménykezelés.</p>
         </a>
 
         <a href="texteditor.html" class="card link">
-            <div class="icon">📝</div>
+            <div class="icon"><span class="material-symbols-rounded">edit</span></div>
             <h3>Jegyzetek</h3>
             <p>Gyors szövegbevitel, automatikus mentés.</p>
         </a>
 
         <a href="musicplayer.html" class="card link">
-            <div class="icon">🎵</div>
+            <div class="icon"><span class="material-symbols-rounded">music_note</span></div>
             <h3>Zenelejátszó</h3>
             <p>Albumokba rendezhető zenék és modern lejátszó.</p>
         </a>
@@ -192,19 +219,19 @@ footer {
 
     <div class="cards">
         <div class="card static">
-            <div class="icon">☁️</div>
+            <div class="icon"><span class="material-symbols-rounded">cloud</span></div>
             <h3>Felhő alapú mentés</h3>
             <p>Bejelentkezés után minden Firestore-ban és Cloudinary-ben tárolódik biztonságosan.</p>
         </div>
 
         <div class="card static">
-            <div class="icon">⚡</div>
+            <div class="icon"><span class="material-symbols-rounded">speed</span></div>
             <h3>Gyors & mobilbarát</h3>
             <p>Minden eszközön kényelmes, modern és gyors.</p>
         </div>
 
         <div class="card static">
-            <div class="icon">🎨</div>
+            <div class="icon"><span class="material-symbols-rounded">palette</span></div>
             <h3>Letisztult design</h3>
             <p>Minimal stílus, ami a használhatóságot helyezi előtérbe.</p>
         </div>
