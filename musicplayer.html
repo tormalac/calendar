@@ -394,18 +394,11 @@ player.onended = () => {
 
 // Kijelölés
 function updatePlayingHighlight() {
-    document.querySelectorAll(".song").forEach(songDiv => {
-        const playBtn = songDiv.querySelector(".playBtn");
-        const id = songDiv.dataset.id;
-
-        if (id === currentSongId) {
-            songDiv.classList.add("playing");
-            playBtn.innerHTML = player.paused 
-                ? '<span class="material-icons">play_arrow</span>' 
-                : '<span class="material-icons">pause</span>';
+    document.querySelectorAll(".song").forEach(div => {
+        if (div.dataset.id === currentSongId) {
+            div.classList.add("playing");
         } else {
-            songDiv.classList.remove("playing");
-            playBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
+            div.classList.remove("playing");
         }
     });
 }
@@ -606,36 +599,38 @@ header.querySelector(".sortSelect").addEventListener("change", (e) => {
             //Play pause gomb
             const playBtn = songDiv.querySelector(".playBtn");
 
-            playBtn.onclick = (e) => {
-                e.stopPropagation();
-// Ha másik gombot nyomtunk meg → visszaállítjuk a régi play ikont
-    if (lastPlayButton && lastPlayButton !== playBtn) {
-        lastPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
-    }
+playBtn.onclick = (e) => {
+    e.stopPropagation();
 
-    // Ha ugyanazt a zenét nyomjuk
-    if (player.src === song.url) {
+    // Ha ugyanazt a dalt nyomjuk, csak pause/play
+    if (currentSongId === song.id) {
         if (player.paused) {
-            player.play();  // folytatás ott, ahol abbahagytuk
+            player.play();
+            playBtn.innerHTML = '<span class="material-icons">pause</span>';
         } else {
-            player.pause(); // szünet
+            player.pause();
+            playBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
         }
     } else {
-        player.src = song.url;  // új zene → újraindítás
+        // Új dal kiválasztása
+        player.src = song.url;
         player.play();
+
+        // Előző play gomb visszaállítása
+        if (lastPlayButton) {
+            lastPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+        }
+
+        lastPlayButton = playBtn;
+        currentSongId = song.id;
+        selectedFileDocId = song.id;
+        selectedFilePublicId = song.public_id;
+        fileNameInput.value = song.name;
     }
 
-    // beállítjuk az új "aktív" play gombot
-                
-                lastPlayButton = playBtn;
-                currentSongId = song.id;
-                selectedFileDocId = song.id;
-                selectedFilePublicId = song.public_id;
-                fileNameInput.value = song.name;
+    updatePlayingHighlight();
+};
 
-                updatePlayingHighlight();
-                //renderSongs();
-            };
 
 
             // Albumváltás
@@ -691,14 +686,6 @@ header.querySelector(".sortSelect").addEventListener("change", (e) => {
 
     updateAlbumSelect(songs);
 }
-
-// ----- PLAYER ESEMÉNYEK -----
-player.onplay = updatePlayingHighlight;
-player.onpause = updatePlayingHighlight;
-player.onended = () => {
-    currentSongId = null;
-    updatePlayingHighlight();
-};
 
 // Fájl kiválasztás
 openBtn.addEventListener('click', () => fileInput.click());
