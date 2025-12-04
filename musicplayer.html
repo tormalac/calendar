@@ -394,11 +394,18 @@ player.onended = () => {
 
 // Kijelölés
 function updatePlayingHighlight() {
-    document.querySelectorAll(".song").forEach(div => {
-        if (div.dataset.id === currentSongId) {
-            div.classList.add("playing");
+    document.querySelectorAll(".song").forEach(songDiv => {
+        const playBtn = songDiv.querySelector(".playBtn");
+        const id = songDiv.dataset.id;
+
+        if (id === currentSongId) {
+            songDiv.classList.add("playing");
+            playBtn.innerHTML = player.paused 
+                ? '<span class="material-icons">play_arrow</span>' 
+                : '<span class="material-icons">pause</span>';
         } else {
-            div.classList.remove("playing");
+            songDiv.classList.remove("playing");
+            playBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
         }
     });
 }
@@ -601,20 +608,21 @@ header.querySelector(".sortSelect").addEventListener("change", (e) => {
 
             playBtn.onclick = (e) => {
                 e.stopPropagation();
-
-    // másik play gomb ikonját visszaállítjuk
+// Ha másik gombot nyomtunk meg → visszaállítjuk a régi play ikont
     if (lastPlayButton && lastPlayButton !== playBtn) {
         lastPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
     }
 
-    // play / pause logika
-    if (player.src === song.url && !player.paused) {
-        player.pause();
-        playBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
+    // Ha ugyanazt a zenét nyomjuk
+    if (player.src === song.url) {
+        if (player.paused) {
+            player.play();  // folytatás ott, ahol abbahagytuk
+        } else {
+            player.pause(); // szünet
+        }
     } else {
-        player.src = song.url;
+        player.src = song.url;  // új zene → újraindítás
         player.play();
-        playBtn.innerHTML = '<span class="material-icons">pause</span>';
     }
 
     // beállítjuk az új "aktív" play gombot
@@ -683,6 +691,14 @@ header.querySelector(".sortSelect").addEventListener("change", (e) => {
 
     updateAlbumSelect(songs);
 }
+
+// ----- PLAYER ESEMÉNYEK -----
+player.onplay = updatePlayingHighlight;
+player.onpause = updatePlayingHighlight;
+player.onended = () => {
+    currentSongId = null;
+    updatePlayingHighlight();
+};
 
 // Fájl kiválasztás
 openBtn.addEventListener('click', () => fileInput.click());
