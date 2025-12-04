@@ -18,7 +18,7 @@ body { display: flex; flex-direction: column; }
 #authDropdown button:hover { background: #eee; }
 #mainContent {
     display: flex;
-    flex-direction: column;   /* ← EDDIG column volt */
+    flex-direction: column;
     margin-top: 60px;
     height: calc(100vh - 60px);
     padding: 10px;
@@ -80,6 +80,16 @@ body { display: flex; flex-direction: column; }
     margin-bottom: 12px;
     font-size: 1.2rem;
     color: #222;
+}
+
+.album-title {
+    border-bottom: 1px solid transparent;
+    padding: 2px 4px;
+}
+
+.album-title:focus {
+    outline: none;
+    border-color: #999;
 }
 
 .right-controls {
@@ -176,6 +186,7 @@ body { display: flex; flex-direction: column; }
     font-size: 18px;
     padding: 6px 10px;
 }
+
 /* Lejátszóban album select design */
 #musicToolbar select#albumSelect {
     padding: 8px 10px;
@@ -185,11 +196,32 @@ body { display: flex; flex-direction: column; }
     color: white;
     min-width: 140px;
 }
+
+#albumSort {
+    display: inline;
+    font-size: 14px;
+}
+
+#albumSortSelect {
+    height: 24px !important;
+    max-width: 160px !important;
+    padding: 0 6px !important;
+    margin-left: 4px;
+    font-size: 14px;
+    background: #fff;
+    color: #222;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box !important;
+    font-weight: normal;
+}
+
 #albumsContainer {
     flex: 1;               /* tölti a jobb oldalt */
     padding-right: 10px;
     overflow-y: auto;      /* scrollozható album lista */
 }
+
 </style>
 </head>
 <body>
@@ -226,10 +258,19 @@ body { display: flex; flex-direction: column; }
         <audio id="player" controls></audio>
     </div>
   </div>
+
    <div id="uploadProgressContainer" style="display:none; margin-top:10px; width:100%; background:#ccc; border-radius:8px;">
     <div id="uploadProgress" style="width:0%; height:12px; background:#4caf50; border-radius:8px;"></div>
    </div>
+
   <input type="file" id="fileInput" accept="audio/*" style="display:none;">
+
+  <div id="albumSort">Albumok rendezése:
+    <select id="albumSortSelect">
+      <option value="abc">ABC</option>
+      <option value="time">időrend</option>
+    </select>
+  </div>
   <div id="albumsContainer"></div>
 </div>
 
@@ -358,9 +399,26 @@ async function renderSongs() {
         albums[albumName].push(song);
     });
 
+    // --- ALBUM RENDEZÉS ---
+    const sortAlbumsBy = document.getElementById("albumSortSelect")?.value || "abc";
+
     const allAlbumNames = Object.keys(albums);
 
-    for (const albumName in albums) {
+    // ABC rendezés
+    if (sortAlbumsBy === "abc") {
+        allAlbumNames.sort((a, b) => a.localeCompare(b));
+    }
+
+    // IDŐREND RENDEZÉS → az album utolsó feltöltött dalának ideje
+    if (sortAlbumsBy === "time") {
+        allAlbumNames.sort((a, b) => {
+           const lastA = Math.max(...albums[a].map(s => s.uploadedAt?.seconds || 0));
+           const lastB = Math.max(...albums[b].map(s => s.uploadedAt?.seconds || 0));
+           return lastB - lastA;
+        });
+    }
+
+    for (const albumName of allAlbumNames) {
 
         // --- Alapértelmezett rendezés beállítása
         if (!albumSortMode[albumName]) albumSortMode[albumName] = 'time';
@@ -376,7 +434,9 @@ async function renderSongs() {
         header.className = "album-header";
 
         header.innerHTML = `
-    <span>📁 ${albumName}</span>
+    <span class="album-title" contenteditable="true" spellcheck="false">
+    📁 ${albumName}
+    </span>
     <span class="right-controls">
         Dalok rendezése: 
         <select class="sortSelect">
@@ -386,8 +446,47 @@ async function renderSongs() {
         <span class="arrow">${openAlbums.has(albumName) ? "▲" : "▼"}</span>
     </span>
 `;
-        // Album nyit/csuk toggle
-        header.addEventListener("click", (e) => {
+    // Album szerkesztése
+    const titleSpan = header.querySelector(".album-title");
+
+titleSpan.addEventListener("click", e => {
+    // Ne csukja be az albumot
+    e.stopPropagation();
+});
+
+titleSpan.addEventListener("blur", async () => {
+    let newName = titleSpan.textContent.replace("📁", "").trim();
+    if (!newName) {
+        titleSpan.textContent = "📁 " + albumName;
+        return;
+    }
+    if (newName === albumName) return;
+
+    // Firestore: minden dal album mezőjének átírása
+    const oldName = albumName;
+
+    const songsToUpdate = albums[oldName]; // ezek tartoznak az albumba
+
+    for (const song of songsToUpdate) {
+        await updateDoc(doc(db, "songs", song.id), {
+            album: newName
+        });
+    }
+
+    // Frissítés UI-ra
+    openAlbums.delete(oldName);
+    openAlbums.add(newName);
+
+    // A rendezési módot is át kell tenni az új névre
+    albumSortMode[newName] = albumSortMode[oldName];
+    delete albumSortMode[oldName];
+
+    renderSongs();
+});
+
+
+    // Album nyit/csuk toggle
+    header.addEventListener("click", (e) => {
     // Ha a kattintás a selectre esett, ne csináljon semmit
     if (e.target.tagName === 'SELECT') return;
 
@@ -676,6 +775,11 @@ document.getElementById('deleteBtn').addEventListener('click', async () => {
         alert("Hiba a törlés során!");
     }
 
+    renderSongs();
+});
+
+// Album rendezés
+document.getElementById("albumSortSelect").addEventListener("change", () => {
     renderSongs();
 });
 
