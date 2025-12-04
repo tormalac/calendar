@@ -39,6 +39,22 @@ body { display: flex; flex-direction: column; }
 
 #musicToolbar .top { display: flex; gap: 8px; align-items: center; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; }
 #musicToolbar input, .album-select { flex: 1; min-width: 120px; padding: 8px 10px; background: #333; border: 1px solid #444; border-radius: 8px; color: white; }
+
+#musicToolbar .icon-btn .material-icons {
+    font-size: 22px;
+    vertical-align: middle;
+    color: #666;
+    transition: color 0.2s;
+}
+
+#musicToolbar .icon-btn.danger .material-icons {
+    color: #e53935; /* piros a törléshez */
+}
+
+#musicToolbar .icon-btn:hover .material-icons {
+    color: #1db954; /* zöld, ha hover-effektet akarsz */
+}
+
 .album-select { max-width: 200px; }
 .icon-btn { padding: 8px 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.2s; }
 .icon-btn:hover { background: #3d3d3d; }
@@ -273,11 +289,21 @@ body { display: flex; flex-direction: column; }
     <select id="albumSelect" class="album-select">
         <option disabled selected>Album választása</option>
     </select>
-    <button id="newAlbumBtn" class="icon-btn">➕</button>
-    <button id="openLocalBtn" class="icon-btn">📂</button>
-    <button id="saveBtn" class="icon-btn">💾</button>
-    <button id="saveFirestoreBtn" class="icon-btn">🌥️</button>
-    <button id="deleteBtn" class="icon-btn danger">🗑️</button>
+    <button id="newAlbumBtn" class="icon-btn" title="Új album létrehozása">
+      <span class="material-icons">library_add</span>
+    </button>
+    <button id="openLocalBtn" class="icon-btn" title="Helyi fájl megnyitása">
+      <span class="material-icons">folder_open</span>
+    </button>
+    <button id="saveBtn" class="icon-btn" title="Mentés a gépre">
+      <span class="material-icons">save</span>
+    </button>
+    <button id="saveFirestoreBtn" class="icon-btn" title="Mentés Firestore-ba / Cloudinary-be">
+      <span class="material-icons">cloud_upload</span>
+    </button>
+    <button id="deleteBtn" class="icon-btn danger" title="Törlés">
+      <span class="material-icons">delete_forever</span>
+    </button>
     </div>
     <div class="player-box">
         <audio id="player" controls></audio>
@@ -422,12 +448,29 @@ player.onended = () => {
 };
 
 // Kijelölés
-function updatePlayingHighlight() {
+/*function updatePlayingHighlight() {
     document.querySelectorAll(".song").forEach(div => {
         if (div.dataset.id === currentSongId) {
             div.classList.add("playing");
         } else {
             div.classList.remove("playing");
+        }
+    });
+}*/
+
+function updatePlayingHighlight() {
+    document.querySelectorAll(".song").forEach(div => {
+        const playBtn = div.querySelector(".playBtn span");
+        if (div.dataset.id === currentSongId) {
+            div.classList.add("playing");
+            if (player.paused) {
+                playBtn.textContent = "play_arrow";
+            } else {
+                playBtn.textContent = "pause";
+            }
+        } else {
+            div.classList.remove("playing");
+            playBtn.textContent = "play_arrow";
         }
     });
 }
@@ -627,38 +670,6 @@ header.querySelector(".sortSelect").addEventListener("change", (e) => {
 
             //Play pause gomb
             const playBtn = songDiv.querySelector(".playBtn");
-
-/*playBtn.onclick = (e) => {
-    e.stopPropagation();
-
-    // Ha ugyanazt a dalt nyomjuk, csak pause/play
-    if (currentSongId === song.id) {
-        if (player.paused) {
-            player.play();
-            playBtn.innerHTML = '<span class="material-icons">pause</span>';
-        } else {
-            player.pause();
-            playBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
-        }
-    } else {
-        // Új dal kiválasztása
-        player.src = song.url;
-        player.play();
-
-        // Előző play gomb visszaállítása
-        if (lastPlayButton) {
-            lastPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
-        }
-
-        lastPlayButton = playBtn;
-        currentSongId = song.id;
-        selectedFileDocId = song.id;
-        selectedFilePublicId = song.public_id;
-        fileNameInput.value = song.name;
-    }
-
-    updatePlayingHighlight();
-};*/
 
 playBtn.onclick = (e) => {
     e.stopPropagation();
