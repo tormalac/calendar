@@ -857,6 +857,7 @@ input, select {
   flex-direction: column; 
   padding: 10px;
   min-width: 0;
+  max-width: 300px;
 }
 #editor textarea {
   flex: 1;                  
@@ -1127,6 +1128,7 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;      /* scrollozható album lista */
 }
+
 
 
 
