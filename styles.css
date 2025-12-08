@@ -860,7 +860,7 @@ input, select {
 }
 #editor textarea {
   flex: 1;                  
-  max-width: calc(100vh - 300px);              
+  width: 300px;              
   box-sizing: border-box;   
   resize: none;
   margin-bottom: 5px;
@@ -1127,6 +1127,7 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;      /* scrollozható album lista */
 }
+
 
 
 
