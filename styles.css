@@ -1,0 +1,1130 @@
+:root {
+    --bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --card-border: #e3e8f5;
+    --shadow-soft: 0 4px 12px rgba(0,0,0,0.05);
+    --radius: 16px;
+
+    --accent: #2c5cc5;
+    --text-dark: #222;
+    --text-light: #555;
+
+    --static-bg: #1e1e1e;
+    --static-text: #f5f5f5;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    font-family: "Inter", sans-serif;
+    color: var(--text-dark);
+    min-height: 100vh;
+    margin: 0;
+    padding-top: 50px;
+}
+
+nav {
+    background: #ffffffcc;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    position: sticky;
+    top: 0;
+    padding: 14px 0;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+}
+
+button {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 10px 18px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text-dark);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+button:hover {
+    background: #eef3ff;
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.material-symbols-rounded {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+    font-size: 20px;
+    vertical-align: middle;
+    margin-right: 6px;
+    color: var(--text-dark);
+}
+
+button:hover .material-symbols-rounded {
+    color: var(--accent);
+}
+
+#aboutWrapper {
+    max-width: 900px;
+    margin: 40px auto 20px;
+    padding: 20px;
+}
+
+#aboutHeader {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#aboutHeader h1 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+#aboutHeader p {
+    font-size: 1.15rem;
+    color: var(--text-light);
+}
+
+#aboutWrapper .material-symbols-rounded {
+    font-variation-settings: 
+        'FILL' 1, 
+        'wght' 400, 
+        'GRAD' 0, 
+        'opsz' 48;
+    font-size: 36px;
+    color: var(--accent);
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.card.link {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 26px;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--card-border);
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.card.link:hover {
+    background: #eef3ff;
+    border-color: var(--accent);
+}
+
+.card.link .icon {
+    font-size: 34px;
+    margin-bottom: 12px;
+    color: var(--accent);
+}
+
+.card.link h3 {
+    margin: 0 0 10px;
+    color: var(--accent);
+    font-size: 1.3rem;
+}
+
+.card.link p {
+    color: var(--text-light);
+}
+
+.card.static {
+    background: #f1f3f6;              
+    color: #444;                       
+    border-radius: var(--radius);
+    padding: 26px;
+    box-shadow: none;
+    border: 1px solid #d7dce3;         
+}
+
+.card.static .icon {
+    font-size: 34px;
+    margin-bottom: 12px;
+    color: #8a8f99;                    
+}
+
+.card.static h3 {
+    color: #333;                       
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.card.static p {
+    color: #555;                       
+}
+
+footer {
+    text-align: center;
+    margin: 50px 0;
+    color: #777;
+}
+
+.container {
+    max-width: 480px;       
+    margin: 0 auto;         
+    padding: 20px;
+    background: white;      
+    border-radius: var(--radius);    
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+}
+
+h1 {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+label {
+    margin-top: 5px;
+    display: block;
+    margin-bottom: 5px;
+    color: #444;
+    font-weight: 500;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    box-sizing: border-box;
+}
+
+.container {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 25px 40px;
+    width: 380px;
+    box-sizing: border-box;
+}
+
+.container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.container h2 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-size: 16px;
+    color: #444;
+}
+
+.container button {
+    width: 100%;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+#eredmeny {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #eee;
+}
+
+#eredmeny p {
+    margin: 5px 0;
+    color: #333;
+}
+
+.file-upload {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px dashed #0078d7;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f0f6ff;
+    cursor: pointer;
+    transition: background 0.2s ease, border 0.2s ease;
+}
+
+.file-upload:hover {
+    background: #e6f0ff;
+    border-color: #005fa3;
+}
+
+.file-upload input[type="file"] {
+    display: none;
+}
+
+.file-upload span {
+    color: #0078d7;
+    font-weight: 500;
+}
+
+#fileName {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #333;
+}
+
+#topBar {
+  display: flex;
+  position: fixed;
+  flex-direction: column;
+  align-items: stretch;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px 20px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  justify-content: space-between;
+  z-index: 1000;
+}
+
+#topBar h1 {
+  display: inline;
+  font-size: 24px;
+  text-align: left;
+}
+
+#authBox {
+    position: fixed;
+    top: 10px;
+    right: 40px;
+    z-index: 2000;
+    font-size: 14px;
+}
+
+#authStatusButton {
+    background: #fff;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+#authDropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 220px;
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+    padding: 10px;
+    opacity: 0;            
+    visibility: hidden;    
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+
+    overflow: hidden;
+    pointer-events: none;  /* ne legyen kattintható csukva */
+}
+
+#authDropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto; 
+}
+
+#authDropdown input,
+#authDropdown button {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 4px 0;
+    padding: 6px;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+#authDropdown input {
+    border: 1px solid #ccc;
+}
+
+#authDropdown button {
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+#authDropdown button:hover {
+    background: #eee;
+}
+
+/* ---Mainmenü---*/
+#fileUploadContainer {  
+  font-size: 14px;
+  z-index: 100;
+}
+
+#fileUploadContainer button {
+  white-space: nowrap;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#fileUploadContainer button:disabled {
+    background-color: #b0b0b0;
+    color: #eee;
+    cursor: not-allowed;
+}
+
+#fileUploadContainer button:disabled:hover {
+    background-color: #b0b0b0 !important;
+}
+
+/* ---Naptár legend --- */
+#calendarLegend {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  margin-left: 40px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  max-width: 680px;
+  font-size: 14px;
+}
+
+#calendarLegend span {
+  margin: 5px 10px 5px 0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  #calendarLegend {
+    justify-content: center; /* Igazítja a legendát középre */
+    padding: 10px;
+  }
+
+  #calendarLegend span {
+    margin: 5px 10px 5px 0;
+    font-size: 12px; /* Csökkentsük a betűméretet */
+    white-space: nowrap; /* Megakadályozza, hogy a szöveg törjön */
+  }
+}
+
+@media (max-width: 480px) {
+  #calendarLegend {
+    flex-direction: column; /* Mobil nézetben függőlegesen rendezi el az elemeket */
+    align-items: flex-start; /* Balra igazítja a legendát */
+  }
+
+  #calendarLegend span {
+    margin: 5px 0;
+    font-size: 12px;
+  }
+}
+
+/* --- Naptár stílusok --- */
+#calendar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:24px;
+  margin-top: 60px;
+  margin-left: 40px;
+  justify-content:flex-start;
+  min-height:200px;
+}
+
+#calendarPlaceholder {
+  color:#aaa;
+  text-align:center;
+  width:100%;
+  padding:80px 0;
+  font-size:18px;
+  font-style:italic;
+  border: 2px dashed #ccc;
+  border-radius:5px;
+  background-color:#fff;
+}
+
+.month {
+  flex:0 0 320px;
+  max-width:560px;
+  border:1px solid #ccc;
+  border-radius:5px;
+  padding:10px;
+  box-sizing:border-box;
+  background: #fff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.month th, .month td {
+  border: none;
+  padding:5px;
+  text-align:center;
+  width:14.28%;
+  position:relative;
+  cursor:pointer;
+}
+
+.month td div {
+  line-height: 1.2;
+}
+
+.month td div:nth-child(2) {
+  font-size: 11px;
+  color: #444;
+  opacity: 0.9;
+}
+
+.month td:not(:empty) {
+    border-radius: 3px;
+    padding: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.month td:not(:empty):hover {
+    background-color: #cfe8ff !important;
+}
+.ledolgozott { background-color:#d3d3d3 !important; }
+.szabadsag { background-color:#ffff99 !important; }
+.tappenz { background-color:#cc99ff; }
+.ledolgozas { background-color:#99ccff; }
+.piheno { background-color:#ffeb99; }
+.unnep { background-color:#f88; }
+
+/* --- Nap szerkesztő popup --- */
+#overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  display: none;
+  z-index: 999;
+  transition: opacity 0.2s ease-in-out;
+}
+
+#dayEditor {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  background: linear-gradient(180deg, #ffffff, #f9f9fb);
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px 24px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  display: none;
+  z-index: 1000;
+  width: 340px;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.98); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+#dayEditor h3 {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 18px;
+  color: #222;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
+}
+
+#dayEditor label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+  color: #333;
+}
+
+#dayEditor select,
+#dayEditor input[type="number"],
+#dayEditor textarea {
+  width: 100%;
+  padding: 6px 8px;
+  margin-top: 3px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+#dayEditor select:focus,
+#dayEditor input:focus,
+#dayEditor textarea:focus {
+  border-color: #0078d7;
+  outline: none;
+}
+
+#statusCheckboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 4px;
+}
+#statusCheckboxes label {
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+#dayEditor textarea {
+  resize: none;
+  height: 60px;
+  font-size: 13px;
+}
+
+#dayEditorButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+#dayEditorButtons button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#cancelEdit {
+  background: #e5e5e5;
+  color: #333;
+}
+#cancelEdit:hover {
+  background: #dcdcdc;
+}
+
+#saveEdit {
+  background: #0078d7;
+  color: white;
+}
+#saveEdit:hover {
+  background: #006ac3;
+}
+#saveEdit:active {
+  transform: scale(0.98);
+}
+.commentIcon {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 12px;
+  color: #0078d7;
+  cursor: pointer;
+}
+
+#sidebarEdge {
+    position: fixed;
+    right: 0px;
+    top: 110px;
+    width: 40px;       /* kattintható felület szélessége */
+    height: 100vh;
+    cursor: pointer;
+    z-index: 501;     /* egyel alacsonyabb mint a sidebar */
+    background: transparent; 
+}
+#settingsSidebar {
+  position: fixed;
+  top: 110px;
+  right: -340px;   /* Kezdés: teljesen kívül */
+  width: 300px;
+  height: 100%;
+  background: #fdfdfd;
+  box-shadow: -3px 0 8px rgba(0,0,0,0.25);
+  border-left: 1px solid #ccc;
+  padding: 20px 40px;
+  z-index: 500;
+  transition: right 0.35s ease;
+  overflow: hidden; 
+}
+#settingsSidebar.open {
+  right: 0;
+}
+#closeSidebar {
+  display: block;
+  margin-bottom: 20px;
+  padding: 8px 12px;
+  background: #e5e5e5;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 40px;
+
+}
+#closeSidebar:hover {
+  background: #d4d4d4;
+}
+#settingsSidebar h2 {
+  margin: 60px 0px 0px 0px;
+  text-align: center;
+  font-size: 20px;
+  color: #222;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
+}
+#settingsSidebar h3 {
+  font-size: 18px;
+  font-weight: normal;
+}
+
+#settingsSidebar label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+  color: #333;
+}
+
+#settingsSidebar select,
+#settingsSidebar input,
+#settingsSidebar textarea {
+  width: 100%;
+  padding: 6px 8px;
+  margin-top: 3px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+#settingsSidebar select:focus,
+#settingsSidebar input:focus,
+#settingsSidebar textarea:focus {
+  border-color: #0078d7;
+  outline: none;
+}
+
+#settingsSidebar textarea {
+  resize: none;
+  height: 60px;
+  font-size: 13px;
+}
+
+#settingsSidebar button {
+  margin: 12px 0px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
+}
+#settingsSidebar button:hover {
+  background: #dcdcdc;
+}
+
+/*Testeditor*/
+
+#mainContent {
+  display: flex;
+  flex: 1;           
+  margin-top: 40px;      
+  height: calc(100vh - 60px);
+  background: white;
+}
+#sidebar {
+  width: 230px;
+  border-right: 1px solid #ccc;
+  padding: 10px;
+  overflow-y: auto;
+}
+#sidebar h4{
+  margin-left: 2px;
+  margin-right: 2px;
+  display: inline;
+  font-size: 12px;
+  font-weight: normal;
+}
+#sidebar button {
+  padding: 2px 6px;
+  border: none;
+  cursor: pointer;
+  border-radius: 2px;
+}
+#sidebar button:hover {
+  background: #e0e0ff;
+}
+
+/*Fájlok*/
+#fileList {
+  padding-left: 0;
+  margin-left: 0;
+}
+
+#fileList li {
+  list-style: none;
+  margin: 4px 2px;;
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s, transform 0.1s;
+  user-select: none; /* véletlen kijelölés megakadályozása */
+}
+
+#fileList li:hover,
+#fileList li:active {
+  background: #e0e0ff;
+}
+
+/*EditorTools*/
+#editorToolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  height: 60px;
+  max-width: 100%; 
+  overflow-x: auto;     /* vízszintes görgetés engedélyezése */
+  white-space: nowrap;  /* gombok egy sorban maradnak */
+}
+
+#editorToolbar button,
+#editorToolbar input {
+  flex: 0 0 auto;      /* ne nyúljanak a szülőhöz */
+}
+  
+::-webkit-scrollbar {
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+#editorToolbar input {
+  max-width: 200px;
+  padding: 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  flex: 0 0 auto;
+}
+
+#editorToolbar button {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+#editorToolbar button:hover {
+  background: #eee;
+}
+/* Editor */
+#editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column; 
+  padding: 10px;
+  min-width: 0;
+}
+#editor textarea {
+  flex: 1;                  
+  width: 100%;              
+  box-sizing: border-box;   
+  resize: none;
+  margin-bottom: 5px;
+  background-color: #fffdf5;
+  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+  background-repeat: repeat;
+  padding: 20px;             
+  border: 1px solid #ccc;   
+  border-radius: 5px;       
+  font-size: 16px;            
+  line-height: 1.5;         
+  color: #333;         
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  overflow-y: auto;
+}
+
+#mainContent {
+    display: flex;
+    flex-direction: column;
+    margin-top: 60px;
+    height: calc(100vh - 60px);
+    padding: 10px;
+    gap: 20px;
+}
+#musicToolbar {
+    min-width: 500px;                    /* ← ízlés szerint */
+    flex-shrink: 0;                  /* ne húzódjon össze */
+    background: #1e1e1e;
+    padding: 15px;
+    border-radius: 16px;
+    color: white;
+    height: fit-content;             /* csak akkora legyen, amennyi kell */
+    position: sticky;
+    top: 80px;                       /* scroll közben is marad felül */
+}
+
+#musicToolbar .top { display: flex; gap: 8px; align-items: center; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; }
+#musicToolbar input, .album-select { flex: 1; min-width: 120px; padding: 8px 10px; background: #333; border: 1px solid #444; border-radius: 8px; color: white; }
+
+#musicToolbar .icon-btn .material-icons {
+    font-size: 22px;
+    vertical-align: middle;
+    color: #666;
+    transition: color 0.2s;
+}
+
+#musicToolbar .icon-btn.danger .material-icons {
+    color: #e53935; /* piros a törléshez */
+}
+
+#musicToolbar .icon-btn:hover {
+    border: 1px solid #666;
+}
+
+#musicToolbar .icon-btn:hover .material-icons {
+    color: #1db954; /* zöld, ha hover-effektet akarsz */ 
+}
+
+
+.album-select { max-width: 200px; }
+.icon-btn { padding: 8px 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.2s; }
+.icon-btn:hover { background: #3d3d3d; }
+.icon-btn.danger { background: #5a1e1e; border-color: #7a2b2b; }
+.icon-btn.danger:hover { background: #7a2b2b; }
+.player-box { background: #2b2b2b; padding: 10px; border-radius: 12px; }
+#player { width: 100%; height: 36px; filter: invert(85%) hue-rotate(180deg); }
+.album {
+    margin-bottom: 12px;
+    border-radius: 8px;
+    background: #f2f2f2;
+    overflow: hidden;
+}
+
+.album-header {
+    padding: 12px 16px;
+    background: #e0e0e0;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    user-select: none;
+}
+
+.album-header:hover {
+    background: #d6d6d6;
+}
+
+.album-content {
+    display: none; /* alapból csukva */
+    padding: 10px 16px;
+    border-top: 1px solid #ccc;
+}
+.album.open .album-content {
+    display: block;
+}
+
+.album h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+    color: #222;
+}
+
+.album-title {
+    border-bottom: 1px solid transparent;
+    padding: 2px 4px;
+}
+
+.album-title:focus {
+    outline: none;
+    border-color: #999;
+}
+
+.right-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* kis távolság a szöveg és a select között */
+    font-size: 0.85rem;
+    font-weight: normal;
+}
+
+.right-controls select {
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.song {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    margin: 6px 0;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.song.playing {
+    background-color: #cce7ff; 
+    transition: background-color 0.3s;
+    color: #003366;
+}
+
+.song .song-info {
+    flex: 1 1 auto; /* növekedhet, de alap 200px */
+    margin-left: 0;                   /* bal margó nullázva */
+    max-width: calc(100% - 260px); 
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.song-info[contenteditable="true"] {
+    border-bottom: 1px solid transparent; /* dashed → solid */
+    cursor: text;
+    transition: border-color 0.2s;
+}
+
+.song-info[contenteditable="true"]:focus {
+    outline: none;
+    border-color: #999;
+}
+
+.song .song-actions {
+    display: flex;
+    gap: 8px;
+    min-width: 250px; /* hogy a gombok elférjenek */
+    justify-content: flex-end;
+}
+
+.song select {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #222;
+    border-radius: 4px;
+    padding: 4px 6px;
+    cursor: pointer;
+}
+
+/*.song button {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background: #eee;
+    color: #222;
+    transition: 0.2s;
+}
+.song button:hover {
+    background: #ddd;
+}*/
+
+.song button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: #eaeaea;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.song button:hover {
+    background: #d5d5d5;
+}
+
+.material-icons {
+    font-size: 20px;
+    color: #333;
+}
+
+.song button.danger {
+    background: #fdd;
+    border-color: #faa;
+}
+.song button.danger:hover {
+    background: #fbb;
+}
+.song button.playBtn {
+    font-size: 18px;
+    padding: 6px 10px;
+}
+
+/* Lejátszóban album select design */
+#musicToolbar select#albumSelect {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #2a2a2a;
+    color: white;
+    min-width: 140px;
+}
+
+#albumSort {
+    display: inline;
+    font-size: 14px;
+}
+
+#albumSortSelect {
+    height: 24px !important;
+    max-width: 160px !important;
+    padding: 0 6px !important;
+    margin-left: 4px;
+    font-size: 14px;
+    background: #fff;
+    color: #222;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box !important;
+    font-weight: normal;
+}
+
+#albumsContainer {
+    flex: 1;               /* tölti a jobb oldalt */
+    padding-right: 10px;
+    overflow-y: auto;      /* scrollozható album lista */
+}
+
+
+
+
