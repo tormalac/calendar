@@ -1,122 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
 <title>Bérkalkulátor</title>
-<style>
-  body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: #f5f7fa;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    margin: 0;
-    padding-top: 50px;
-  }
 
-  .container {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    padding: 25px 40px;
-    width: 380px;
-    box-sizing: border-box;
-  }
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" />
+<link rel="stylesheet" href="styles.css" />
 
-  h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 25px;
-  }
-
-  label {
-    display: block;
-    margin-bottom: 10px;
-    color: #444;
-    font-weight: 500;
-  }
-
-  input, select {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 14px;
-    margin-top: 5px;
-    margin-bottom: 15px;
-    box-sizing: border-box;
-  }
-
-  button {
-    width: 100%;
-    background-color: #0078d7;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px;
-    font-size: 15px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-
-  button:hover {
-    background-color: #005fa3;
-  }
-
-  #eredmeny {
-    margin-top: 20px;
-    background: #f9fafb;
-    border-radius: 8px;
-    padding: 15px;
-    border: 1px solid #eee;
-  }
-
-  #eredmeny p {
-    margin: 5px 0;
-    color: #333;
-  }
-
-  /* Szebb fájlfeltöltő stílus */
-  .file-upload {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 2px dashed #0078d7;
-    border-radius: 8px;
-    padding: 20px;
-    background: #f0f6ff;
-    cursor: pointer;
-    transition: background 0.2s ease, border 0.2s ease;
-  }
-
-  .file-upload:hover {
-    background: #e6f0ff;
-    border-color: #005fa3;
-  }
-
-  .file-upload input[type="file"] {
-    display: none;
-  }
-
-  .file-upload span {
-    color: #0078d7;
-    font-weight: 500;
-  }
-
-  #fileName {
-    margin-top: 10px;
-    font-size: 13px;
-    color: #333;
-  }
-
-  h2 {
-    color: #444;
-    margin-top: 25px;
-  }
-</style>
 </head>
 <body>
   <div class="container">
@@ -131,21 +22,26 @@
 
     <label>Hónap: <input type="number" id="honap" min="1" max="12" value="1"></label>
     <label>Alapbér: <input type="number" id="alapber" value="437000"></label>
-    <label>Seniority bónusz (%):
+    <label>Seniority bónusz (%):</label>
       <select id="senioritas">
         <option value="0">0%</option>
         <option value="5">5%</option>
         <option value="10">10%</option>
         <option value="15">15%</option>
       </select>
-    </label>
     <label>Rezsitámogatás: <input type="number" id="rezsi" value="30000"></label>
     <label>Egyéb járandóságok: <input type="number" id="egyeb" value="0"></label>
-    <button onclick="szamit()">Számol</button>
+    <button onclick="szamit()">
+      <span class="material-symbols-rounded">calculate</span>
+      Számol
+    </button>
 
-    <h2>Eredmények</h2>
+    <h2>Eredmények:</h2>
     <div id="eredmeny"></div>
-    <button onclick="exportCSV()">CSV mentése</button>
+    <button onclick="exportCSV()">
+      <span class="material-symbols-rounded">arrow_downward</span>
+      CSV mentése
+    </button>
   </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
