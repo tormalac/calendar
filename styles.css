@@ -809,7 +809,7 @@ input, select {
   background: #fff;
   border-bottom: 1px solid #ccc;
   height: 60px;
-  max-width: calc(100vh - 300px); 
+  max-width: 100%; 
   overflow-x: auto;     /* vízszintes görgetés engedélyezése */
   white-space: nowrap;  /* gombok egy sorban maradnak */
 }
@@ -857,11 +857,10 @@ input, select {
   flex-direction: column; 
   padding: 10px;
   min-width: 0;
-  max-width: 300px;
 }
 #editor textarea {
   flex: 1;                  
-  width: 300px;              
+  width: 100%;              
   box-sizing: border-box;   
   resize: none;
   margin-bottom: 5px;
@@ -1128,11 +1127,6 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;      /* scrollozható album lista */
 }
-
-
-
-
-
 
 
 
