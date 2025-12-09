@@ -904,28 +904,6 @@ input, select {
     margin-left: auto; 
 }
 
-@media (max-width: 800px) {
-
-    #mainContentMusic {
-        flex-direction: column; /* egymás alá kerülnek */
-        height: auto;
-        overflow: visible;
-        padding: 10px;
-    }
-
-    #leftZone {
-        width: 100%;
-        max-height: none;
-        overflow: visible;
-    }
-
-    #rightZone {
-        width: 100%;
-        max-height: none;
-        overflow: visible;
-    }
-}
-
 #albumSort {
     padding-bottom: 20px;
     flex-shrink: 0;
@@ -1028,12 +1006,12 @@ input, select {
 }
 
 .folder-icon {
-    user-select: none;        /* nem jelölhető ki */
-    pointer-events: none;     /* nem kattintható */
+    user-select: none;        
+    pointer-events: none;     
     margin-right: 6px;
     font-size: 22px;
     vertical-align: middle;
-    color: #555;              /* opcionális */
+    color: #555;              
 }
 
 .right-controls {
