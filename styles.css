@@ -23,6 +23,11 @@ body {
     padding-top: 50px;
 }
 
+body.notesApp {
+    height: 100%;
+    overflow: hidden;
+}
+
 nav {
     background: #ffffffcc;
     backdrop-filter: blur(10px);
@@ -744,22 +749,37 @@ input, select {
 
 /*Testeditor*/
 
-#mainContent {
+/*#mainContent {
   display: flex;
-  flex-direction: row;   /* ← legyen egymás mellett */
+  flex-direction: row; 
   margin-top: 40px;
   height: calc(100vh - 40px);
   padding: 10px;
   gap: 20px;
   background: white;
+}*/
+
+#mainContent {
+    position: absolute;
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    overflow: hidden;
+    padding-top: 20px;
+    padding-left: 10px;
+    background: #fff;
 }
+
 #sidebar {
   width: 230px;
   border-right: 1px solid #ccc;
   padding: 10px;
   overflow-y: auto;
-  max-height: calc(100vh - 80px);
+  max-height: calc(100vh - 60px);
 }
+
 #sidebar h4{
   margin-left: 2px;
   margin-right: 2px;
@@ -767,12 +787,14 @@ input, select {
   font-size: 12px;
   font-weight: normal;
 }
+
 #sidebar button {
   padding: 2px 6px;
   border: none;
   cursor: pointer;
   border-radius: 2px;
 }
+
 #sidebar button:hover {
   background: #e0e0ff;
 }
@@ -806,9 +828,8 @@ input, select {
   align-items: center;
   gap: 10px;
   padding: 8px;
-  background: #fff;
   border-bottom: 1px solid #ccc;
-  height: 60px;
+  height: 80px;
   max-width: 100%; 
   overflow-x: auto;     /* vízszintes görgetés engedélyezése */
   white-space: nowrap;  /* gombok egy sorban maradnak */
@@ -865,8 +886,8 @@ input, select {
   resize: none;
   margin-bottom: 5px;
   background-color: #fffdf5;
-  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-  background-repeat: repeat;
+  /*background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+  background-repeat: repeat;*/
   padding: 20px;             
   border: 1px solid #ccc;   
   border-radius: 5px;       
@@ -1119,3 +1140,7 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;      /* scrollozható album lista */
 }
+
+
+
+
