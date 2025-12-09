@@ -196,7 +196,7 @@ input, select {
 
 .container {
     max-width: 480px;       
-    margin: 0 auto;         
+    margin: auto;         
     padding: 20px;
     background: white;      
     border-radius: var(--radius);    
@@ -2308,5 +2308,6 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;      /* scrollozható album lista */
 }
+
 
 
