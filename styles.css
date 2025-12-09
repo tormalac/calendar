@@ -892,7 +892,6 @@ input, select {
     display: flex;
     padding: 20px;
     gap: 20px;
-    overflow: hidden;
     box-sizing: border-box;
 }
 
@@ -903,6 +902,28 @@ input, select {
 #rightZone {
     width: 1000px; 
     margin-left: auto; 
+}
+
+@media (max-width: 800px) {
+
+    #mainContentMusic {
+        flex-direction: column; /* egymás alá kerülnek */
+        height: auto;
+        overflow: visible;
+        padding: 10px;
+    }
+
+    #leftZone {
+        width: 100%;
+        max-height: none;
+        overflow: visible;
+    }
+
+    #rightZone {
+        width: 100%;
+        max-height: none;
+        overflow: visible;
+    }
 }
 
 #albumSort {
@@ -996,14 +1017,23 @@ input, select {
     color: #222;
 }
 
-.album-title {
+.album-name {
     border-bottom: 1px solid transparent;
     padding: 2px 4px;
 }
 
-.album-title:focus {
+.album-name:focus {
     outline: none;
     border-color: #999;
+}
+
+.folder-icon {
+    user-select: none;        /* nem jelölhető ki */
+    pointer-events: none;     /* nem kattintható */
+    margin-right: 6px;
+    font-size: 22px;
+    vertical-align: middle;
+    color: #555;              /* opcionális */
 }
 
 .right-controls {
