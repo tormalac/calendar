@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="hu">
 <head>
@@ -26,11 +25,22 @@
 </div>
 <!-- Fájl feltöltések -->
  <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
-  <button id="selectFileBtn">📂 Megnyitás (.csv)</button>
+  <button id="selectFileBtn">
+    <span class="material-symbols-rounded">folder_open</span> Megnyitás (.csv)
+  </button>
   <input type="file" id="csvFile" accept=".csv" style="display:none;">
-  <button id="loadFromCloudBtn" disabled>⬇️ Betöltés Firestore-ból</button>
-  <button id="saveFirestoreBtn" disabled>🔥 Mentés Firestore-ba</button>
-  <button id="saveCsvBtn" style="display:none;">💾 Mentés (.csv)</button>
+  
+  <button id="loadFromCloudBtn" disabled>
+    <span class="material-symbols-rounded">cloud_download</span> Betöltés Firestore-ból
+  </button>
+  
+  <button id="saveFirestoreBtn" disabled>
+    <span class="material-symbols-rounded">cloud_upload</span> Mentés Firestore-ba
+  </button>
+  
+  <button id="saveCsvBtn" style="display:none;">
+    <span class="material-symbols-rounded">save</span> Mentés (.csv)
+  </button>
  </div>
 </div>
 
