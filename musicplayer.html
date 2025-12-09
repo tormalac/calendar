@@ -25,48 +25,52 @@
 </div>
 </div>
 
-<div id="mainContent">
+<div id="mainContentMusic">
   
-  <div id="musicToolbar">
-    <div class="top">
-    <input type="text" id="fileName" placeholder="Zene címe">
-    <select id="albumSelect" class="album-select">
-        <option disabled selected>Album választása</option>
-    </select>
-    <button id="newAlbumBtn" class="icon-btn" title="Új album létrehozása">
-      <span class="material-icons">library_add</span>
-    </button>
-    <button id="openLocalBtn" class="icon-btn" title="Helyi fájl megnyitása">
-      <span class="material-icons">folder_open</span>
-    </button>
-    <button id="saveBtn" class="icon-btn" title="Mentés a gépre">
-      <span class="material-icons">save</span>
-    </button>
-    <button id="saveFirestoreBtn" class="icon-btn" title="Mentés Firestore-ba / Cloudinary-be">
-      <span class="material-icons">cloud_upload</span>
-    </button>
-    <button id="deleteBtn" class="icon-btn danger" title="Törlés">
-      <span class="material-icons">delete_forever</span>
-    </button>
-    </div>
-    <div class="player-box">
-        <audio id="player" controls></audio>
-    </div>
-  </div>
 
-   <div id="uploadProgressContainer" style="display:none; margin-top:10px; width:100%; background:#ccc; border-radius:8px;">
-    <div id="uploadProgress" style="width:0%; height:12px; background:#4caf50; border-radius:8px;"></div>
+  <div id="leftZone">
+      <div id="musicToolbar">
+         <div class="top">
+            <input type="text" id="fileName" placeholder="Zene címe">
+            <select id="albumSelect" class="album-select">
+               <option disabled selected>Album választása</option>
+            </select>
+            <button id="newAlbumBtn" class="icon-btn" title="Új album létrehozása">
+               <span class="material-icons">library_add</span>
+            </button>
+            <button id="openLocalBtn" class="icon-btn" title="Helyi fájl megnyitása">
+               <span class="material-icons">folder_open</span>
+            </button>
+            <button id="saveBtn" class="icon-btn" title="Mentés a gépre">
+               <span class="material-icons">save</span>
+            </button>
+            <button id="saveFirestoreBtn" class="icon-btn" title="Mentés Firestore-ba / Cloudinary-be">
+               <span class="material-icons">cloud_upload</span>
+            </button>
+            <button id="deleteBtn" class="icon-btn danger" title="Törlés">
+               <span class="material-icons">delete_forever</span>
+            </button>
+         </div>
+         <div class="player-box">
+            <audio id="player" controls></audio>
+         </div>
+         <div id="uploadProgressContainer" style="display:none; margin-top:10px; width:100%; background:#ccc; border-radius:8px;">
+         <div id="uploadProgress" style="width:0%; height:12px; background:#4caf50; border-radius:8px;"></div>
+      </div>
+      </div>
+      <input type="file" id="fileInput" accept="audio/*" style="display:none;">
    </div>
 
-  <input type="file" id="fileInput" accept="audio/*" style="display:none;">
+   <div id="rightZone">
 
-  <div id="albumSort">Albumok rendezése:
-    <select id="albumSortSelect">
-      <option value="abc">ABC</option>
-      <option value="time">időrend</option>
-    </select>
-  </div>
-  <div id="albumsContainer"></div>
+   <div id="albumSort">Albumok rendezése:
+      <select id="albumSortSelect">
+        <option value="abc">ABC</option>
+        <option value="time">időrend</option>
+      </select>
+     </div>
+     <div id="albumsContainer"></div>
+   </div>
 </div>
 
 <script type="module">
