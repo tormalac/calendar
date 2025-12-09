@@ -368,8 +368,12 @@ nameSpan.addEventListener("blur", async () => {
     if (e.target.tagName === 'SELECT') return;
 
     albumDiv.classList.toggle("open");
-    const arrow = header.querySelector(".arrow");
-    arrow.textContent = albumDiv.classList.contains("open") ? "▲" : "▼";
+
+    const arrowIcon = header.querySelector(".arrow .material-symbols-rounded");
+    arrowIcon.textContent = albumDiv.classList.contains("open")
+    ? "expand_less"
+    : "expand_more";
+
     if (albumDiv.classList.contains("open")) openAlbums.add(albumName);
     else openAlbums.delete(albumName);
 });
@@ -702,6 +706,3 @@ document.getElementById("albumSortSelect").addEventListener("change", () => {
 </script>
 </body>
 </html>
-
-
-
