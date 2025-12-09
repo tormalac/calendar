@@ -773,7 +773,7 @@ input, select {
 }
 
 #sidebar {
-  width: 250px;
+  width: 260px;
   border-right: 1px solid #ccc;
   padding: 10px;
   overflow-y: auto;
@@ -1140,6 +1140,7 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;      /* scrollozható album lista */
 }
+
 
 
 
