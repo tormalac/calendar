@@ -26,10 +26,19 @@
 <!-- Left sidebar -->
   <div id="mainContent">
   <div id="sidebar">
-    <h3>📁Firestore jegyzetek</h3>
+    <h3>
+      <span class="material-symbols-rounded">folder</span>
+      Firestore jegyzetek
+    </h3>
     <h4>Rendezés:</h4>
-    <button id="sortTimeBtn">⏱️ Időrend</button>
-    <button id="sortNameBtn">🔤 ABC</button>
+    <button id="sortTimeBtn">
+       <span class="material-symbols-rounded">schedule</span>
+       Időrend
+    </button>
+    <button id="sortNameBtn">
+       <span class="material-symbols-rounded">sort_by_alpha</span>
+       ABC
+    </button>
     <ul id="fileList"></ul>
     <div id="noteCount" style="margin-top:10px; font-size:14px; opacity:0.7;"></div>
   </div>
@@ -39,12 +48,30 @@
   <div id="editorToolbar">
     <div id="toolbarHandle" title="Húzd ide!"></div>
     <input type="text" id="fileName" placeholder="Fájl neve">
-    <button id="newBtn">📄 Új jegyzet</button>
-    <button id="openLocalBtn">📂 Megnyitás gépről</button>
-    <button id="saveBtn">💾 Mentés a gépre</button>
-    <button id="saveFirestoreBtn">🔥 Mentés Firestore-ba</button>
-    <button id="duplicateBtn">📑 Duplikálás</button>
-    <button id="deleteBtn">🗑️ Törlés Firestore-ból</button>
+    <button id="newBtn">
+       <span class="material-symbols-rounded">note_add</span>
+       Új jegyzet
+    </button>
+    <button id="openLocalBtn">
+       <span class="material-symbols-rounded">folder_open</span>
+       Megnyitás gépről
+    </button>
+    <button id="saveBtn">
+       <span class="material-symbols-rounded">save</span>
+       Mentés a gépre
+    </button>
+    <button id="saveFirestoreBtn">
+       <span class="material-symbols-rounded">cloud_upload</span>
+       Mentés Firestore-ba
+    </button>
+    <button id="duplicateBtn">
+       <span class="material-symbols-rounded">content_copy</span>
+       Duplikálás
+    </button>
+    <button id="deleteBtn">
+       <span class="material-symbols-rounded">delete</span>
+       Törlés Firestore-ból
+    </button>
   </div>
 
   <input type="file" id="openLocalFile" accept=".txt" style="display:none;">
