@@ -831,13 +831,13 @@ input, select {
   border-bottom: 1px solid #ccc;
   height: 80px;
   max-width: 100%; 
-  overflow-x: auto;     /* vízszintes görgetés engedélyezése */
-  white-space: nowrap;  /* gombok egy sorban maradnak */
+  overflow-x: auto;    
+  white-space: nowrap;  
 }
 
 #editorToolbar button,
 #editorToolbar input {
-  flex: 0 0 auto;      /* ne nyúljanak a szülőhöz */
+  flex: 0 0 auto;      
 }
   
 ::-webkit-scrollbar {
@@ -898,16 +898,55 @@ input, select {
   overflow-y: auto;
 }
 
+// MusicPlayer
+
+#mainContentMusic {
+    display: flex;
+    height: 100vh;
+    gap: 20px;
+    box-sizing: border-box;
+    background: #121212;
+    overflow: hidden;
+}
+
+#mainContentMusic {
+    display: flex;
+    margin-top: 60px;
+    padding: 20px;
+    gap: 20px;
+}
+
+#leftZone {
+    flex: 1; 
+}
+
+#rightZone {
+    width: 800px; 
+    margin-left: auto; 
+}
+
+#albumSort {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+#albumsContainer {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
 #musicToolbar {
-    min-width: 500px;                    /* ← ízlés szerint */
-    flex-shrink: 0;                  /* ne húzódjon össze */
+    min-width: 500px;                 
+    flex-shrink: 0;                  
     background: #1e1e1e;
     padding: 15px;
     border-radius: 16px;
     color: white;
-    height: fit-content;             /* csak akkora legyen, amennyi kell */
+    height: fit-content;            
     position: sticky;
-    top: 80px;                       /* scroll közben is marad felül */
+    z-index: 10;         
+    margin-bottom: 10px;                   
 }
 
 #musicToolbar .top { display: flex; gap: 8px; align-items: center; white-space: nowrap; overflow-x: auto; padding-bottom: 4px; }
@@ -1140,10 +1179,6 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;      /* scrollozható album lista */
 }
-
-
-
-
 
 
 
