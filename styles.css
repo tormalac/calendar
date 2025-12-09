@@ -1097,19 +1097,6 @@ input, select {
     cursor: pointer;
 }
 
-/*.song button {
-    padding: 6px 10px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    background: #eee;
-    color: #222;
-    transition: 0.2s;
-}
-.song button:hover {
-    background: #ddd;
-}*/
-
 .song button {
     display: flex;
     align-items: center;
@@ -1179,3 +1166,7 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;      /* scrollozható album lista */
 }
+
+
+
+
