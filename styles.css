@@ -921,7 +921,7 @@ input, select {
 }
 
 #rightZone {
-    width: 800px; 
+    width: 1000px; 
     margin-left: auto; 
 }
 
@@ -1029,9 +1029,10 @@ input, select {
 .right-controls {
     display: flex;
     align-items: center;
-    gap: 5px; /* kis távolság a szöveg és a select között */
+    gap: 5px;
     font-size: 0.85rem;
     font-weight: normal;
+    white-space: nowrap;
 }
 
 .right-controls select {
