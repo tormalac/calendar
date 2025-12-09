@@ -20,7 +20,7 @@ body {
     color: var(--text-dark);
     min-height: 100vh;
     margin: 0;
-    padding-top: 50px;
+    /*padding-top: 50px;*/
 }
 
 body.notesApp {
@@ -401,6 +401,7 @@ input, select {
   flex-wrap: wrap;
   margin-top: 20px;
   margin-left: 40px;
+  margin-bottom: 20px;
   padding: 10px;
   background: #fff;
   border: 1px solid #ccc;
@@ -447,8 +448,9 @@ input, select {
   display:flex;
   flex-wrap:wrap;
   gap:24px;
-  margin-top: 60px;
+  margin-top: 100px;
   margin-left: 40px;
+  margin-bottom: 20px;
   justify-content:flex-start;
   min-height:200px;
 }
@@ -882,22 +884,16 @@ input, select {
   overflow-y: auto;
 }
 
-// MusicPlayer
+/* MusicPlayer*/
 
 #mainContentMusic {
-    display: flex;
+    margin-top: 100px;
     height: 100vh;
-    gap: 20px;
-    box-sizing: border-box;
-    background: #121212;
-    overflow: hidden;
-}
-
-#mainContentMusic {
     display: flex;
-    margin-top: 60px;
     padding: 20px;
     gap: 20px;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 #leftZone {
