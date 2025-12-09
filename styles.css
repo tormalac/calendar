@@ -851,26 +851,10 @@ input, select {
 
 #editorToolbar input {
   max-width: 200px;
-  padding: 6px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  flex: 0 0 auto;
+  padding: 10px;
+  font-size: 16px;
 }
 
-#editorToolbar button {
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  background: #fff;
-  border-radius: 5px;
-  cursor: pointer;
-  white-space: nowrap;
-  flex: 0 0 auto;
-}
-
-#editorToolbar button:hover {
-  background: #eee;
-}
 /* Editor */
 #editor {
   flex: 1;
