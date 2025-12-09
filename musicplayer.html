@@ -312,8 +312,9 @@ async function renderSongs() {
         header.className = "album-header";
 
         header.innerHTML = `
-    <span class="album-title" contenteditable="true" spellcheck="false">
-    📁 ${albumName}
+    <span class="album-title">
+        <span class="folder-icon material-symbols-rounded">folder</span>
+        <span class="album-name" contenteditable="true" spellcheck="false">${albumName}</span>
     </span>
     <span class="right-controls">
         Dalok rendezése: 
@@ -321,47 +322,45 @@ async function renderSongs() {
             <option value="time" ${albumSortMode[albumName]==='time' ? 'selected' : ''}>Időrend</option>
             <option value="abc" ${albumSortMode[albumName]==='abc' ? 'selected' : ''}>ABC</option>
         </select>
-        <span class="arrow">${openAlbums.has(albumName) ? "▲" : "▼"}</span>
+        <span class="arrow">
+          <span class="material-symbols-rounded">
+          ${openAlbums.has(albumName) ? "expand_less" : "expand_more"}
+          </span>
+        </span>
     </span>
 `;
     // Album szerkesztése
-    const titleSpan = header.querySelector(".album-title");
+    const nameSpan = header.querySelector(".album-name");
 
-titleSpan.addEventListener("click", e => {
-    // Ne csukja be az albumot
-    e.stopPropagation();
+nameSpan.addEventListener("click", e => {
+    e.stopPropagation(); // ne csukja be az albumot
 });
 
-titleSpan.addEventListener("blur", async () => {
-    let newName = titleSpan.textContent.replace("📁", "").trim();
+nameSpan.addEventListener("blur", async () => {
+    const newName = nameSpan.textContent.trim();
     if (!newName) {
-        titleSpan.textContent = "📁 " + albumName;
+        nameSpan.textContent = albumName;
         return;
     }
     if (newName === albumName) return;
 
-    // Firestore: minden dal album mezőjének átírása
     const oldName = albumName;
+    const songsToUpdate = albums[oldName];
 
-    const songsToUpdate = albums[oldName]; // ezek tartoznak az albumba
-
+    // dalok album mező átírása
     for (const song of songsToUpdate) {
-        await updateDoc(doc(db, "songs", song.id), {
-            album: newName
-        });
+        await updateDoc(doc(db, "songs", song.id), { album: newName });
     }
 
-    // Frissítés UI-ra
+    // állapot átmozgatása
     openAlbums.delete(oldName);
     openAlbums.add(newName);
 
-    // A rendezési módot is át kell tenni az új névre
     albumSortMode[newName] = albumSortMode[oldName];
     delete albumSortMode[oldName];
 
     renderSongs();
 });
-
 
     // Album nyit/csuk toggle
     header.addEventListener("click", (e) => {
@@ -703,6 +702,3 @@ document.getElementById("albumSortSelect").addEventListener("change", () => {
 </script>
 </body>
 </html>
-
-
-
