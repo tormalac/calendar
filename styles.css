@@ -19,7 +19,7 @@ body {
     font-family: "Inter", sans-serif;
     color: var(--text-dark);
     min-height: 100vh;
-    /*padding-top: 50px;*/
+    padding-top: 120px;
 }
 
 body.notesApp {
@@ -408,41 +408,15 @@ input, select {
   font-size: 14px;
 }
 
-/*@media (max-width: 768px) {
-  #calendarLegend {
-    justify-content: center; /* Igazítja a legendát középre */
-    padding: 10px;
-  }
-
-  #calendarLegend span {
-    margin: 5px 10px 5px 0;
-    font-size: 12px; /* Csökkentsük a betűméretet */
-    white-space: nowrap; /* Megakadályozza, hogy a szöveg törjön */
-  }
-}
-
-@media (max-width: 480px) {
-  #calendarLegend {
-    flex-direction: column; /* Mobil nézetben függőlegesen rendezi el az elemeket */
-    align-items: flex-start; /* Balra igazítja a legendát */
-  }
-
-  #calendarLegend span {
-    margin: 5px 0;
-    font-size: 12px;
-  }
-}*/
-
 /* --- Naptár stílusok --- */
 #calendar {
-  display:flex;
-  flex-wrap:wrap;
-  gap:24px;
-  margin-top: 100px;
-  margin-left: 40px;
-  margin-bottom: 20px;
-  justify-content:flex-start;
-  min-height:200px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  min-height: 300px;
+  padding: 20px;
+  margin-left: 20px;
+  box-sizing: border-box; 
 }
 
 #calendarPlaceholder {
@@ -459,7 +433,7 @@ input, select {
 
 .month {
   flex:0 0 320px;
-  max-width:560px;
+  max-width: 460px;
   border:1px solid #ccc;
   border-radius:5px;
   padding:10px;
