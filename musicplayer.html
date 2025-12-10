@@ -491,9 +491,28 @@ playBtn.onclick = (e) => {
                 e.stopPropagation();
                 if (!confirm(`Biztos törlöd: ${song.name}?`)) return;
                 if (song.public_id) {
-                    await fetch(`https://music-backend-jq1s.onrender.com/delete/${song.public_id}`, { method: "DELETE" });
+                    try {
+                        const res = await fetch(`https://music-backend-jq1s.onrender.com/delete/${song.public_id}`, { method: "DELETE" });
+                        console.log("DELETE response:", res);
+                        if (!res.ok) {
+                            console.error("Hiba a backend törlésnél:", res.status, await res.text());
+                            alert("Hiba a törlés során a backendnél!");
+                            return;
+                        }
+                    } catch(err) {
+                        console.error("Fetch hiba:", err);
+                        alert("Hiba a törlés során: "+err.message);
+                        return;
+                    }
                 }
-                await deleteDoc(doc(db, "songs", song.id));
+                    try {
+                        await deleteDoc(doc(db, "songs", song.id));
+                    } catch(err) {
+                        console.error("Firestore törlési hiba:", err);
+                        alert("Hiba a Firestore törlés során: "+err.message);
+                        return;
+                    }
+
                 if (player.src === song.url) player.src = "";
                 renderSongs();
             };
@@ -666,7 +685,7 @@ document.getElementById('saveFirestoreBtn').addEventListener('click', async () =
 });
 
 // Törlés Firestore + Cloudinary
-document.getElementById('deleteBtn').addEventListener('click', async () => {
+/*document.getElementById('deleteBtn').addEventListener('click', async () => {
     if (!selectedFileDocId || !selectedFilePublicId) {
         alert("Nincs kiválasztva fájl!");
         return;
@@ -696,6 +715,48 @@ document.getElementById('deleteBtn').addEventListener('click', async () => {
     }
 
     renderSongs();
+});*/
+
+document.getElementById('deleteBtn').addEventListener('click', async () => {
+    if (!selectedFileDocId || !selectedFilePublicId) {
+        alert("Nincs kiválasztva fájl!");
+        return;
+    }
+
+    if (!confirm("Biztos törlöd a kiválasztott zenét?")) return;
+
+    try {
+        // Cloudinary törlés
+        if (selectedFilePublicId) {
+            const res = await fetch(`https://music-backend-jq1s.onrender.com/delete/${selectedFilePublicId}`, {
+                method: 'DELETE'
+            });
+
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error("Cloudinary törlés hiba: " + text);
+            }
+        }
+
+        // Firestore törlés
+        await deleteDoc(doc(db, "songs", selectedFileDocId));
+
+        // UI reset
+        player.src = "";
+        fileNameInput.value = "";
+        selectedFile = null;
+        selectedFileDocId = null;
+        selectedFilePublicId = null;
+        currentSongId = null;
+        lastPlayButton = null;
+
+        alert("A fájl sikeresen törölve lett!");
+        renderSongs();
+
+    } catch (err) {
+        console.error("Törlés hiba:", err);
+        alert("Hiba a törlés során: " + err.message);
+    }
 });
 
 // Album rendezés
