@@ -414,7 +414,7 @@ input, select {
   gap: 24px;
   min-height: 300px;
   padding: 20px;
-  margin-top: 80px;
+  margin-top: 120px;
   margin-left: 20px;
   box-sizing: border-box; 
 }
@@ -424,7 +424,6 @@ input, select {
   text-align:center;
   width:100%;
   padding:80px 0;
-  margin-top: 80px;
   font-size:18px;
   font-style:italic;
   border: 2px dashed #ccc;
@@ -1152,6 +1151,7 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;     
 }
+
 
 
 
