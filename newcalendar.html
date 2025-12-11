@@ -62,6 +62,40 @@
     </form>
   </div>
 
+<!-- Help információ -->
+<button class="help-btn" id="helpBtn">
+    <span class="material-symbols-rounded">help</span>
+</button>
+
+<div class="modal" id="helpModal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeModal">
+        <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <h2>Hogyan működik ez az oldal?</h2>
+<p class="descr">
+Ez az oldal lehetővé teszi, hogy gyorsan és egyszerűen elkészítsd a saját éves munkaidő-naptárad.
+Megadhatod az évet, a saját és a partnered műszakrendjét, valamint kezdő műszakot.
+</p>
+
+<p class="descr">
+Beállíthatod az ünnepnapokat, pihenőnapokat és a ledolgozós napokat is, így a naptár minden fontos dátumot tartalmaz.
+A naptár minden napját külön kezelheted, és év közben bármikor újragenerálhatod a főoldal <strong>„Naptár szerkesztése”</strong> menüpontja alatt.
+</p>
+
+<p class="descr">
+A generált naptár CSV formátumban menthető, így könnyen megnyitható táblázatkezelő programokban vagy más szoftverekben.
+Bejelentkezés után a felhőbe (Firestore) is elmenthető, így mobilon és számítógépen is elérhető.
+</p>
+
+<p class="descr">
+Ez a felület ideális azoknak, akik szeretnék áttekinteni és rendszerezni a munkaidejüket, nyomon követni a ledolgozott napokat, szabadságokat és pihenőnapokat, valamint a műszakbeosztást egyszerűen kezelni.
+</p>
+  </div>
+</div>
+
+
   <script>
 // CSV generálás és letöltés
   function generalNaptar() {
@@ -117,6 +151,18 @@
     URL.revokeObjectURL(url);
     alert("✅ CSV sikeresen generálva és letöltve!");
   }
+
+const helpBtn = document.getElementById("helpBtn");
+const helpModal = document.getElementById("helpModal");
+const closeModal = document.getElementById("closeModal");
+
+helpBtn.onclick = () => helpModal.classList.add("show");
+closeModal.onclick = () => helpModal.classList.remove("show");
+
+helpModal.onclick = e => {
+    if (e.target === helpModal) helpModal.classList.remove("show");
+};
+
   </script>
 
 </body>
