@@ -23,6 +23,12 @@
         <button id="logoutBtn" style="display:none;">Kilépés</button>
     </div>
 </div>
+
+<!-- Help információ -->
+<button class="help-btn" id="helpBtn">
+    <span class="material-symbols-rounded">help</span>
+</button>
+
 <!-- Fájl feltöltések -->
  <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
   <button id="selectFileBtn">
@@ -91,6 +97,27 @@
   <span style="background:#cc99ff; padding:2px 6px; border-radius:3px; margin-left:5px;">Táppénz</span>
   <span style="background:#ffeb99; padding:2px 6px; border-radius:3px; margin-left:5px;">Pihenő</span>
   <span style="background:#f88; padding:2px 6px; border-radius:3px; margin-left:5px;">Ünnep</span>
+</div>
+
+<div class="modal" id="helpModal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeModal">
+        <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <h2>Hogyan működik ez az oldal?</h2>
+<p class="descr">
+Ez az oldal a saját éves munkaidő-naptárad szerkesztésére szolgál.  
+Ha még nincs naptárad, a főoldalon az <strong>„Új naptár”</strong> menüpont alatt tudsz létrehozni egyet.
+</p><p class="descr">
+A naptár CSV-fájlban tárolja az adott év minden napját, beleértve az ünnepnapokat, pihenőnapokat és ledolgozásokat is.  
+Beállíthatod benne a saját és a párod (vagy bármely fontos személy) műszakbeosztását, amely megjelenik a naptárban, és év közben bármikor újragenerálható.
+</p><p class="descr">
+A naptár minden napját külön szerkesztheted: rögzíthetsz ledolgozott órákat, túlórát, szabadságot, táppénzt, pihenőt vagy akár személyes megjegyzéseket, eseményeket.
+</p><p class="descr">
+A fájl automatikusan menthető CSV-be, vagy – bejelentkezés után – a felhőbe (Firestore) is elmentheted, így számítógépen és mobilon is bármikor elérheted.
+</p>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -546,6 +573,18 @@ function openDayEditor(day){
   overlay.style.display='block';
   dayEditor.style.display='block';
 }
+
+const helpBtn = document.getElementById("helpBtn");
+const helpModal = document.getElementById("helpModal");
+const closeModal = document.getElementById("closeModal");
+
+helpBtn.onclick = () => helpModal.classList.add("show");
+closeModal.onclick = () => helpModal.classList.remove("show");
+
+helpModal.onclick = e => {
+    if (e.target === helpModal) helpModal.classList.remove("show");
+};
+
 </script>
 </body>
 </html>
