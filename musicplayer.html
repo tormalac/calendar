@@ -13,7 +13,7 @@
 
 <div id="topBar">
 <h1>Zenelejátszó</h1>
-<div id="authBox">
+ <div id="authBox">
   <div id="authStatusButton">❌ Nincs bejelentkezve</div>
   <div id="authDropdown">
     <input type="email" id="email" placeholder="Email">
@@ -22,7 +22,12 @@
     <button id="registerBtn">Regisztráció</button>
     <button id="logoutBtn" style="display:none;">Kilépés</button>
   </div>
-</div>
+ </div>
+
+<!-- Help információ -->
+<button class="help-btn" id="helpBtn">
+    <span class="material-symbols-rounded">help</span>
+</button>
 </div>
 
 <div id="mainContentMusic">
@@ -71,6 +76,38 @@
      </div>
      <div id="albumsContainer"></div>
    </div>
+</div>
+
+<div class="modal" id="helpModal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeModal">
+        <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <h2>Hogyan működik ez az oldal?</h2>
+
+<p class="descr">Ez az oldal egy webes zenelejátszó és albumkezelő alkalmazás, ahol a saját zenéidet tudod feltölteni, rendszerezni és lejátszani.</p>
+
+<h3>Főbb funkciók:</h3>
+
+<ol>
+  <li><strong>Bejelentkezés / Regisztráció</strong><br>
+      Bejelentkezett felhasználóként a zenéid a felhőben (Firestore + Cloudinary) is tárolódnak, így bárhonnan elérheted őket. Nélküle a zenék csak helyileg maradnak a böngészőben.
+  </li>
+  <li><strong>Zenefeltöltés</strong><br>
+      Helyi <code>.mp3</code> fájl kiválasztása az „Open Local” gombbal. Feltöltés a felhőbe a „Mentés Firestore-ba / Cloudinary-be” gombbal. Feltöltés közben a progress bar mutatja a folyamatot.
+  </li>
+  <li><strong>Lejátszás és playlist</strong><br>
+      Kattints a lejátszógombra a dal indításához. Az albumon belüli dalok automatikusan követik egymást. Lejátszás közben a kiválasztott dal vizuálisan kiemelésre kerül.
+  </li>
+  <li><strong>Albumok kezelése</strong><br>
+      Új album létrehozása a „Új album” gombbal. Dalok áthelyezése albumok között a legördülő menüvel. Albumok és dalok rendezhetők ABC vagy időrend szerint. Album és dalnevek közvetlenül szerkeszthetők a lista felületén.
+  </li>
+  <li><strong>Mentés és törlés</strong><br>
+      Zenét le tudsz menteni a gépre. Dalok törlése mind a Cloudinary-ból, mind a Firestore-ból történik.
+  </li>
+</ol>
+  </div>
 </div>
 
 <script type="module">
@@ -763,6 +800,17 @@ document.getElementById('deleteBtn').addEventListener('click', async () => {
 document.getElementById("albumSortSelect").addEventListener("change", () => {
     renderSongs();
 });
+
+const helpBtn = document.getElementById("helpBtn");
+const helpModal = document.getElementById("helpModal");
+const closeModal = document.getElementById("closeModal");
+
+helpBtn.onclick = () => helpModal.classList.add("show");
+closeModal.onclick = () => helpModal.classList.remove("show");
+
+helpModal.onclick = e => {
+    if (e.target === helpModal) helpModal.classList.remove("show");
+};
 
 </script>
 </body>
