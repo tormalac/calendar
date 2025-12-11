@@ -1160,3 +1160,66 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;     
 }
+
+.help-btn {
+    position: fixed;
+    top: 16px;
+    right: 0px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    font-size: 14px;
+}
+
+.help-btn:hover {
+    background: none;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 24px;
+    max-width: 480px;
+    width: 90%;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 12px 24px rgba(0,0,0,.2);
+}
+
+.modal-content h2 {
+    text-align: center;
+}
+
+.close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.close-btn:hover {
+    background: none;
+}
