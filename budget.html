@@ -44,6 +44,39 @@
     </button>
   </div>
 
+<!-- Help információ -->
+<button class="help-btn" id="helpBtn">
+    <span class="material-symbols-rounded">help</span>
+</button>
+
+<div class="modal" id="helpModal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeModal">
+        <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <h2>Hogyan működik ez az oldal?</h2>
+<p class="descr">
+Ez az oldal lehetővé teszi, hogy gyorsan kiszámold a nettó bérdet a munkaidő-naptárad alapján. 
+Először töltsd fel a munkaidő CSV fájlodat, amely tartalmazza a hónapok, napok és műszakok adatait.
+</p>
+
+<p class="descr">
+Beállíthatod az adott hónapot, az alapbért, a senioritás bónuszt, a rezsitámogatást és egyéb járandóságokat. 
+A kalkulátor ezek alapján számolja ki a nettó keresetet, a délelőttös, délutános és éjszakás órákat, a szabadnapokat és a túlórákat.
+</p>
+
+<p class="descr">
+Az eredményeket az oldalon azonnal megtekintheted, és egyetlen gombnyomással exportálhatod CSV formátumban, így könnyen archiválható vagy tovább feldolgozható táblázatkezelőben.
+</p>
+
+<p class="descr">
+Ez a felület ideális mindazok számára, akik áttekinthetően szeretnék nyomon követni a bérük alakulását, a műszakokhoz kapcsolódó óraszámokat és a túlórákat.
+</p>
+  </div>
+</div>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
 let csvData = [];
@@ -174,6 +207,18 @@ function exportCSV(){
     link.click();
     document.body.removeChild(link);
 }
+
+const helpBtn = document.getElementById("helpBtn");
+const helpModal = document.getElementById("helpModal");
+const closeModal = document.getElementById("closeModal");
+
+helpBtn.onclick = () => helpModal.classList.add("show");
+closeModal.onclick = () => helpModal.classList.remove("show");
+
+helpModal.onclick = e => {
+    if (e.target === helpModal) helpModal.classList.remove("show");
+};
+
 </script>
 </body>
 </html>
