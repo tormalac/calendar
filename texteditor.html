@@ -9,7 +9,7 @@
 
 </head>
 <body class="notesApp">
-  <div id="topBar">
+ <div id="topBar">
  <h1>Jegyzet szerkesztő</h1>
 <!-- Bejelentkezés panel -->
    <div id="authBox">
@@ -22,7 +22,13 @@
         <button id="logoutBtn" style="display:none;">Kilépés</button>
     </div>
   </div>
-  </div>
+
+<!-- Help információ -->
+<button class="help-btn" id="helpBtn">
+    <span class="material-symbols-rounded">help</span>
+</button>
+
+ </div>
 <!-- Left sidebar -->
   <div id="mainContent">
   <div id="sidebar">
@@ -78,7 +84,40 @@
   <textarea id="fileContent" lang="hu" spellcheck="true"></textarea>
 
   </div>
+
 </div>
+<div class="modal" id="helpModal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeModal">
+        <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <h2>Hogyan működik ez az oldal?</h2>
+<p class="descr">
+Ez az oldal egy jegyzetkezelő alkalmazás, ahol saját jegyzeteidet létrehozhatod, szerkesztheted és rendszerezheted. 
+Bejelentkezés után a jegyzeteid a felhőben (Firestore) is tárolódnak, így bárhonnan elérheted őket.
+</p>
+
+<p class="descr">
+A bal oldali sávban láthatod az összes mentett jegyzetet. 
+Itt rendezheted őket ABC szerint vagy időrendben.
+</p>
+
+<p class="descr">
+A szerkesztőben új jegyzetet hozhatsz létre, megnyithatsz gépről szövegfájlokat, mentheted őket a gépre vagy a Firestore-ba, duplikálhatod, illetve törölheted a jegyzeteket.
+</p>
+
+<p class="descr">
+A fájl neve szerkeszthető az input mezőben, és a tartalom automatikusan a textarea-ba kerül. 
+Bejelentkezés nélkül a jegyzetek csak helyileg tárolódnak a böngészőben.
+</p>
+
+<p class="descr">
+Ez a felület ideális gyors jegyzetelésre, dokumentumok archiválására és felhőalapú szinkronizációra, így mindig kéznél van minden fontos szöveg.
+</p>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 
@@ -419,6 +458,18 @@ deleteBtn.onclick = async () => {
 };
 
     loadFiles();
+
+const helpBtn = document.getElementById("helpBtn");
+const helpModal = document.getElementById("helpModal");
+const closeModal = document.getElementById("closeModal");
+
+helpBtn.onclick = () => helpModal.classList.add("show");
+closeModal.onclick = () => helpModal.classList.remove("show");
+
+helpModal.onclick = e => {
+    if (e.target === helpModal) helpModal.classList.remove("show");
+};
+
   </script>
 </body>
 </html>
