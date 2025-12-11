@@ -148,7 +148,7 @@ button:hover .material-symbols-rounded {
 .card.static .icon {
     font-size: 34px;
     margin-bottom: 12px;
-    color: #8a8f99;                    
+    color: #333; /*8a8f99*/                    
 }
 
 .card.static h3 {
@@ -1151,6 +1151,7 @@ input, select {
     padding-right: 10px;
     overflow-y: auto;     
 }
+
 
 
 
