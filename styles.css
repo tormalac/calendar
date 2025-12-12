@@ -861,13 +861,15 @@ input, select {
 /* MusicPlayer*/
 
 #mainContentMusic {
-    margin-top: 214px;
+    margin: 220px auto 20px; 
+    /*margin-top: 214px;*/
     display: flex;
     flex-direction: column; 
     padding: 20px;
     gap: 20px;
     box-sizing: border-box;
-    height: auto;  
+    height: auto;
+    max-width: 1200px;
 }
 
 #topZone {
@@ -917,6 +919,8 @@ input, select {
     align-items: center;
     white-space: nowrap;
     overflow-x: auto;
+    min-width: 1200px;
+    margin: 0px auto;
     padding-bottom: 4px;
 }
 
@@ -968,31 +972,48 @@ input, select {
 .icon-btn:hover { background: #3d3d3d; }
 .icon-btn.danger { background: #5a1e1e; border-color: #7a2b2b; }
 .icon-btn.danger:hover { background: #7a2b2b; }
-.player-box { background: #2b2b2b; padding: 10px; border-radius: 12px; }
-#player { width: 100%; height: 36px; filter: invert(85%) hue-rotate(180deg); }
+
+.player-box {
+    background: #2b2b2b;
+    min-width: 1200px;
+    margin: 0px auto;
+    padding: 10px;
+    border-radius: 12px;
+}
+
+#player {
+    width: 100%;
+    height: 36px;
+    filter: invert(85%) hue-rotate(180deg);
+}
+
 .album {
+    background: #f1f3f6;              
+    color: #444;                       
+    border-radius: var(--radius);
+    box-shadow: none;
+    border: 1px solid #d7dce3;
     margin-bottom: 12px;
-    border-radius: 8px;
-    background: #f2f2f2;
     overflow: hidden;
 }
 
 .album-header {
+    background: #d1d4da;
     padding: 12px 16px;
-    background: #e0e0e0;
     cursor: pointer;
     font-weight: bold;
     display: flex;
     justify-content: space-between;
     user-select: none;
+    align-items: center;
 }
 
 .album-header:hover {
-    background: #d6d6d6;
+    background: #b0b4bd;
 }
 
 .album-content {
-    display: none; /* alapból csukva */
+    display: none;
     padding: 10px 16px;
     border-top: 1px solid #ccc;
 }
