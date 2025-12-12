@@ -302,7 +302,7 @@ input, select {
 #authBox {
     position: fixed;
     top: 10px;
-    right: 80px;
+    right: 100px;
     z-index: 2000;
     font-size: 14px;
 }
@@ -861,8 +861,7 @@ input, select {
 /* MusicPlayer*/
 
 #mainContentMusic {
-    margin: 220px auto 20px; 
-    /*margin-top: 214px;*/
+    margin: 214px auto 20px; 
     display: flex;
     flex-direction: column; 
     padding: 20px;
@@ -919,8 +918,6 @@ input, select {
     align-items: center;
     white-space: nowrap;
     overflow-x: auto;
-    max-width: 1200px;
-    margin: 0px auto;
     padding-bottom: 4px;
 }
 
@@ -974,11 +971,7 @@ input, select {
 .icon-btn.danger:hover { background: #7a2b2b; }
 
 .player-box {
-    background: #2b2b2b;
-    max-width: 1200px;
-    margin: 0px auto;
-    padding: 10px;
-    border-radius: 12px;
+    padding: 0px;
 }
 
 #player {
@@ -1185,8 +1178,8 @@ input, select {
 
 .help-btn {
     position: fixed;
-    top: 16px;
-    right: 40px;
+    top: 18px;
+    right: 60px;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -1196,8 +1189,12 @@ input, select {
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    font-size: 14px;
+    font-size: 12px;
     background: none;
+}
+
+.help-btn .material-symbols-rounded {
+    color: #444;
 }
 
 .help-btn:hover {
@@ -1246,4 +1243,3 @@ input, select {
 .close-btn:hover {
     background: none;
 }
-
