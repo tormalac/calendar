@@ -88,10 +88,15 @@
 </div>
 
 
-<div id="calendar"><div id="calendarPlaceholder">Naptár betöltése...</div></div>
+<div id="calendar">
+  <div id="calendarPlaceholder">
+     Ha még nincs az idei évre munkaidő naptárad, <br />
+     kattints a jobb felső sarokban lévő kérdőjelre a részletekért...
+  </div>
+</div>
 <div id="calendarLegend" style="display:none;">
   <strong>Jelmagyarázat:</strong>
-  <span style="background:#d3d3d3; padding:2px 6px; border-radius:3px; margin-left:5px;">Ledolgozott</span>
+  <span style="background:#e6e6e6; padding:2px 6px; border-radius:3px; margin-left:5px;">Ledolgozott</span>
   <span style="background:#99ccff; padding:2px 6px; border-radius:3px; margin-left:5px;">Ledolgozás</span>
   <span style="background:#ffff99; padding:2px 6px; border-radius:3px; margin-left:5px;">Szabadság</span>
   <span style="background:#cc99ff; padding:2px 6px; border-radius:3px; margin-left:5px;">Táppénz</span>
@@ -353,7 +358,11 @@ function renderCalendarFS() {
   const cal = document.getElementById('calendar');
   cal.innerHTML = '';
   if (!data.length) {
-    cal.innerHTML = '<div id="calendarPlaceholder">Naptár betöltése...</div>';
+    cal.innerHTML = `<div id="calendarPlaceholder">
+       Ha még nincs az idei évre munkaidő naptárad, <br />
+       kattints a jobb felső sarokban lévő kérdőjelre a részletekért...
+    </div>
+    `;
     return;
   }
 
