@@ -380,7 +380,7 @@ input, select {
 
 #fileUploadContainer button {
   white-space: nowrap;
-  padding: 6px 12px;
+  padding: 10px;
   border-radius: 5px;
   cursor: pointer;
   font-weight: 500;
@@ -389,13 +389,14 @@ input, select {
 }
 
 #fileUploadContainer button:disabled {
-    background-color: #b0b0b0;
+    background-color: #c0c0c0;
     color: #eee;
     cursor: not-allowed;
 }
 
 #fileUploadContainer button:disabled:hover {
     background-color: #b0b0b0 !important;
+    border: 1px solid #c0c0c0;
 }
 
 /* ---Naptár legend --- */
@@ -435,8 +436,8 @@ input, select {
 
 #calendarPlaceholder {
   color:#aaa;
+  width: 100%;
   text-align:center;
-  width:100%;
   padding:80px 0;
   font-size:18px;
   font-style:italic;
@@ -485,7 +486,7 @@ input, select {
 .month td:not(:empty):hover {
     background-color: #cfe8ff !important;
 }
-.ledolgozott { background-color:#d3d3d3 !important; }
+.ledolgozott { background-color:#e6e6e6 !important; }
 .szabadsag { background-color:#ffff99 !important; }
 .tappenz { background-color:#cc99ff; }
 .ledolgozas { background-color:#99ccff; }
@@ -729,7 +730,7 @@ input, select {
   color: #333;
 }
 
-/*Testeditor*/
+/*Texteditor*/
 
 #mainContent {
     position: absolute;
