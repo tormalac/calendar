@@ -229,6 +229,11 @@ input, select {
     transition: background 0.2s ease;
 }
 
+.newCalendarBtn {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 #eredmeny {
     margin-top: 20px;
     margin-bottom: 20px;
@@ -1178,10 +1183,10 @@ input, select {
 
 .help-btn {
     position: fixed;
-    top: 18px;
+    top: 11px;
     right: 60px;
-    width: 10px;
-    height: 10px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: none;
     cursor: pointer;
@@ -1191,6 +1196,17 @@ input, select {
     z-index: 1000;
     font-size: 12px;
     background: none;
+}
+
+.relative-wrapper {
+  position: relative;
+}
+
+.container .relative-wrapper > .help-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
 }
 
 .help-btn .material-symbols-rounded {
