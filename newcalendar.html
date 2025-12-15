@@ -9,6 +9,14 @@
 <body>
 
   <div class="container">
+
+    <div class="relative-wrapper">
+    <!-- Help információ -->
+    <button class="help-btn" id="helpBtn">
+       <span class="material-symbols-rounded">help</span>
+    </button>
+    </div>
+
     <h1>Munkaidő naptár generálás</h1>
 
     <form id="naptarForm">
@@ -52,7 +60,7 @@
       <label>Ledolgozós napok:</label>
       <input type="text" id="ledolgozas" placeholder="01.10;08.21">
 
-      <button type="button" onclick="generalNaptar()">
+      <button class="newCalendarBtn" type="button" onclick="generalNaptar()">
          <span class="material-symbols-rounded">arrow_downward</span>
          Generálás és CSV letöltés
       </button>
@@ -60,11 +68,6 @@
       <small>Formátum: hónap.nap (pl. 03.15;08.19)</small>
     </form>
   </div>
-
-<!-- Help információ -->
-<button class="help-btn" id="helpBtn">
-    <span class="material-symbols-rounded">help</span>
-</button>
 
 <div class="modal" id="helpModal">
   <div class="modal-content">
