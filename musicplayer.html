@@ -57,7 +57,7 @@
             </button>
          </div>
          <div class="player-box">
-            <audio id="player" controls></audio>
+            <audio id="player" controls preload="metadata"></audio>
          </div>
          <div id="uploadProgressContainer" style="display:none; margin-top:10px; width:100%; background:#ccc; border-radius:8px;">
          <div id="uploadProgress" style="width:0%; height:12px; background:#4caf50; border-radius:8px;"></div>
@@ -173,6 +173,23 @@ onAuthStateChanged(auth, user => {
 const openBtn = document.getElementById('openLocalBtn');
 const fileInput = document.getElementById('fileInput');
 const player = document.getElementById('player');
+const isMobileData =
+  navigator.connection &&
+  (navigator.connection.saveData ||
+   ['cellular', 'slow-2g', '2g', '3g'].includes(navigator.connection.effectiveType));
+
+player.preload = isMobileData ? "none" : "metadata";
+
+// --- Hálózat változás figyelése ---
+if (navigator.connection) {
+  navigator.connection.addEventListener('change', () => {
+    const mobile =
+      navigator.connection.saveData ||
+      ['cellular','slow-2g','2g','3g'].includes(navigator.connection.effectiveType);
+    player.preload = mobile ? "none" : "metadata";
+  });
+}
+
 const fileNameInput = document.getElementById('fileName');
 let selectedFile = null;          // A helyi fájl, amit épp kiválasztott a felhasználó
 let selectedFileDocId = null;     // Firestore dokumentum ID-ja a kiválasztott zenének
@@ -209,7 +226,11 @@ player.onended = () => {
     if (currentIndex + 1 < playlist.length) {
         currentIndex++;
         const nextSong = playlist[currentIndex];
-        player.src = nextSong.url;
+        let nextUrl = nextSong.url;
+        if (isMobileData) {
+            nextUrl = nextUrl.replace('/upload/', '/upload/q_auto:low/');
+        }
+        player.src = nextUrl;
         player.play();
         currentSongId = nextSong.id;
         selectedFileDocId = nextSong.id;
@@ -479,7 +500,11 @@ playBtn.onclick = (e) => {
         selectedFileDocId = song.id;
         selectedFilePublicId = song.public_id;
         fileNameInput.value = song.name;
-        player.src = song.url;
+        let url = song.url;
+        if (isMobileData) {
+            url = url.replace('/upload/', '/upload/q_auto:low/');
+        }
+        player.src = url;
         player.play();
         lastPlayButton = playBtn;
     } else {
@@ -550,7 +575,10 @@ playBtn.onclick = (e) => {
                         return;
                     }
 
-                if (player.src === song.url) player.src = "";
+                if (currentSongId === song.id) {
+                    player.src = "";
+                    currentSongId = null;
+                }
                 renderSongs();
             };
 
