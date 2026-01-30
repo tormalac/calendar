@@ -399,6 +399,17 @@ input, select {
     border: 1px solid #c0c0c0;
 }
 
+#saveStatus {
+  margin-left: auto;
+  margin-right: 80px;
+  margin-top: 16px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.01);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 /* ---Naptár legend --- */
 #calendarLegend {
   display: flex;
