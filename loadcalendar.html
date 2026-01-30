@@ -47,7 +47,10 @@
   <button id="saveCsvBtn" style="display:none;">
     <span class="material-symbols-rounded">save</span> Mentés (.csv)
   </button>
+
+  <div id="saveStatus">Nincs mentve</div>
  </div>
+
 </div>
 
 <!-- Sidebar -->
@@ -146,8 +149,9 @@ const auth = getAuth(app);
 
 // --- Globális változók ---
 let data = [];
+
 // oldal betöltésekor
-const saved = localStorage.getItem('calendarData');
+/*const saved = localStorage.getItem('calendarData');
 if (saved) {
   try {
     // Ha van mentett adat, próbáld meg betölteni
@@ -157,7 +161,53 @@ if (saved) {
     console.error('Hiba történt az adatok betöltésekor:', e);
     data = [];
   }
+}*/
+
+
+let localTimestamp = 0;
+let lastSavedTimestamp = localTimestamp || 0;
+let hasUnsavedChanges = false;
+
+const saved = localStorage.getItem('calendarData');
+if (saved) {
+  try {
+    const parsed = JSON.parse(saved);
+    data = parsed.data || [];
+    localTimestamp = parsed.timestamp || 0;
+    lastSavedTimestamp = localTimestamp;
+  } catch {
+    data = [];
+  }
 }
+
+function updateSaveStatus() {
+  const el = document.getElementById('saveStatus');
+
+  if (hasUnsavedChanges) {
+    el.textContent = "Módosítva – nincs mentve";
+    el.style.color = "#c0392b";
+    return;
+  }
+
+  if (!lastSavedTimestamp) {
+    el.textContent = "Nincs mentve";
+    el.style.color = "#555";
+    return;
+  }
+
+  const d = new Date(lastSavedTimestamp);
+  const txt = d.toLocaleString('hu-HU', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  el.textContent = `Utolsó mentés: ${txt}`;
+  el.style.color = "#2c3e50";
+}
+
 const honapNevek = ['', 'Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
 const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
 
@@ -188,13 +238,21 @@ document.addEventListener("click", (e) => {
     }
 });
 
-renderCalendarFS();
+/*renderCalendarFS();
 updateSaveButtonVisibility();
 
 // --- Mentés localStorage-be ---
 function saveData() {
   localStorage.setItem('calendarData', JSON.stringify(data));
+}*/
+
+function saveData(timestamp = Date.now()) {
+  localStorage.setItem('calendarData', JSON.stringify({
+    data,
+    timestamp
+  }));
 }
+
 // --- Műszak újraszámláló ---
 
 // --- Auth állapot figyelése ---
@@ -229,7 +287,7 @@ document.addEventListener("click", (e) => {
     }
 });
 
-onAuthStateChanged(auth, user => {
+/*onAuthStateChanged(auth, user => {
     if (user) {
         authStatusButton.textContent = "👤 " + user.email;
         logoutBtn.style.display = "block";
@@ -241,6 +299,66 @@ onAuthStateChanged(auth, user => {
         loadBtn.disabled = true;
         saveBtn.disabled = true;
     }
+});
+
+*/
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    authStatusButton.textContent = "❌ Nincs bejelentkezve";
+    logoutBtn.style.display = "none";
+    loadBtn.disabled = true;
+    saveBtn.disabled = true;
+
+    renderCalendarFS();
+    updateSaveButtonVisibility();
+    return;
+  }
+
+  authStatusButton.textContent = "👤 " + user.email;
+  logoutBtn.style.display = "block";
+  loadBtn.disabled = false;
+  saveBtn.disabled = false;
+
+  const snap = await getDoc(doc(db, "naptarak", user.uid));
+
+  // 🔥 HA VAN Firestore adat
+  if (snap.exists()) {
+    const fsTimestamp = snap.data().timestamp || 0;
+
+    if (fsTimestamp > localTimestamp) {
+      console.log("☁️ Firestore újabb → betölt");
+      const csvText = snap.data().csv;
+      const results = Papa.parse(csvText, { header: true, delimiter: ';' });
+
+      data = results.data.map(d => ({
+        honap:+d.honap, nap:+d.nap, napIndex:+d.napIndex,
+        muszak1:+d.muszak1, muszak2:+d.muszak2,
+        unnep:d.unnep === 'true',
+        szabadsag:d.szabadsag === 'true',
+        tappenz:d.tappenz === 'true',
+        piheno:d.piheno === 'true',
+        ledolgozas:d.ledolgozas === 'true',
+        ledolgozott:d.ledolgozott === 'true',
+        ledolgozottOra:+d.ledolgozottOra,
+        tulora:+d.tulora,
+        komment:d.komment || ''
+      }));
+
+      localTimestamp = fsTimestamp;
+      lastSavedTimestamp = fsTimestamp;
+      hasUnsavedChanges = false;
+      saveData(fsTimestamp);
+      updateSaveStatus();
+    } else {
+      console.log("📦 Local frissebb vagy egyenlő → marad");
+    }
+  } else {
+    console.log("📭 Nincs Firestore adat → local marad");
+  }
+
+  renderCalendarFS();
+  updateSaveButtonVisibility();
 });
 
 //---Mentés gomb láthatósága---
@@ -274,7 +392,11 @@ fileInput.onchange = e => {
   komment:d.komment || ''
 }));
     updateSaveButtonVisibility();
-    saveData();
+    const now = Date.now();
+    localTimestamp = now;
+    hasUnsavedChanges = true;
+    saveData(now);
+    updateSaveStatus();
     renderCalendarFS();
   }});
 };
@@ -283,6 +405,9 @@ fileInput.onchange = e => {
 saveBtn.onclick = async () => {
   if(!auth.currentUser){ alert("Jelentkezz be!"); return; }
   if(!data.length){ alert("Nincs adat!"); return; }
+
+  const now = Date.now();
+
   let csv="honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
   data.forEach(d=>{
     csv+=`${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};"${(d.komment||'').replace(/"/g,'""')}"\n`;
@@ -290,8 +415,13 @@ saveBtn.onclick = async () => {
   try{ await setDoc(doc(db,"naptarak",auth.currentUser.uid),{
    csv,
    owner: auth.currentUser.uid,
-   timestamp: new Date()
+   timestamp: now
   });
+  localTimestamp = now;
+  lastSavedTimestamp = now;
+  hasUnsavedChanges = false;
+  saveData(now);
+  updateSaveStatus();
   alert("✅ Mentve!");
   }
   catch(e){ alert("Mentési hiba: "+e.message); }
@@ -318,7 +448,14 @@ loadBtn.onclick = async () => {
       komment:d.komment || ''
     }));
     updateSaveButtonVisibility();
-    saveData();
+
+    const fsTimestamp = snap.data().timestamp || Date.now();
+    localTimestamp = fsTimestamp;
+    lastSavedTimestamp = fsTimestamp;
+    hasUnsavedChanges = false;
+    saveData(fsTimestamp);
+    updateSaveStatus();
+
     renderCalendarFS();
   } else alert("Nincs mentett naptár!");
 };
@@ -487,7 +624,13 @@ document.getElementById('generateShifts').addEventListener('click', () => {
         }
     }
     updateSaveButtonVisibility();
-    saveData();
+    
+    const now = Date.now();
+    localTimestamp = now;
+    hasUnsavedChanges = true;
+    saveData(now);
+    updateSaveStatus();
+
     renderCalendarFS();
 
     alert('Műszakok újragenerálva!');
@@ -563,7 +706,13 @@ document.getElementById('saveEdit').onclick = () => {
   Object.keys(statusInputs).forEach(k => editingDay[k] = statusInputs[k].checked);
   overlay.style.display='none';
   dayEditor.style.display='none';
-  saveData();
+  
+  const now = Date.now();
+  localTimestamp = now;
+  hasUnsavedChanges = true;
+  saveData(now);
+  updateSaveStatus();
+
   renderCalendarFS();
 };
 
