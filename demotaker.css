@@ -42,41 +42,47 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-.hero {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 140px 20px 80px;
-    text-align: left;
+@media (orientation: landscape) and (max-width: 768px) {
+    .hero {
+        display: flex;
+        flex-direction: row;   /* sorban legyen */
+        justify-content: space-between;
+        align-items: center;
+        max-width: 100%;       /* ne legyen korlátozva a 680px */
+        padding: 60px 20px;    /* kevesebb padding landscape mobilon */
+        text-align: left;      /* balra igazítás */
+    }
+
+    .hero h1, .hero p {
+        flex: 1;
+    }
+
+    .hero h1 {
+        margin-right: 20px;
+        font-size: 2rem;       /* kicsit kisebb a horizontális nézetben */
+    }
+
+    .hero p {
+        font-size: 1rem;
+        line-height: 1.4;
+    }
 }
 
-.demotaker-logo {
-    position: fixed;
-    top: 6px;
-    left: 12px;
-    z-index: 10000;
+/* DESKTOP optimalizálás */
+@media (min-width: 769px) {
+    .hero {
+        padding: 140px 20px 80px;
+        max-width: 680px;
+        margin: 0 auto;
+        text-align: left;
+    }
 
-    display: flex;
-    align-items: center;
+    .hero h1 {
+        font-size: 3rem;
+    }
 
-    text-decoration: none;
-}
-
-.demotaker-logo img {
-    height: 36px;
-    width: auto;
-
-    filter: drop-shadow(0 0 6px rgba(0, 255, 213, 0.35));
-    transition: transform 0.2s ease, filter 0.2s ease;
-}
-
-/* finom hover élet */
-.demotaker-logo:hover img {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 10px rgba(0, 255, 213, 0.6));
-}
-
-@media (max-width: 600px) {
-    .demotaker-logo img {
-        height: 28px;
+    .hero p {
+        font-size: 1.2rem;
+        line-height: 1.6;
     }
 }
