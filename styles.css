@@ -26,6 +26,53 @@ body.notesApp {
     overflow: hidden;
 }
 
+.ad-bar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    height: 48px;
+    background: #1f1f1f;
+    overflow: hidden;
+    z-index: 9999;
+    border-bottom: 1px solid #222;
+}
+
+.ad-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+    white-space: nowrap;
+
+    animation: slideAd 30s linear infinite;
+}
+
+.ad-content img {
+    height: 32px;
+    filter: drop-shadow(0 0 4px #00ffd5);
+}
+
+.ad-content span {
+    color: #00ffd5;
+    font-size: 15px;
+    letter-spacing: 1px;
+}
+
+.ad-content b {
+    color: #fff;
+}
+
+/* FIXÁLT ANIMÁCIÓ */
+@keyframes slideAd {
+    from {
+        transform: translateX(100vw);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
 nav {
     background: #ffffffcc;
     backdrop-filter: blur(10px);
