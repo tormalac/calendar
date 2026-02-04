@@ -237,6 +237,7 @@ h1, h2, h3 {
 }
 
 .track-list {
+    position: relative;
     margin-top: 16px;
     display: flex;
     flex-direction: column;
@@ -336,10 +337,63 @@ h1, h2, h3 {
   font-size: 0.65rem;
 }
 
+.timeline-scroll {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-left: 200px;
+  height: 100%;
+  min-height: 60px;
+}
+
 .track-area {
-  flex: 1;
+  position: relative;
+  height: 240px;
+  overflow: hidden;
   background: rgba(255,255,255,0.01);
-  min-height: 50px; /* demo célokra */
+}
+
+.timeline {
+  position: relative;
+  height: 100%;
+  width: max-content;
+  min-width: 2000px;
+  overflow: hidden; /* ← KÖTELEZŐ */
+}
+
+.timeline-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      rgba(255,255,255,0.08) 0,
+      rgba(255,255,255,0.08) 1px,
+      transparent 1px,
+      transparent 100px
+    );
+}
+
+#playhead {
+  position: absolute;
+  top: 60px; 
+  left: 154px;
+  width: 2px;
+  height: calc(100% - 60px); 
+  background: red;
+  z-index: 10;
+  pointer-events: none;
+}
+
+#playhead::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 0;
+  width: 20px;
+  height: 100%;
 }
 
 .track-header.drum   { border-color: #ff6b6b; }
