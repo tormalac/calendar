@@ -1,54 +1,170 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-
-    <!-- ALAP META -->
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- SEO -->
     <title>demoTaker BETA – Online DAW gitárosoknak</title>
-    <meta name="description" content="demoTaker egy online DAW gitárosoknak. Csak egy telefon kell a felvételhez. Szalagos magnó élmény modern stúdió eszközökkel.">
-    <meta name="keywords" content="demoTaker, online DAW, gitár felvétel, lo-fi recording, tape recording, mobil zene">
-    <meta name="author" content="demoTaker">
-
-    <!-- OPEN GRAPH (Facebook, Messenger, stb.) -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="demoTaker BETA – Online DAW gitárosoknak">
-    <meta property="og:description" content="Szalagos magnó élmény + modern stúdió eszközök. Csak egy telefon kell.">
-    <meta property="og:image" content="https://tormalac.github.io/calendar/og-image.jpg">
-    <meta property="og:url" content="https://tormalac.github.io/calendar/demotaker.html">
-    <meta property="og:site_name" content="demoTaker">
-
-    <!-- TWITTER / X -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="demoTaker BETA – Online DAW gitárosoknak">
-    <meta name="twitter:description" content="Nem stúdió. Szalag. Gitár. Telefon.">
-    <meta name="twitter:image" content="https://tormalac.github.io/calendar/og-image.jpg">
-
-    <link rel="icon" type="image/png" href="favicon.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="demotaker.css">
-
 </head>
+
 <body>
 
-    <header class="hero">
+    <header class="topbar">
+    <div class="logo">
         <h1>demoTaker <span>BETA</span></h1>
-        <p>
-            Online DAW gitárosoknak.<br>
-            Csak egy telefon kell a felvételhez.<br>
-            Szalagos magnó élmény, modern stúdió eszközökkel.
-        </p>
-    </header>
+    </div>
 
+    <div id="authBox">
+    <div id="authStatusButton">Nincs bejelentkezve</div>
+    <div id="authDropdown">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Jelszó">
+        <button id="loginBtn">Bejelentkezés</button>
+        <button id="registerBtn">Regisztráció</button>
+        <button id="logoutBtn" style="display:none;">Kilépés</button>
+    </div>
+    </div>
+
+    </header>
+    <main>
+        <div class="add-track-wrap">
+
+        <button class="add-track" id="addTrackBtn">
+             <span>+</span>
+             add track
+        </button>
+
+         <div class="track-picker" id="trackPicker">
+         <button data-type="drum">drum</button>
+         <button data-type="bass">bass</button>
+         <button data-type="synth">synth</button>
+         <button data-type="guitar">guitar</button>
+         <button data-type="vocal">vocal</button>
+         </div>
+        </div>
+
+        <div class="track-list" id="trackList">
+         <div class="track-header guitar">
+            <span class="track-type">guitar</span>
+            <span class="track-name">Track 01</span>
+         </div>
+        </div>
+    </main>
     <footer>
-        © 2026 demoTaker – Tape vibes. Modern tools.
+        © 2025 demoTaker – Tape vibes. Modern tools.
     </footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+
+import { 
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  Timestamp
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+import { 
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut 
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+// --- Firebase konfiguráció ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDFK6o6sJnFJImBhkX_ZfQq6fXldLZt7vA",
+  authDomain: "calendarformeapp.firebaseapp.com",
+  projectId: "calendarformeapp",
+  storageBucket: "calendarformeapp.firebasestorage.app",
+  messagingSenderId: "421913143205",
+  appId: "1:421913143205:web:24dc04f3c768f99356aa4c"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const authBox = document.getElementById("authBox");
+
+
+const addBtn = document.getElementById('addTrackBtn');
+const picker = document.getElementById('trackPicker');
+const list = document.getElementById('trackList');
+
+// --- Auth állapot figyelése ---
+const emailInput = document.getElementById('email');
+const passInput = document.getElementById('password');
+const logoutBtn = document.getElementById('logoutBtn');
+
+document.getElementById('loginBtn').onclick = async () => {
+  try { await signInWithEmailAndPassword(auth, emailInput.value, passInput.value); } 
+  catch(e){ alert("Hiba: "+e.message); }
+};
+document.getElementById('registerBtn').onclick = async () => {
+  try { await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value); alert("Regisztráció sikeres"); } 
+  catch(e){ alert("Hiba: "+e.message); }
+};
+logoutBtn.onclick = async () => { await signOut(auth); };
+
+const authStatusButton = document.getElementById("authStatusButton");
+const authDropdown = document.getElementById("authDropdown");
+
+// --- Dropdown nyitása/csukása ---
+authStatusButton.onclick = () => {
+    authDropdown.classList.toggle("open");
+};
+
+document.addEventListener("click", (e) => {
+    if (!authBox.contains(e.target)) {
+        authDropdown.classList.remove("open");
+    }
+});
+
+onAuthStateChanged(auth, user => {
+    if (user) {
+        authStatusButton.textContent = user.email;
+        logoutBtn.style.display = "block";
+
+        loadFiles(); // csak ha be van jelentkezve
+    } else {
+        authStatusButton.textContent = "Nincs bejelentkezve";
+        logoutBtn.style.display = "none";
+
+        fileList.innerHTML = "";  // sidebar törlése
+        fileContent.value = "";    // editor törlése
+    }
+});
+
+addBtn.addEventListener('click', () => {
+    picker.classList.toggle('show');
+});
+
+picker.addEventListener('click', (e) => {
+    if (!e.target.dataset.type) return;
+
+    const type = e.target.dataset.type;
+
+    const track = document.createElement('div');
+    track.className = `track-header ${type}`;
+    track.innerHTML = `
+        <span class="track-type">${type}</span>
+        <span class="track-name">track ${list.children.length + 1}</span>
+    `;
+
+    list.appendChild(track);
+    picker.classList.remove('show');
+});
+</script>
 
 </body>
 </html>
-
-
