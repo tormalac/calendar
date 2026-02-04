@@ -85,7 +85,7 @@ h1, h2, h3 {
 }
 
 #authBox {
-    position: fixed;
+    position: absolute;
     top: 20px;
     right: 60px;
     z-index: 2000;
@@ -347,3 +347,4 @@ h1, h2, h3 {
 .track-header.synth  { border-color: #6bcfff; }
 .track-header.guitar { border-color: #00ffd5; }
 .track-header.vocal  { border-color: #c77dff; }
+
