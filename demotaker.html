@@ -45,12 +45,10 @@
          </div>
         </div>
 
-        <div class="track-list" id="trackList">
-         <div class="track-header guitar">
-            <span class="track-type">guitar</span>
-            <span class="track-name">Track 01</span>
+        <div class="track-container">
+         <div class="track-list" id="trackList">
+          
          </div>
-        </div>
     </main>
     <footer>
         © 2026 demoTaker – Tape vibes. Modern tools.
@@ -155,17 +153,63 @@ picker.addEventListener('click', (e) => {
     const type = e.target.dataset.type;
 
     const track = document.createElement('div');
-    track.className = `track-header ${type}`;
+    track.className = `track-container ${type}`;
     track.innerHTML = `
+      <div class="track-inspector">
         <span class="track-type">${type}</span>
-        <span class="track-name">track ${list.children.length + 1}</span>
+        <span class="track-name" contenteditable="true">Track ${list.children.length + 1}</span>
+
+        <button class="delete-track">×</button>
+
+        <div class="track-controls">
+          <button class="mute">M</button>
+          <button class="solo">S</button>
+          <button class="record">●</button>
+        </div>
+
+        <div class="track-sliders">
+          <label>Vol
+            <input type="range" min="0" max="100" value="80">
+          </label>
+          <label>Pan
+            <input type="range" min="-50" max="50" value="0">
+          </label>
+        </div>
+
+        <div class="track-meta">
+          <span class="audio-source">Mic 1</span>
+          <span class="output">Out 1</span>
+        </div>
+     
+        <div class="track-inserts" title="Click to edit inserts">
+           Audio Inserts
+        </div>
+
+      </div>
+      <div class="track-area"></div>
     `;
 
     list.appendChild(track);
     picker.classList.remove('show');
 });
+
+// Track törlés
+list.addEventListener('click', (e) => {
+  if (e.target.classList.contains('delete-track')) {
+    if (confirm('Biztosan törlöd ezt a sávot?')) {
+      e.target.closest('.track-container').remove();
+    }
+  }
+});
+
+// Insert szerkesztés
+list.addEventListener('click', (e) => {
+  if (e.target.classList.contains('track-inserts')) {
+    alert('Itt nyílik a insert szerkesztő modal (később implementálható)');
+  }
+});
+
 </script>
 
 </body>
 </html>
-
