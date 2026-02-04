@@ -46,10 +46,12 @@
          </div>
         </div>
 
-        <div class="track-container">
-         <div class="track-list" id="trackList">
-          
+        <div class="track-list" id="trackList">
+         <div class="timeline-scroll" id="timelineScroll">
          </div>
+         <div id="playhead"></div>
+        </div>
+
     </main>
     <footer>
         © 2026 demoTaker – Tape vibes. Modern tools.
@@ -187,7 +189,12 @@ picker.addEventListener('click', (e) => {
         </div>
 
       </div>
-      <div class="track-area"></div>
+      <div class="track-area">
+       <div class="timeline">
+        <div class="timeline-grid"></div>
+        <div class="clips"></div>
+       </div>
+      </div>
     `;
 
     list.appendChild(track);
@@ -209,6 +216,75 @@ list.addEventListener('click', (e) => {
     alert('Itt nyílik a insert szerkesztő modal (később implementálható)');
   }
 });
+
+// Lejátszó
+let playheadX = 200;
+
+const playhead = document.getElementById("playhead");
+
+function updatePlayhead(x) {
+  playheadX = x;
+  playhead.style.left = x + "px";
+}
+
+const timelineScroll = document.getElementById("timelineScroll");
+
+function updatePlayheadFromEvent(e) {
+  const scroll = document.getElementById('timelineScroll');
+  const rect = scroll.getBoundingClientRect();
+
+  const x =
+    e.clientX
+    - rect.left
+    + scroll.scrollLeft;
+
+  updatePlayhead(x);
+}
+
+function isTimelineEvent(e) {
+  return e.target.closest('.track-area');
+}
+
+document.addEventListener("pointerdown", e => {
+  if (!isTimelineEvent(e)) return;
+  updatePlayheadFromEvent(e);
+});
+
+document.addEventListener("pointermove", e => {
+  if (e.buttons !== 1) return;
+  if (!isTimelineEvent(e)) return;
+  updatePlayheadFromEvent(e);
+});
+
+// időkezelés
+let PX_PER_SECOND = 100;
+
+function timeToX(time) {
+  return time * PX_PER_SECOND;
+}
+
+function xToTime(x) {
+  return x / PX_PER_SECOND;
+}
+
+function updatePlayheadFromTime(time) {
+  updatePlayhead(timeToX(time));
+}
+
+//zoom
+let zoom = 1;
+
+function updateScale() {
+  PX_PER_SECOND = 100 * zoom;
+}
+
+//scroll playhead együtt
+list.addEventListener('scroll', e => {
+  if (!e.target.classList.contains('track-area')) return;
+
+  playhead.style.transform =
+    `translateX(${-e.target.scrollLeft}px)`;
+}, true);
 
 </script>
 
