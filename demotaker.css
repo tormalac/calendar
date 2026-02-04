@@ -256,30 +256,103 @@ h1, h2, h3 {
     gap: 6px;
 }
 
-.track-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    background: rgba(255,255,255,0.03);
-    border-left: 3px solid var(--accent);
-    font-family: var(--font-mono);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+/*track konténer*/
+.track-container {
+  display: flex;
+  width: 100%;
 }
 
-.track-header span {
-    font-size: 0.75rem;
+.track-inspector {
+  width: 200px;
+  position: relative;
+  padding: 8px;
+  background: rgba(255,255,255,0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-mono);
+  border-left: 4px solid var(--accent);
 }
 
-.track-type {
-    color: var(--accent);
-    font-size: 0.75rem;
+.track-inspector .track-name {
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: text;
 }
 
-.track-name {
-    opacity: 0.8;
-    font-size: 0.75rem;
+.delete-track {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.delete-track:hover {
+  color: #ff4c4c;
+}
+
+.track-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.track-controls button {
+  width: 24px;
+  height: 24px;
+  background: #111;
+  border: 1px solid var(--accent-soft);
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: 2px;
+  font-size: 0.75rem;
+}
+
+.track-sliders label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.7rem;
+  gap: 2px;
+}
+
+.track-sliders input[type=range] {
+  -webkit-appearance: none;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+.track-sliders input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.track-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.track-meta span {
+  background: rgba(255,255,255,0.05);
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 0.65rem;
+}
+
+.track-area {
+  flex: 1;
+  background: rgba(255,255,255,0.01);
+  min-height: 50px; /* demo célokra */
 }
 
 .track-header.drum   { border-color: #ff6b6b; }
@@ -287,5 +360,3 @@ h1, h2, h3 {
 .track-header.synth  { border-color: #6bcfff; }
 .track-header.guitar { border-color: #00ffd5; }
 .track-header.vocal  { border-color: #c77dff; }
-
-
