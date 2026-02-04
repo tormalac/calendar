@@ -24,6 +24,13 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+.wrapper {
+    width: 100%;
+    min-width: 800px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
 .logo {
     padding: 8px 0;
     max-width: 600px;
@@ -70,26 +77,6 @@ h1, h2, h3 {
     text-transform: uppercase;
 }
 
-@media (orientation: landscape) and (max-width: 768px) {
-    .logo h1 {
-        font-size: 1.8rem;
-    }
-
-    main p {
-        font-size: 1rem;
-    }
-}
-
-@media (min-width: 769px) {
-    .logo h1 {
-        font-size: 3rem;
-    }
-
-    main p {
-        font-size: 1.2rem;
-    }
-}
-
 .topbar {
     display: flex;
     justify-content: space-between;
@@ -100,7 +87,7 @@ h1, h2, h3 {
 #authBox {
     position: fixed;
     top: 20px;
-    right: 20px;
+    right: 60px;
     z-index: 2000;
     font-size: 14px;
 }
