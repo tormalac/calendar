@@ -40,6 +40,7 @@ body {
     margin: 0;
     padding: 0;
     font-size: 2.2rem;
+    white-space: nowrap;
 }
 
 .logo h1 span {
@@ -78,6 +79,7 @@ h1, h2, h3 {
 }
 
 .topbar {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -85,7 +87,7 @@ h1, h2, h3 {
 }
 
 #authBox {
-    position: absolute;
+    position: static;
     top: 20px;
     right: 60px;
     z-index: 2000;
@@ -113,7 +115,7 @@ h1, h2, h3 {
 
 #authDropdown {
     position: absolute;
-    top: 40px;
+    top: calc(100% - 10px); 
     right: 0;
     width: 190px;
     border: 1px solid var(--accent-soft);
@@ -396,9 +398,41 @@ h1, h2, h3 {
   height: 100%;
 }
 
-.track-header.drum   { border-color: #ff6b6b; }
-.track-header.bass   { border-color: #ffd93d; }
-.track-header.synth  { border-color: #6bcfff; }
-.track-header.guitar { border-color: #00ffd5; }
-.track-header.vocal  { border-color: #c77dff; }
+/*track type színek*/
+.track-container.drum   .track-inspector { border-color: #3fa9f5; } /* kék */
+.track-container.bass   .track-inspector { border-color: #ffd93d; } /* sárga */
+.track-container.synth  .track-inspector { border-color: #b084f7; } /* lila */
+.track-container.guitar .track-inspector { border-color: #00ffd5; } /* zöld */
+.track-container.vocal  .track-inspector { border-color: #ff7ac8; } /* rózsaszín */
 
+.track-container.guitar .track-type { color: #00ffd5; }
+.track-container.drum   .track-type { color: #3fa9f5; }
+.track-container.bass   .track-type { color: #ffd93d; }
+.track-container.synth  .track-type { color: #b084f7; }
+.track-container.vocal  .track-type { color: #ff7ac8; }
+
+/* DRUM – blue */
+.track-container.drum .track-inspector {
+  border-color: #3FA9F5;
+  box-shadow: inset 0 0 0 1px rgba(63,169,245,0.45);
+}
+
+/* BASS – yellow */
+.track-container.bass .track-inspector {
+  box-shadow: inset 0 0 0 1px rgba(255,217,61,0.45);
+}
+
+/* SYNTH – violet */
+.track-container.synth .track-inspector {
+  box-shadow: inset 0 0 0 1px rgba(176,132,247,0.45);
+}
+
+/* GUITAR – neon mint */
+.track-container.guitar .track-inspector {
+  box-shadow: inset 0 0 0 1px rgba(0,255,213,0.45);
+}
+
+/* VOCAL – rose */
+.track-container.vocal .track-inspector {
+  box-shadow: inset 0 0 0 1px rgba(255,122,200,0.45);
+}
