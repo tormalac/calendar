@@ -24,6 +24,19 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+button {
+  -webkit-tap-highlight-color: transparent; /* iOS / Safari */
+  tap-highlight-color: transparent;         /* Android / egyes böngészők */
+  outline: none;                            /* fókusz körvonal kikapcsolása */
+}
+
+button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  color: var(--text-main);
+}
+
 .wrapper {
     width: 100%;
     min-width: 800px;
@@ -273,16 +286,20 @@ h1, h2, h3 {
     background: rgba(11,11,11,0.92);
     backdrop-filter: blur(6px);
     border-bottom: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    font-family: var(--font-mono);
 }
 
-.control-panel.is-stuck {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+.control-panel button {
+    background: transparent;
+    border: none;
 }
 
 /*track lista*/
 .track-list {
     position: relative;
-    margin-top: 16px;
+    margin-top: 8px;
+    margin-left: 20px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -368,6 +385,15 @@ h1, h2, h3 {
   cursor: pointer;
 }
 
+.slider-value {
+  font-size: 0.65rem;
+  margin-left: 6px;
+  color: var(--accent);
+  min-width: 24px;
+  display: inline-block;
+  text-align: right;
+}
+
 .track-meta {
   display: flex;
   flex-direction: column;
@@ -381,6 +407,35 @@ h1, h2, h3 {
   font-size: 0.65rem;
 }
 
+.audio-source-picker {
+  position: absolute;
+  top: 78%;
+  left: 8px;
+  background: rgba(0,0,0,0.95);
+  border: 1px solid var(--accent-soft);
+  display: none;
+  flex-direction: column;
+  z-index: 100;
+  padding: 4px 0;
+  min-width: 120px;
+  border-radius: 4px;
+}
+
+.audio-source-picker button {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 6px 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.audio-source-picker button:hover {
+  background: rgba(0,255,213,0.1);
+  color: var(--accent);
+}
+
+/*time-line görgetés*/
 .timeline-scroll {
   position: relative;
   overflow-x: auto;
@@ -391,7 +446,7 @@ h1, h2, h3 {
 
 .track-area {
   position: relative;
-  height: 240px;
+  height: 280px;
   overflow: hidden;
   background: rgba(255,255,255,0.01);
 }
