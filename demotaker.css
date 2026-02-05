@@ -187,15 +187,12 @@ h1, h2, h3 {
     position: absolute;
     top: 110%;
     left: 0;
-
-    z-index: 100;
+    z-index: 200;
     display: none;
-
     border: 1px solid var(--accent-soft);
     background: rgba(0,0,0,0.9);
     padding: 8px;
     min-width: 180px;
-
     opacity: 0;
     transform: translateY(-4px);
     transition: opacity 0.15s ease, transform 0.15s ease;
@@ -241,6 +238,8 @@ h1, h2, h3 {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .project-btn {
@@ -260,6 +259,24 @@ h1, h2, h3 {
     color: var(--accent);
     border-color: var(--accent-soft);
     background: rgba(0,255,213,0.04);
+}
+
+/*control panel*/
+.control-panel {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 20px;
+    background: rgba(11,11,11,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.control-panel.is-stuck {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
 /*track lista*/
@@ -370,7 +387,6 @@ h1, h2, h3 {
   overflow-y: hidden;
   padding-left: 200px;
   height: 100%;
-  min-height: 60px;
 }
 
 .track-area {
@@ -405,10 +421,10 @@ h1, h2, h3 {
 
 #playhead {
   position: absolute;
-  top: 60px; 
+  top: 4px; 
   left: 154px;
   width: 2px;
-  height: calc(100% - 60px); 
+  height: 100%; 
   background: red;
   z-index: 10;
   pointer-events: none;
