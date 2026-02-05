@@ -88,8 +88,6 @@ h1, h2, h3 {
 
 #authBox {
     position: static;
-    top: 20px;
-    right: 60px;
     z-index: 2000;
     font-size: 14px;
 }
@@ -238,6 +236,33 @@ h1, h2, h3 {
     background: rgba(0, 255, 213, 0.05);
 }
 
+/*track akciók*/
+.track-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.project-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(230,230,230,0.75);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.65rem;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.project-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent-soft);
+    background: rgba(0,255,213,0.04);
+}
+
+/*track lista*/
 .track-list {
     position: relative;
     margin-top: 16px;
