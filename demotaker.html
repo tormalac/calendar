@@ -50,11 +50,34 @@
        <button class="project-btn">Save</button>
        <button class="project-btn">Open</button>
        <button class="project-btn">Cloud</button>
+       <button class="project-btn">Export</button>
         
     </div>
     
     <div class="control-panel">
-        ▶  ⏸  ⏺   |  BPM 120  |  ⟳ Loop  |  ⏱ 00:32.441
+       <button id="enableAudioBtn" class="project-btn">Enable Audio</button>|
+       <button class="loop-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+         <path d="M2,8 a6,6 0 0,1 12,0" stroke="currentColor" stroke-width="2" fill="none"/>
+         <polygon points="12,6 14,8 12,10" fill="currentColor"/>
+        </svg>
+       </button>|
+       <button class="play-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+         <polygon points="3,2 13,8 3,14" fill="currentColor"/>
+        </svg>
+       </button>|
+       <button class="pause-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+         <rect x="2" y="2" width="4" height="12" fill="currentColor"/>
+         <rect x="10" y="2" width="4" height="12" fill="currentColor"/>
+        </svg>
+       </button>|
+       <button class="rec-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+         <circle cx="8" cy="8" r="6" fill="currentColor"/>
+        </svg>
+       </button>|  BPM 120  |  ⏱ 00:32.441   <!--⟳ Loop  |   ▶  ⏸  ⏺   |-->
     </div>
 
 
@@ -163,6 +186,41 @@ onAuthStateChanged(auth, user => {
     }
 });
 
+// audio engedélyezése
+let audioEnabled = false;
+let availableInputs = [];
+
+async function enableAudio() {
+  if (audioEnabled) return;
+
+  await navigator.mediaDevices.getUserMedia({ audio: true });
+
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  availableInputs = devices.filter(d => d.kind === 'audioinput');
+
+  audioEnabled = true;
+  console.log('Audio enabled', availableInputs);
+}
+
+const enableAudioBtn = document.getElementById('enableAudioBtn');
+
+enableAudioBtn.onclick = async () => {
+  try {
+    await enableAudio();
+
+    document.querySelectorAll('.track-container').forEach(track => {
+      populateAudioSources(track);
+    });
+
+    enableAudioBtn.textContent = 'Audio Ready';
+    enableAudioBtn.disabled = true;
+  } catch (e) {
+    alert('Audio permission needed');
+    console.error(e);
+  }
+};
+
+//track típus választó
 addBtn.addEventListener('click', () => {
     picker.classList.toggle('show');
 });
@@ -190,15 +248,20 @@ picker.addEventListener('click', (e) => {
         <div class="track-sliders">
           <label>Vol
             <input type="range" min="0" max="100" value="80">
+            <span class="slider-value">80%</span>
           </label>
           <label>Pan
             <input type="range" min="-50" max="50" value="0">
+            <span class="slider-value">0</span>
           </label>
         </div>
 
         <div class="track-meta">
-          <span class="audio-source">Mic 1</span>
-          <span class="output">Out 1</span>
+          <span class="audio-source" contenteditable="false">No Input</span>
+                           <div class="audio-source-picker">
+                               <button data-source="Virtual">Virtual</button>
+                           </div>
+                           <span class="output">Out 1</span>
         </div>
      
         <div class="track-inserts" title="Click to edit inserts">
@@ -215,6 +278,7 @@ picker.addEventListener('click', (e) => {
     `;
 
     list.appendChild(track);
+    populateAudioSources(track);
     picker.classList.remove('show');
 });
 
@@ -232,6 +296,82 @@ list.addEventListener('click', (e) => {
     if (confirm('Biztosan törlöd ezt a sávot?')) {
       e.target.closest('.track-container').remove();
     }
+  }
+});
+
+//sliderek értéke látszódjon
+document.addEventListener('input', e => {
+  if (e.target.matches('.track-sliders input[type="range"]')) {
+    const valueSpan = e.target.nextElementSibling;
+    if (valueSpan) {
+      // Ha Volume, mutass % jelet, ha Pan, csak szám
+      if (e.target.parentElement.textContent.includes('Vol')) {
+        valueSpan.textContent = e.target.value + '%';
+      } else {
+        valueSpan.textContent = e.target.value;
+      }
+    }
+  }
+});
+
+// Audió források nyilvánossátétele
+function populateAudioSources(track) {
+  const picker = track.querySelector('.audio-source-picker');
+  picker.innerHTML = '';
+
+  if (!audioEnabled) {
+    const btn = document.createElement('button');
+    btn.textContent = 'Enable Audio first';
+    btn.disabled = true;
+    picker.appendChild(btn);
+    return;
+  }
+
+  availableInputs.forEach(input => {
+    const btn = document.createElement('button');
+    btn.textContent = input.label || 'Audio Input';
+    btn.dataset.deviceId = input.deviceId;
+    btn.dataset.source = 'device';
+    picker.appendChild(btn);
+  });
+
+  const virtualBtn = document.createElement('button');
+  virtualBtn.textContent = 'Virtual';
+  virtualBtn.dataset.source = 'virtual';
+  picker.appendChild(virtualBtn);
+}
+
+// Input választó
+list.addEventListener('click', e => {
+  const track = e.target.closest('.track-container');
+  if (!track) return;
+
+  const sourceSpan = track.querySelector('.audio-source');
+  const picker = track.querySelector('.audio-source-picker');
+
+  // audio-source span kattintás → dropdown
+  if (e.target === sourceSpan) {
+    picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  // dropdown gomb kattintás
+  if (e.target.closest('.audio-source-picker')) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    sourceSpan.textContent = btn.dataset.source;
+    picker.style.display = 'none';
+
+    if (btn.dataset.source === 'Virtual') {
+      console.log('Virtual instrument selected for', track.querySelector('.track-name').textContent);
+    }
+  }
+});
+
+// kattintás máshová → bezárás
+document.addEventListener('click', e => {
+  if (!e.target.closest('.track-container')) {
+    document.querySelectorAll('.audio-source-picker').forEach(p => p.style.display = 'none');
   }
 });
 
