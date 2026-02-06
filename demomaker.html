@@ -240,11 +240,22 @@ picker.addEventListener('click', (e) => {
         <button class="delete-track">×</button>
 
         <div class="track-controls">
-          <button class="mute">M</button>
-          <button class="solo">S</button>
-          <button class="record">●</button>
+          <button class="daw-btn mute" title="Mute">M</button>
+          <button class="daw-btn solo" title="Solo">S</button>
+          <button class="daw-btn record" title="Enable Recording">●</button>
+          <button class="daw-btn monitor" title="Direct Monitoring">
+                               <svg viewBox="0 0 24 24">
+                                    <path d="M3 9v6h4l5 4V5L7 9H3z"/>
+                                    <path
+                                          class="wave"
+                                          d="M16 8c1.5 1.5 1.5 6 0 7.5"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          stroke-width="3"
+                                     />
+                                </svg>
+                        </button>
         </div>
-
         <div class="track-sliders">
           <label>Vol
             <input type="range" min="0" max="100" value="80">
@@ -295,6 +306,23 @@ list.addEventListener('click', (e) => {
   if (e.target.classList.contains('delete-track')) {
     if (confirm('Biztosan törlöd ezt a sávot?')) {
       e.target.closest('.track-container').remove();
+    }
+  }
+});
+
+//kapcsolható monitoring
+list.addEventListener('click', e => {
+  if (e.target.closest('.monitor-btn')) {
+    const btn = e.target.closest('.monitor-btn');
+    btn.classList.toggle('active');
+
+    const track = btn.closest('.track-container');
+    const name = track.querySelector('.track-name').textContent;
+
+    if (btn.classList.contains('active')) {
+      console.log('Direct monitoring ON:', name);
+    } else {
+      console.log('Direct monitoring OFF:', name);
     }
   }
 });
@@ -382,6 +410,19 @@ list.addEventListener('click', (e) => {
   }
 });
 
+// Control menuben toggle
+list.addEventListener('click', e => {
+  const btn = e.target.closest('.daw-btn');
+  if (!btn) return;
+
+  btn.classList.toggle('active');
+
+  const track = btn.closest('.track-container');
+  const trackName = track?.querySelector('.track-name')?.textContent;
+
+  console.log(btn.classList[1], btn.classList.contains('active'), trackName);
+});
+
 // Lejátszó
 let playheadX = 200;
 
@@ -455,4 +496,3 @@ list.addEventListener('scroll', e => {
 
 </body>
 </html>
-
