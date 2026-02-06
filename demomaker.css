@@ -506,6 +506,28 @@ h1, h2, h3 {
   color: var(--accent);
 }
 
+/*track effektek*/
+.track-inserts {
+    background: transparent;
+    /*border: 1px solid rgba(255,255,255,0.12);*/
+    color: #fff;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    padding: 16px 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+.track-inserts:hover {
+    color: var(--accent);
+    border-color: var(--accent-soft);
+    background: rgba(0,255,213,0.04);
+}
+
+
 /*time-line görgetés*/
 .timeline-scroll {
   position: relative;
