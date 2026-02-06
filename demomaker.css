@@ -1,0 +1,534 @@
+:root {
+    --bg-main: #0b0b0b;
+    --text-main: #e6e6e6;
+    --accent: #00ffd5;
+    --accent-soft: rgba(0, 255, 213, 0.4);
+
+    --font-main: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-main);
+    color: var(--text-main);
+    font-family: var(--font-main);
+}
+
+body {
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent; /* iOS / Safari */
+  tap-highlight-color: transparent;         /* Android / egyes böngészők */
+  outline: none;                            /* fókusz körvonal kikapcsolása */
+}
+
+button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  color: var(--text-main);
+}
+
+.wrapper {
+    width: 100%;
+    min-width: 800px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.logo {
+    padding: 8px 0;
+    max-width: 600px;
+}
+
+.logo h1 {
+    margin: 0;
+    padding: 0;
+    font-size: 2.2rem;
+    white-space: nowrap;
+}
+
+.logo h1 span {
+    font-family: var(--font-mono);
+    font-size: 0.6em;
+    color: var(--accent);
+}
+
+main {
+    margin-left: 20px;
+}
+
+main p {
+    font-size: 1.1rem;
+    padding-left: 20px;
+}
+
+footer {
+    margin-top: auto;
+    text-align: center;
+    padding: 0.6rem;
+    opacity: 0.8;
+}
+
+h1, h2, h3 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.mono,
+.code,
+.badge {
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.topbar {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+#authBox {
+    position: static;
+    z-index: 2000;
+    font-size: 14px;
+}
+
+#authStatusButton {
+    white-space: nowrap;
+    background: transparent;
+    border: 1px solid var(--accent-soft);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#authStatusButton:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(0,255,213,0.05);
+}
+
+#authDropdown {
+    position: absolute;
+    top: calc(100% - 10px); 
+    right: 0;
+    width: 190px;
+    border: 1px solid var(--accent-soft);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    padding: 10px;
+    opacity: 0;            
+    visibility: hidden;    
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+    overflow: hidden;
+    pointer-events: none;
+    background: rgba(0,0,0,0.9); 
+}
+
+#authDropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto; 
+}
+
+#authDropdown input,
+#authDropdown button {
+    background: transparent;
+    border: 1px solid var(--accent-soft);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    margin: 8px 0 0 0;
+}
+
+#authDropdown button {
+    width: 100%;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+#authDropdown button:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(0,255,213,0.05);
+}
+
+.tracks {
+    padding: 20px;
+}
+
+.add-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: 1px dashed var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/*track típus választás*/
+.add-track-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.track-picker {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    z-index: 200;
+    display: none;
+    border: 1px solid var(--accent-soft);
+    background: rgba(0,0,0,0.9);
+    padding: 8px;
+    min-width: 180px;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.track-picker.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.track-picker button {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 8px 6px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.track-picker button:hover {
+    color: var(--accent);
+    background: rgba(0,255,213,0.05);
+}
+
+.add-track span {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.add-track:hover {
+    border-color: var(--accent);
+    background: rgba(0, 255, 213, 0.05);
+}
+
+/*track akciók*/
+.track-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.project-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(230,230,230,0.75);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.65rem;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.project-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent-soft);
+    background: rgba(0,255,213,0.04);
+}
+
+/*control panel*/
+.control-panel {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 20px;
+    background: rgba(11,11,11,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    font-family: var(--font-mono);
+}
+
+.control-panel button {
+    background: transparent;
+    border: none;
+}
+
+/*track lista*/
+.track-list {
+    position: relative;
+    margin-top: 8px;
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/*track konténer*/
+.track-container {
+  display: flex;
+  width: 100%;
+}
+
+.track-inspector {
+  width: 200px;
+  position: relative;
+  padding: 8px;
+  background: rgba(255,255,255,0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-mono);
+  border-left: 4px solid var(--accent);
+}
+
+.track-inspector .track-name {
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: text;
+}
+
+.delete-track {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.delete-track:hover {
+  color: #ff4c4c;
+}
+
+.track-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.track-controls button {
+  width: 24px;
+  height: 24px;
+  background: #111;
+  border: 1px solid var(--accent-soft);
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: 2px;
+  font-size: 0.75rem;
+}
+
+.track-sliders label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.7rem;
+  gap: 2px;
+}
+
+.track-sliders input[type=range] {
+  -webkit-appearance: none;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+.track-sliders input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.slider-value {
+  font-size: 0.65rem;
+  margin-left: 6px;
+  color: var(--accent);
+  min-width: 24px;
+  display: inline-block;
+  text-align: right;
+}
+
+.track-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.track-meta span {
+  background: rgba(255,255,255,0.05);
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 0.65rem;
+}
+
+.audio-source-picker {
+  position: absolute;
+  top: 78%;
+  left: 8px;
+  background: rgba(0,0,0,0.95);
+  border: 1px solid var(--accent-soft);
+  display: none;
+  flex-direction: column;
+  z-index: 100;
+  padding: 4px 0;
+  min-width: 120px;
+  border-radius: 4px;
+}
+
+.audio-source-picker button {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 6px 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.audio-source-picker button:hover {
+  background: rgba(0,255,213,0.1);
+  color: var(--accent);
+}
+
+/*time-line görgetés*/
+.timeline-scroll {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-left: 200px;
+  height: 100%;
+}
+
+.track-area {
+  position: relative;
+  height: 280px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.01);
+}
+
+.timeline {
+  position: relative;
+  height: 100%;
+  width: max-content;
+  min-width: 2000px;
+  overflow: hidden; /* ← KÖTELEZŐ */
+}
+
+.timeline-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      rgba(255,255,255,0.08) 0,
+      rgba(255,255,255,0.08) 1px,
+      transparent 1px,
+      transparent 100px
+    );
+}
+
+#playhead {
+  position: absolute;
+  top: 4px; 
+  left: 154px;
+  width: 2px;
+  height: 100%; 
+  background: red;
+  z-index: 10;
+  pointer-events: none;
+}
+
+#playhead::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 0;
+  width: 20px;
+  height: 100%;
+}
+
+/*track type színek*/
+.track-container.drum   .track-inspector { border-color: #3fa9f5; } /* kék */
+.track-container.bass   .track-inspector { border-color: #ffd93d; } /* sárga */
+.track-container.synth  .track-inspector { border-color: #b084f7; } /* lila */
+.track-container.guitar .track-inspector { border-color: #00ffd5; } /* zöld */
+.track-container.vocal  .track-inspector { border-color: #ff7ac8; } /* rózsaszín */
+
+.track-container.guitar .track-type { color: #00ffd5; }
+.track-container.drum   .track-type { color: #3fa9f5; }
+.track-container.bass   .track-type { color: #ffd93d; }
+.track-container.synth  .track-type { color: #b084f7; }
+.track-container.vocal  .track-type { color: #ff7ac8; }
+
+/* DRUM – blue */
+.track-container.drum .track-inspector {
+  border-color: #3FA9F5;
+  box-shadow: inset 0 0 0 1px rgba(63,169,245,0.45);
+}
+
+/* BASS – yellow */
+.track-container.bass .track-inspector {
+  box-shadow: inset 0 0 0 1px rgba(255,217,61,0.45);
+}
+
+/* SYNTH – violet */
+.track-container.synth .track-inspector {
+  box-shadow: inset 0 0 0 1px rgba(176,132,247,0.45);
+}
+
+/* GUITAR – neon mint */
+.track-container.guitar .track-inspector {
+  box-shadow: inset 0 0 0 1px rgba(0,255,213,0.45);
+}
+
+/* VOCAL – rose */
+.track-container.vocal .track-inspector {
+  box-shadow: inset 0 0 0 1px rgba(255,122,200,0.45);
+}

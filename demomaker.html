@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>demoMaker BETA – Online DAW</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="demotaker.css">
+</head>
+
+<body>
+ <div class="wrapper">
+
+    <header class="topbar">
+    <div class="logo">
+        <h1>demoMaker <span>BETA</span></h1>
+    </div>
+
+    <div id="authBox">
+    <div id="authStatusButton">Nincs bejelentkezve</div>
+    <div id="authDropdown">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Jelszó">
+        <button id="loginBtn">Bejelentkezés</button>
+        <button id="registerBtn">Regisztráció</button>
+        <button id="logoutBtn" style="display:none;">Kilépés</button>
+    </div>
+    </div>
+    </header>
+
+   <div class="track-actions">
+        <div class="add-track-wrap">
+
+         <button class="add-track" id="addTrackBtn">
+             <span>+</span>
+             add track
+         </button>
+
+        <div class="track-picker" id="trackPicker">
+          <button data-type="drum">drum</button>
+          <button data-type="bass">bass</button>
+          <button data-type="synth">synth</button>
+          <button data-type="guitar">guitar</button>
+          <button data-type="vocal">vocal</button>
+        </div>
+       </div>
+
+       <button class="project-btn">New</button>
+       <button class="project-btn">Save</button>
+       <button class="project-btn">Open</button>
+       <button class="project-btn">Cloud</button>
+       <button class="project-btn">Export</button>
+        
+    </div>
+    
+    <div class="control-panel">
+       <button id="enableAudioBtn" class="project-btn">Enable Audio</button>|
+       <button class="loop-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+         <path d="M2,8 a6,6 0 0,1 12,0" stroke="currentColor" stroke-width="2" fill="none"/>
+         <polygon points="12,6 14,8 12,10" fill="currentColor"/>
+        </svg>
+       </button>|
+       <button class="play-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+         <polygon points="3,2 13,8 3,14" fill="currentColor"/>
+        </svg>
+       </button>|
+       <button class="pause-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+         <rect x="2" y="2" width="4" height="12" fill="currentColor"/>
+         <rect x="10" y="2" width="4" height="12" fill="currentColor"/>
+        </svg>
+       </button>|
+       <button class="rec-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+         <circle cx="8" cy="8" r="6" fill="currentColor"/>
+        </svg>
+       </button>|  BPM 120  |  ⏱ 00:32.441   <!--⟳ Loop  |   ▶  ⏸  ⏺   |-->
+    </div>
+
+
+    <main>
+
+        <div class="track-list" id="trackList">
+         <div class="timeline-scroll" id="timelineScroll">
+
+         </div>
+
+         <div id="playhead"></div>
+
+        </div>
+
+    </main>
+    <footer>
+        © 2026 demoMaker – Tape vibes. Modern tools.
+    </footer>
+ </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+
+import { 
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  Timestamp
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+import { 
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut 
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+// --- Firebase konfiguráció ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDFK6o6sJnFJImBhkX_ZfQq6fXldLZt7vA",
+  authDomain: "calendarformeapp.firebaseapp.com",
+  projectId: "calendarformeapp",
+  storageBucket: "calendarformeapp.firebasestorage.app",
+  messagingSenderId: "421913143205",
+  appId: "1:421913143205:web:24dc04f3c768f99356aa4c"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const authBox = document.getElementById("authBox");
+
+
+const addBtn = document.getElementById('addTrackBtn');
+const picker = document.getElementById('trackPicker');
+const list = document.getElementById('trackList');
+
+// --- Auth állapot figyelése ---
+const emailInput = document.getElementById('email');
+const passInput = document.getElementById('password');
+const logoutBtn = document.getElementById('logoutBtn');
+
+document.getElementById('loginBtn').onclick = async () => {
+  try { await signInWithEmailAndPassword(auth, emailInput.value, passInput.value); } 
+  catch(e){ alert("Hiba: "+e.message); }
+};
+document.getElementById('registerBtn').onclick = async () => {
+  try { await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value); alert("Regisztráció sikeres"); } 
+  catch(e){ alert("Hiba: "+e.message); }
+};
+logoutBtn.onclick = async () => { await signOut(auth); };
+
+const authStatusButton = document.getElementById("authStatusButton");
+const authDropdown = document.getElementById("authDropdown");
+
+// --- Dropdown nyitása/csukása ---
+authStatusButton.onclick = () => {
+    authDropdown.classList.toggle("open");
+};
+
+document.addEventListener("click", (e) => {
+    if (!authBox.contains(e.target)) {
+        authDropdown.classList.remove("open");
+    }
+});
+
+onAuthStateChanged(auth, user => {
+    if (user) {
+        authStatusButton.textContent = user.email;
+        logoutBtn.style.display = "block";
+
+        loadFiles(); // csak ha be van jelentkezve
+    } else {
+        authStatusButton.textContent = "Nincs bejelentkezve";
+        logoutBtn.style.display = "none";
+
+        fileList.innerHTML = "";  // sidebar törlése
+        fileContent.value = "";    // editor törlése
+    }
+});
+
+// audio engedélyezése
+let audioEnabled = false;
+let availableInputs = [];
+
+async function enableAudio() {
+  if (audioEnabled) return;
+
+  await navigator.mediaDevices.getUserMedia({ audio: true });
+
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  availableInputs = devices.filter(d => d.kind === 'audioinput');
+
+  audioEnabled = true;
+  console.log('Audio enabled', availableInputs);
+}
+
+const enableAudioBtn = document.getElementById('enableAudioBtn');
+
+enableAudioBtn.onclick = async () => {
+  try {
+    await enableAudio();
+
+    document.querySelectorAll('.track-container').forEach(track => {
+      populateAudioSources(track);
+    });
+
+    enableAudioBtn.textContent = 'Audio Ready';
+    enableAudioBtn.disabled = true;
+  } catch (e) {
+    alert('Audio permission needed');
+    console.error(e);
+  }
+};
+
+//track típus választó
+addBtn.addEventListener('click', () => {
+    picker.classList.toggle('show');
+});
+
+picker.addEventListener('click', (e) => {
+    if (!e.target.dataset.type) return;
+
+    const type = e.target.dataset.type;
+
+    const track = document.createElement('div');
+    track.className = `track-container ${type}`;
+    track.innerHTML = `
+      <div class="track-inspector">
+        <span class="track-type">${type}</span>
+        <span class="track-name" contenteditable="true">Track ${list.children.length + 1}</span>
+
+        <button class="delete-track">×</button>
+
+        <div class="track-controls">
+          <button class="mute">M</button>
+          <button class="solo">S</button>
+          <button class="record">●</button>
+        </div>
+
+        <div class="track-sliders">
+          <label>Vol
+            <input type="range" min="0" max="100" value="80">
+            <span class="slider-value">80%</span>
+          </label>
+          <label>Pan
+            <input type="range" min="-50" max="50" value="0">
+            <span class="slider-value">0</span>
+          </label>
+        </div>
+
+        <div class="track-meta">
+          <span class="audio-source" contenteditable="false">No Input</span>
+                           <div class="audio-source-picker">
+                               <button data-source="Virtual">Virtual</button>
+                           </div>
+                           <span class="output">Out 1</span>
+        </div>
+     
+        <div class="track-inserts" title="Click to edit inserts">
+           Audio Inserts
+        </div>
+
+      </div>
+      <div class="track-area">
+       <div class="timeline">
+        <div class="timeline-grid"></div>
+        <div class="clips"></div>
+       </div>
+      </div>
+    `;
+
+    list.appendChild(track);
+    populateAudioSources(track);
+    picker.classList.remove('show');
+});
+
+// control panel árnyék
+const panel = document.querySelector('.control-panel');
+const observer = new IntersectionObserver(
+  ([e]) => panel.classList.toggle('is-stuck', e.intersectionRatio < 1),
+  { threshold: [1] }
+);
+observer.observe(panel);
+
+// Track törlés
+list.addEventListener('click', (e) => {
+  if (e.target.classList.contains('delete-track')) {
+    if (confirm('Biztosan törlöd ezt a sávot?')) {
+      e.target.closest('.track-container').remove();
+    }
+  }
+});
+
+//sliderek értéke látszódjon
+document.addEventListener('input', e => {
+  if (e.target.matches('.track-sliders input[type="range"]')) {
+    const valueSpan = e.target.nextElementSibling;
+    if (valueSpan) {
+      // Ha Volume, mutass % jelet, ha Pan, csak szám
+      if (e.target.parentElement.textContent.includes('Vol')) {
+        valueSpan.textContent = e.target.value + '%';
+      } else {
+        valueSpan.textContent = e.target.value;
+      }
+    }
+  }
+});
+
+// Audió források nyilvánossátétele
+function populateAudioSources(track) {
+  const picker = track.querySelector('.audio-source-picker');
+  picker.innerHTML = '';
+
+  if (!audioEnabled) {
+    const btn = document.createElement('button');
+    btn.textContent = 'Enable Audio first';
+    btn.disabled = true;
+    picker.appendChild(btn);
+    return;
+  }
+
+  availableInputs.forEach(input => {
+    const btn = document.createElement('button');
+    btn.textContent = input.label || 'Audio Input';
+    btn.dataset.deviceId = input.deviceId;
+    btn.dataset.source = 'device';
+    picker.appendChild(btn);
+  });
+
+  const virtualBtn = document.createElement('button');
+  virtualBtn.textContent = 'Virtual';
+  virtualBtn.dataset.source = 'virtual';
+  picker.appendChild(virtualBtn);
+}
+
+// Input választó
+list.addEventListener('click', e => {
+  const track = e.target.closest('.track-container');
+  if (!track) return;
+
+  const sourceSpan = track.querySelector('.audio-source');
+  const picker = track.querySelector('.audio-source-picker');
+
+  // audio-source span kattintás → dropdown
+  if (e.target === sourceSpan) {
+    picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  // dropdown gomb kattintás
+  if (e.target.closest('.audio-source-picker')) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    sourceSpan.textContent = btn.dataset.source;
+    picker.style.display = 'none';
+
+    if (btn.dataset.source === 'Virtual') {
+      console.log('Virtual instrument selected for', track.querySelector('.track-name').textContent);
+    }
+  }
+});
+
+// kattintás máshová → bezárás
+document.addEventListener('click', e => {
+  if (!e.target.closest('.track-container')) {
+    document.querySelectorAll('.audio-source-picker').forEach(p => p.style.display = 'none');
+  }
+});
+
+// Insert szerkesztés
+list.addEventListener('click', (e) => {
+  if (e.target.classList.contains('track-inserts')) {
+    alert('Itt nyílik a insert szerkesztő modal (később implementálható)');
+  }
+});
+
+// Lejátszó
+let playheadX = 200;
+
+const playhead = document.getElementById("playhead");
+
+function updatePlayhead(x) {
+  playheadX = x;
+  playhead.style.left = x + "px";
+}
+
+const timelineScroll = document.getElementById("timelineScroll");
+
+function updatePlayheadFromEvent(e) {
+  const scroll = document.getElementById('timelineScroll');
+  const rect = scroll.getBoundingClientRect();
+
+  const x =
+    e.clientX
+    - rect.left
+    + scroll.scrollLeft;
+
+  updatePlayhead(x);
+}
+
+function isTimelineEvent(e) {
+  return e.target.closest('.track-area');
+}
+
+document.addEventListener("pointerdown", e => {
+  if (!isTimelineEvent(e)) return;
+  updatePlayheadFromEvent(e);
+});
+
+document.addEventListener("pointermove", e => {
+  if (e.buttons !== 1) return;
+  if (!isTimelineEvent(e)) return;
+  updatePlayheadFromEvent(e);
+});
+
+// időkezelés
+let PX_PER_SECOND = 100;
+
+function timeToX(time) {
+  return time * PX_PER_SECOND;
+}
+
+function xToTime(x) {
+  return x / PX_PER_SECOND;
+}
+
+function updatePlayheadFromTime(time) {
+  updatePlayhead(timeToX(time));
+}
+
+//zoom
+let zoom = 1;
+
+function updateScale() {
+  PX_PER_SECOND = 100 * zoom;
+}
+
+//scroll playhead együtt
+list.addEventListener('scroll', e => {
+  if (!e.target.classList.contains('track-area')) return;
+
+  playhead.style.transform =
+    `translateX(${-e.target.scrollLeft}px)`;
+}, true);
+
+</script>
+
+</body>
+</html>
