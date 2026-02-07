@@ -55,29 +55,29 @@
     </div>
     
     <div class="control-panel">
-       <button id="enableAudioBtn" class="project-btn">Enable Audio</button>|
+       <button id="enableAudioBtn" class="project-btn">Enable Audio</button>
        <button class="loop-btn">
         <svg width="16" height="16" viewBox="0 0 16 16">
          <path d="M2,8 a6,6 0 0,1 12,0" stroke="currentColor" stroke-width="2" fill="none"/>
          <polygon points="12,6 14,8 12,10" fill="currentColor"/>
         </svg>
-       </button>|
+       </button>
        <button class="play-btn">
         <svg width="16" height="16" viewBox="0 0 16 16">
          <polygon points="3,2 13,8 3,14" fill="currentColor"/>
         </svg>
-       </button>|
+       </button>
        <button class="pause-btn">
         <svg width="16" height="16" viewBox="0 0 16 16">
          <rect x="2" y="2" width="4" height="12" fill="currentColor"/>
          <rect x="10" y="2" width="4" height="12" fill="currentColor"/>
         </svg>
-       </button>|
+       </button>
        <button class="rec-btn">
         <svg width="16" height="16" viewBox="0 0 16 16">
          <circle cx="8" cy="8" r="6" fill="currentColor"/>
         </svg>
-       </button>|  BPM 120  |  ⏱ 00:32.441   <!--⟳ Loop  |   ▶  ⏸  ⏺   |-->
+       </button>    BPM   120    4/4    00:32.441<!--⟳ Loop  |   ▶  ⏸  ⏺   |-->
     </div>
 
 
@@ -277,7 +277,8 @@ picker.addEventListener('click', (e) => {
                                           stroke-width="3"
                                      />
                                 </svg>
-                        </button>
+          </button>
+          <button class="daw-btn edit" title="Edit">e</button>
         </div>
         <div class="track-sliders">
           <label>Vol
@@ -427,10 +428,15 @@ document.addEventListener('input', e => {
 function populateAudioSources(track) {
   const inputPicker = track.querySelector('.audio-source-picker');
   inputPicker.innerHTML = '';
+ 
+  const virtualBtn = document.createElement('button');
+  virtualBtn.textContent = 'Virtual';
+  virtualBtn.dataset.deviceId = 'virtual';
+  inputPicker.appendChild(virtualBtn);
 
   if (!audioEnabled) {
     const btn = document.createElement('button');
-    btn.textContent = 'Enable Audio first';
+    btn.textContent = 'More inputs: Enable Audio';
     btn.disabled = true;
     inputPicker.appendChild(btn);
     return;
@@ -442,11 +448,6 @@ function populateAudioSources(track) {
     btn.dataset.deviceId = input.deviceId;
     inputPicker.appendChild(btn);
   });
-
-  const virtualBtn = document.createElement('button');
-  virtualBtn.textContent = 'Virtual';
-  virtualBtn.dataset.deviceId = 'virtual';
-  inputPicker.appendChild(virtualBtn);
 }
 
 // Kimenet dropdown feltöltése
@@ -454,9 +455,14 @@ function populateOutputDevices(track) {
   const outputPicker1 = track.querySelector('.output-picker');
   outputPicker1.innerHTML = '';
 
+  const virtualBtn = document.createElement('button');
+  virtualBtn.textContent = 'Virtual';
+  virtualBtn.dataset.deviceId = 'virtual';
+  outputPicker1.appendChild(virtualBtn);
+
   if (!audioEnabled) {
     const btn = document.createElement('button');
-    btn.textContent = 'Enable Audio first';
+    btn.textContent = 'More outputs: Enable Audio';
     btn.disabled = true;
     outputPicker1.appendChild(btn);
     return;
