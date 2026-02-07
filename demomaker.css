@@ -433,6 +433,10 @@ h1, h2, h3 {
   50% { opacity: 1; }
 }
 
+.daw-btn.edit {
+  border-radius: 50%;
+}
+
 /*sliderek az inspectorban*/
 .track-sliders label {
   display: flex;
