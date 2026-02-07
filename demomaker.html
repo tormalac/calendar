@@ -189,17 +189,34 @@ onAuthStateChanged(auth, user => {
 // audio engedélyezése
 let audioEnabled = false;
 let availableInputs = [];
+let availableOutputs = [];
 
 async function enableAudio() {
   if (audioEnabled) return;
 
-  await navigator.mediaDevices.getUserMedia({ audio: true });
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    console.error('Audio permission denied or error:', err);
+    alert('Audio engedély szükséges a működéshez.\nHiba: ' + err.message);
+    throw err; // újradobjuk, hogy a hívó is kezelje
+  }
 
-  const devices = await navigator.mediaDevices.enumerateDevices();
-  availableInputs = devices.filter(d => d.kind === 'audioinput');
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    availableInputs = devices.filter(d => d.kind === 'audioinput');
+    availableOutputs = devices.filter(d => d.kind === 'audiooutput');
 
-  audioEnabled = true;
-  console.log('Audio enabled', availableInputs);
+    audioEnabled = true;
+    console.log('Audio enabled');
+    console.log('Available inputs:', availableInputs);
+    console.log('Available outputs:', availableOutputs);
+
+  } catch (err) {
+    console.error('Error enumerating devices:', err);
+    alert('Nem sikerült lekérni az audio eszközöket.\nHiba: ' + err.message);
+    throw err;
+  }
 }
 
 const enableAudioBtn = document.getElementById('enableAudioBtn');
@@ -210,15 +227,21 @@ enableAudioBtn.onclick = async () => {
 
     document.querySelectorAll('.track-container').forEach(track => {
       populateAudioSources(track);
+      populateOutputDevices(track);
     });
 
     enableAudioBtn.textContent = 'Audio Ready';
     enableAudioBtn.disabled = true;
-  } catch (e) {
-    alert('Audio permission needed');
-    console.error(e);
+
+  } catch (err) {
+    console.warn('Audio nem aktiválható:', err);
+    enableAudioBtn.textContent = 'Enable Audio';
+    enableAudioBtn.disabled = false;
   }
 };
+
+// Stream Monitoring
+const trackStreams = new Map();
 
 //track típus választó
 addBtn.addEventListener('click', () => {
@@ -270,9 +293,10 @@ picker.addEventListener('click', (e) => {
         <div class="track-meta">
           <span class="audio-source" contenteditable="false">No Input</span>
                            <div class="audio-source-picker">
-                               <button data-source="Virtual">Virtual</button>
                            </div>
-                           <span class="output">Out 1</span>
+          <span class="output" contenteditable="false">No Output</span>
+                           <div class="output-picker">
+                           </div>
         </div>
      
         <div class="track-inserts" title="Click to edit inserts">
@@ -290,6 +314,7 @@ picker.addEventListener('click', (e) => {
 
     list.appendChild(track);
     populateAudioSources(track);
+    populateOutputDevices(track);
     picker.classList.remove('show');
 });
 
@@ -311,7 +336,7 @@ list.addEventListener('click', (e) => {
 });
 
 //kapcsolható monitoring
-list.addEventListener('click', e => {
+/*list.addEventListener('click', e => {
   if (e.target.closest('.monitor-btn')) {
     const btn = e.target.closest('.monitor-btn');
     btn.classList.toggle('active');
@@ -324,6 +349,61 @@ list.addEventListener('click', e => {
     } else {
       console.log('Direct monitoring OFF:', name);
     }
+  }
+});*/
+
+list.addEventListener('click', async e => {
+  const btn = e.target.closest('.monitor-btn');
+  if (!btn) return;
+
+  btn.classList.toggle('active');
+
+  const track = btn.closest('.track-container');
+  const name = track.querySelector('.track-name').textContent;
+
+  const inputBtn = track.querySelector('.audio-source-picker button.selected');
+  const outputBtn = track.querySelector('.output-picker button.selected');
+
+  if (!inputBtn) {
+    alert("Válassz előbb bemenetet!");
+    btn.classList.remove('active');
+    return;
+  }
+
+  const inputId = inputBtn.dataset.deviceId;
+  const outputId = outputBtn?.dataset.outputId;
+
+  let stream = trackStreams.get(track);
+
+  if (!stream && inputId !== 'virtual') {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: inputId } });
+      trackStreams.set(track, stream);
+    } catch (err) {
+      console.error('Cannot get input stream:', err);
+      alert('Hiba a mikrofon elérésénél: ' + err.message);
+      btn.classList.remove('active');
+      return;
+    }
+  }
+
+  let audioEl = track.querySelector('audio');
+  if (!audioEl) {
+    audioEl = document.createElement('audio');
+    audioEl.autoplay = true;
+    track.appendChild(audioEl);
+  }
+
+  if (btn.classList.contains('active')) {
+    audioEl.srcObject = inputId === 'virtual' ? null : stream;
+    audioEl.muted = false;
+    if (outputId && outputId !== 'virtual') {
+      audioEl.setSinkId(outputId).catch(err => console.warn('Cannot set output', err));
+    }
+    console.log('Direct monitoring ON:', name);
+  } else {
+    audioEl.srcObject = null;
+    console.log('Direct monitoring OFF:', name);
   }
 });
 
@@ -343,15 +423,16 @@ document.addEventListener('input', e => {
 });
 
 // Audió források nyilvánossátétele
+// Bemenet dropdown feltöltése
 function populateAudioSources(track) {
-  const picker = track.querySelector('.audio-source-picker');
-  picker.innerHTML = '';
+  const inputPicker = track.querySelector('.audio-source-picker');
+  inputPicker.innerHTML = '';
 
   if (!audioEnabled) {
     const btn = document.createElement('button');
     btn.textContent = 'Enable Audio first';
     btn.disabled = true;
-    picker.appendChild(btn);
+    inputPicker.appendChild(btn);
     return;
   }
 
@@ -359,47 +440,96 @@ function populateAudioSources(track) {
     const btn = document.createElement('button');
     btn.textContent = input.label || 'Audio Input';
     btn.dataset.deviceId = input.deviceId;
-    btn.dataset.source = 'device';
-    picker.appendChild(btn);
+    inputPicker.appendChild(btn);
   });
 
   const virtualBtn = document.createElement('button');
   virtualBtn.textContent = 'Virtual';
-  virtualBtn.dataset.source = 'virtual';
-  picker.appendChild(virtualBtn);
+  virtualBtn.dataset.deviceId = 'virtual';
+  inputPicker.appendChild(virtualBtn);
 }
 
-// Input választó
-list.addEventListener('click', e => {
-  const track = e.target.closest('.track-container');
-  if (!track) return;
+// Kimenet dropdown feltöltése
+function populateOutputDevices(track) {
+  const outputPicker1 = track.querySelector('.output-picker');
+  outputPicker1.innerHTML = '';
 
-  const sourceSpan = track.querySelector('.audio-source');
-  const picker = track.querySelector('.audio-source-picker');
-
-  // audio-source span kattintás → dropdown
-  if (e.target === sourceSpan) {
-    picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex';
+  if (!audioEnabled) {
+    const btn = document.createElement('button');
+    btn.textContent = 'Enable Audio first';
+    btn.disabled = true;
+    outputPicker1.appendChild(btn);
+    return;
   }
 
-  // dropdown gomb kattintás
+  availableOutputs.forEach(device => {
+    const btn = document.createElement('button');
+    btn.textContent = device.label || 'Unknown Output';
+    btn.dataset.outputId = device.deviceId;
+    outputPicker1.appendChild(btn);
+  });
+}
+
+document.addEventListener('click', e => {
+  const track = e.target.closest('.track-container');
+
+  if (!track) {
+    document.querySelectorAll('.audio-source-picker, .output-picker')
+            .forEach(p => p.style.display = 'none');
+    return;
+  }
+
+  const sourceSpan = track.querySelector('.audio-source');
+  const sourcePicker = track.querySelector('.audio-source-picker');
+
+  const outputSpan = track.querySelector('.output');
+  const outputPicker = track.querySelector('.output-picker');
+
+  // Input span → nyit/zár
+  if (e.target === sourceSpan) {
+    sourcePicker.style.display = sourcePicker.style.display === 'flex' ? 'none' : 'flex';
+    outputPicker.style.display = 'none';
+    return;
+  }
+
+  // Output span → nyit/zár
+  if (e.target === outputSpan) {
+    outputPicker.style.display = outputPicker.style.display === 'flex' ? 'none' : 'flex';
+    sourcePicker.style.display = 'none';
+    return;
+  }
+
+  // Input gomb kiválasztás
   if (e.target.closest('.audio-source-picker')) {
     const btn = e.target.closest('button');
     if (!btn) return;
 
-    sourceSpan.textContent = btn.dataset.source;
-    picker.style.display = 'none';
+    sourceSpan.textContent = btn.textContent;
+    sourcePicker.style.display = 'none';
 
-    if (btn.dataset.source === 'Virtual') {
-      console.log('Virtual instrument selected for', track.querySelector('.track-name').textContent);
-    }
+    console.log('Input selected:', btn.textContent);
+    return;
   }
-});
 
-// kattintás máshová → bezárás
-document.addEventListener('click', e => {
-  if (!e.target.closest('.track-container')) {
-    document.querySelectorAll('.audio-source-picker').forEach(p => p.style.display = 'none');
+  // Output gomb kiválasztás
+  if (e.target.closest('.output-picker')) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    outputSpan.textContent = btn.textContent;
+    outputPicker.style.display = 'none';
+
+    // Audio elemhez kimenet beállítása
+    const audioEl = track.querySelector('audio');
+    if (audioEl && btn.dataset.outputId) {
+      if (btn.dataset.outputId !== 'virtual') {
+        audioEl.setSinkId(btn.dataset.outputId)
+          .then(() => console.log('Output set to', btn.textContent))
+          .catch(err => console.error('Cannot set output', err));
+      }
+    }
+
+    return;
   }
 });
 
