@@ -309,6 +309,7 @@ h1, h2, h3 {
 .track-container {
   display: flex;
   width: 100%;
+  position: relative;
 }
 
 .track-inspector {
@@ -476,6 +477,8 @@ h1, h2, h3 {
   padding: 2px 4px;
   border-radius: 2px;
   font-size: 0.65rem;
+  position: relative;
+  cursor: pointer;
 }
 
 .audio-source-picker {
@@ -502,6 +505,34 @@ h1, h2, h3 {
 }
 
 .audio-source-picker button:hover {
+  background: rgba(0,255,213,0.1);
+  color: var(--accent);
+}
+
+.output-picker {
+  position: absolute;
+  top: 225px;
+  left: 8px;
+  background: rgba(0,0,0,0.95);
+  border: 1px solid var(--accent-soft);
+  display: none;
+  flex-direction: column;
+  z-index: 100;
+  padding: 4px 0;
+  min-width: 120px;
+  border-radius: 4px;
+}
+
+.output-picker button {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 6px 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.output-picker button:hover {
   background: rgba(0,255,213,0.1);
   color: var(--accent);
 }
