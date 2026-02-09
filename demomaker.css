@@ -474,6 +474,12 @@ h1, h2, h3 {
   background: transparent;
 }
 
+/* kijelölő eszköz toggle */
+.select-btn.active {
+  color: var(--accent);
+  background: transparent;
+}
+
 /* track lista */
 .track-list {
     position: relative;
