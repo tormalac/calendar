@@ -100,6 +100,9 @@
        <button class="snap-btn">
        Snap
        </button>
+       <button class="select-btn">
+       Select
+       </button>
        <button class="play-time-btn">00:32.441
        </button>
     </div>
@@ -344,6 +347,13 @@ const snapBtn = document.querySelector('.snap-btn');
 
 snapBtn.addEventListener('click', () => {
   snapBtn.classList.toggle('active');
+});
+
+// kijelölés toggle
+const selectBtn = document.querySelector('.select-btn');
+
+selectBtn.addEventListener('click', () => {
+   selectBtn.classList.toggle('active');
 });
 
 // Stream Monitoring
