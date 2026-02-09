@@ -171,6 +171,13 @@ h1, h2, h3 {
     background: rgba(0,255,213,0.05);
 }
 
+#authDropdown input:focus {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none;
+    border: 1px solid var(--accent);
+}
+
 .tracks {
     padding: 20px;
 }
@@ -293,9 +300,192 @@ h1, h2, h3 {
 .control-panel button {
     background: transparent;
     border: none;
+    border-radius: 4px;
+    color: rgba(230,230,230,0.75);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
 }
 
-/*track lista*/
+.control-panel button:hover {
+    color: var(--accent);
+    border-color: var(--accent-soft);
+    background: rgba(0,255,213,0.04);
+}
+
+.control-panel button svg {
+  color: #aaa;
+}
+
+.control-panel button:hover svg {
+  color: var(--accent);
+}
+
+/* loop toggle */
+.loop-btn {
+  position: relative;
+  background: transparent;
+  border: none;
+  color: rgba(230,230,230,0.75);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.loop-btn:hover {
+  color: var(--accent);
+  background: rgba(0,255,213,0.04);
+}
+
+.loop-btn.active {
+  color: var(--accent);
+  background: rgba(0,255,213,0.04);
+}
+
+
+/* bpm beállítás */
+.bpm-wrap {
+  display: inline-block;
+}
+
+.bpm-input {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #aaa;
+  font-family: var(--font-mono);
+  text-align: center;
+  padding: 6px 10px;
+  width: 50px;
+  font-size: 0.7rem;
+  cursor: text;
+  transition: all 0.15s ease;
+}
+
+.bpm-input:focus {
+  border-color: var(--accent);
+  outline: none;
+  background: rgba(0,255,213,0.05);
+}
+
+/* ütem beállítása */
+.time-signature-wrap {
+  position: relative;
+}
+
+.time-signature-input {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #aaa;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  text-align: center;
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  width: 50px;
+  cursor: text;
+  transition: all 0.2s ease;
+}
+
+.time-signature-input:focus {
+  border-color: var(--accent);
+  outline: none;
+  background: rgba(0,255,213,0.05);
+}
+
+/* grid beállítása */
+.grid-wrap {
+  position: relative;
+}
+
+.grid-btn {
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+
+.grid-dropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  min-width: 100%;
+  background: rgba(0,0,0,0.9);
+  border: 1px solid var(--accent-soft);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 300;
+}
+
+.grid-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.grid-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.grid-dropdown button:hover {
+  color: var(--accent);
+  background: rgba(0,255,213,0.05);
+}
+
+.grid-dropdown button.active {
+  color: var(--accent);
+}
+
+.grid-dropdown button[data-grid$="T"] {
+  opacity: 0.85;
+}
+
+/* ütemhez igazodás */
+.snap-btn {
+  position: relative;
+  background: transparent;
+  border: none;
+  color: rgba(230,230,230,0.75);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.snap-btn:hover {
+  color: var(--accent);
+  background: rgba(0,255,213,0.04);
+}
+
+.snap-btn.active {
+  color: var(--accent);
+  background: rgba(0,255,213,0.04);
+}
+
+/* track lista */
 .track-list {
     position: relative;
     margin-top: 8px;
@@ -454,8 +644,8 @@ h1, h2, h3 {
 
 .track-sliders input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 10px;
-  height: 14px;
+  width: 12px;
+  height: 16px;
   background: var(--accent);
   border-radius: 2px;
   cursor: pointer;
@@ -478,16 +668,16 @@ h1, h2, h3 {
 
 .track-meta span {
   background: rgba(255,255,255,0.05);
-  padding: 2px 4px;
+  padding: 10px 4px;
   border-radius: 2px;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   position: relative;
   cursor: pointer;
 }
 
 .audio-source-picker {
   position: absolute;
-  top: 204px;
+  top: 220px;
   left: 8px;
   background: rgba(0,0,0,0.95);
   border: 1px solid var(--accent-soft);
@@ -515,7 +705,7 @@ h1, h2, h3 {
 
 .output-picker {
   position: absolute;
-  top: 225px;
+  top: 258px;
   left: 8px;
   background: rgba(0,0,0,0.95);
   border: 1px solid var(--accent-soft);
@@ -544,13 +734,12 @@ h1, h2, h3 {
 /*track effektek*/
 .track-inserts {
     background: transparent;
-    /*border: 1px solid rgba(255,255,255,0.12);*/
     color: #fff;
     font-family: var(--font-mono);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.7rem;
-    padding: 16px 4px;
+    padding: 10px 4px;
     cursor: pointer;
     transition: all 0.15s ease;
     text-align: center;
@@ -574,7 +763,7 @@ h1, h2, h3 {
 
 .track-area {
   position: relative;
-  height: 280px;
+  height: 310px;
   overflow: hidden;
   background: rgba(255,255,255,0.01);
 }
