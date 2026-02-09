@@ -55,12 +55,9 @@
     </div>
     
     <div class="control-panel">
-       <button id="enableAudioBtn" class="project-btn">Enable Audio</button>
+       <button id="enableAudioBtn">Enable Audio</button>
        <button class="loop-btn">
-        <svg width="16" height="16" viewBox="0 0 16 16">
-         <path d="M2,8 a6,6 0 0,1 12,0" stroke="currentColor" stroke-width="2" fill="none"/>
-         <polygon points="12,6 14,8 12,10" fill="currentColor"/>
-        </svg>
+       Loop
        </button>
        <button class="play-btn">
         <svg width="16" height="16" viewBox="0 0 16 16">
@@ -77,7 +74,34 @@
         <svg width="16" height="16" viewBox="0 0 16 16">
          <circle cx="8" cy="8" r="6" fill="currentColor"/>
         </svg>
-       </button>    BPM   120    4/4    00:32.441<!--⟳ Loop  |   ▶  ⏸  ⏺   |-->
+       </button>
+       <div class="bpm-wrap">
+        <input type="text" class="bpm-input" value="120" maxlength="3">
+       </div>
+       <div class="time-signature-wrap">
+        <input type="text" class="time-signature-input" value="4/4" maxlength="5">
+       </div>
+       <div class="grid-wrap">
+        <button class="grid-btn">1/8</button>
+
+        <div class="grid-dropdown">
+         <button data-grid="1/2">1/2</button>
+         <button data-grid="1/4">1/4</button>
+         <button data-grid="1/4T">1/4T</button>
+         <button data-grid="1/8" class="active">1/8</button>
+         <button data-grid="1/8T">1/8T</button>
+         <button data-grid="1/16">1/16</button>
+         <button data-grid="1/16T">1/16T</button>
+         <button data-grid="1/32">1/32</button>
+         <button data-grid="1/32T">1/32T</button>
+         <button data-grid="1/64">1/64</button>
+        </div>
+       </div>
+       <button class="snap-btn">
+       Snap
+       </button>
+       <button class="play-time-btn">00:32.441
+       </button>
     </div>
 
 
@@ -239,6 +263,76 @@ enableAudioBtn.onclick = async () => {
     enableAudioBtn.disabled = false;
   }
 };
+
+// toggle a loop-hoz
+const loopBtn = document.querySelector('.loop-btn');
+loopBtn.addEventListener('click', () => {
+loopBtn.classList.toggle('active');
+});
+
+// BPM választó
+const bpmInput = document.querySelector('.bpm-input');
+
+bpmInput.addEventListener('input', () => {
+  // csak számokat engedünk
+  bpmInput.value = bpmInput.value.replace(/\D/g, '');
+
+  // opcionálisan korlátozhatjuk a tartományt 1–999
+  let bpm = parseInt(bpmInput.value);
+  if (bpm > 999) bpmInput.value = '999';
+  if (bpm < 1 && bpmInput.value !== '') bpmInput.value = '1';
+});
+
+// Ütem választás
+const tsInput = document.querySelector('.time-signature-input');
+
+tsInput.addEventListener('input', () => {
+  // engedélyezett karakterek: számok és /
+  tsInput.value = tsInput.value.replace(/[^0-9\/]/g, '');
+
+  // automatikusan formázni is lehet pl. "44" → "4/4"
+  if (/^\d{2}$/.test(tsInput.value)) {
+    tsInput.value = tsInput.value[0] + '/' + tsInput.value[1];
+  }
+});
+
+// Grid választás
+const gridWrap = document.querySelector('.grid-wrap');
+const gridBtn = gridWrap.querySelector('.grid-btn');
+const gridDropdown = gridWrap.querySelector('.grid-dropdown');
+
+gridBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  gridDropdown.classList.toggle('open');
+});
+
+gridDropdown.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const value = btn.dataset.grid;
+
+    // gomb szöveg frissítése a kiválasztott értékre
+    gridBtn.textContent = value;
+
+    gridDropdown.classList.remove('open');
+
+    gridDropdown.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    console.log('Grid set to:', value);
+  });
+});
+
+// kattintás kívül → bezár
+document.addEventListener('click', () => {
+  gridDropdown.classList.remove('open');
+});
+
+// toggle az ütemhez igazodáshoz
+const snapBtn = document.querySelector('.snap-btn');
+
+snapBtn.addEventListener('click', () => {
+  snapBtn.classList.toggle('active');
+});
 
 // Stream Monitoring
 const trackStreams = new Map();
