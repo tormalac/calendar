@@ -178,9 +178,9 @@ h1, h2, h3 {
     border: 1px solid var(--accent);
 }
 
-.tracks {
+/*.tracks {
     padding: 20px;
-}
+}*/
 
 .add-track {
     display: inline-flex;
@@ -486,14 +486,51 @@ h1, h2, h3 {
   background: transparent;
 }
 
+/* vonalzó */
+.timeline-ruler {
+  position: sticky;
+  top: 0;
+  margin-left: 154px;
+  height: 22px;
+  background: #0e0e0e;
+  border-bottom: 1px solid #333;
+  display: flex;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  z-index: 20;
+  overflow: hidden;
+}
+
+.ruler-inner {
+  position: relative;
+  display: flex;
+  height: 100%;
+  will-change: transform;
+}
+
+.ruler-bar {
+  position: relative;
+  height: 100%;
+  border-left: 1px solid #444;
+  box-sizing: border-box;
+  background: rgba(255,255,255,0.03);
+}
+
+.ruler-bar span {
+  position: absolute;
+  top: 6px;
+  left: 4px;
+  color: #aaa;
+}
+
 /* track lista */
 .track-list {
     position: relative;
-    margin-top: 8px;
-    margin-left: 20px;
+    margin: 0;
+    margin-left: 22px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 0;
 }
 
 /*track konténer*/
@@ -796,7 +833,7 @@ h1, h2, h3 {
 
 #playhead {
   position: absolute;
-  top: 4px; 
+  top: 0px; 
   left: 154px;
   width: 2px;
   height: 100%; 
