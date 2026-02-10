@@ -63,7 +63,7 @@ button svg {
 }
 
 main {
-    margin-left: 20px;
+    margin: 0;
 }
 
 main p {
@@ -488,9 +488,9 @@ h1, h2, h3 {
 
 /* vonalzó */
 .timeline-ruler {
-  position: sticky;
+  position: absolute;
   top: 0;
-  margin-left: 154px;
+  left: 164px;
   height: 22px;
   background: #0e0e0e;
   border-bottom: 1px solid #333;
@@ -541,13 +541,13 @@ h1, h2, h3 {
 }
 
 .track-inspector {
-  width: 200px;
   position: relative;
   padding: 6px;
   background: rgba(255,255,255,0.03);
   display: flex;
   flex-direction: column;
   gap: 5px;
+  flex: 0 0 146px;
   font-family: var(--font-mono);
   border-left: 6px solid var(--accent);
 }
@@ -833,8 +833,8 @@ h1, h2, h3 {
 
 #playhead {
   position: absolute;
-  top: 0px; 
-  left: 154px;
+  top: 0; 
+  left: 164px;
   width: 2px;
   height: 100%; 
   background: rgba(255,50,50,0.9);
