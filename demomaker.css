@@ -526,7 +526,6 @@ h1, h2, h3 {
 .track-list {
     position: relative;
     margin: 0;
-    margin-left: 22px;
     display: flex;
     flex-direction: column;
     gap: 0;
