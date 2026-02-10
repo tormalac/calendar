@@ -75,6 +75,9 @@
          <circle cx="8" cy="8" r="6" fill="currentColor"/>
         </svg>
        </button>
+       <button class="click-btn">
+       Click
+       </button>
        <div class="bpm-wrap">
         <input type="text" class="bpm-input" value="120" maxlength="3">
        </div>
@@ -276,13 +279,19 @@ loopBtn.classList.toggle('active');
 // toggle play gombhoz
 const playBtn = document.querySelector('.play-btn');
 playBtn.addEventListener('click', () => {
-playBtn.classList.toggle('active');
+  playBtn.classList.toggle('active');
 });
 
 // toggle play gombhoz
 const recBtn = document.querySelector('.rec-btn');
 recBtn.addEventListener('click', () => {
-recBtn.classList.toggle('active');
+  recBtn.classList.toggle('active');
+});
+
+// toggle click gombhoz
+const clickBtn = document.querySelector('.click-btn');
+clickBtn.addEventListener('click', () => {
+  clickBtn.classList.toggle('active');
 });
 
 // BPM választó
