@@ -488,9 +488,8 @@ h1, h2, h3 {
 
 /* vonalzó */
 .timeline-ruler {
-  position: absolute;
-  top: 0;
-  left: 164px;
+  position: realative;
+  padding-left: 164px;
   height: 22px;
   background: #0e0e0e;
   border-bottom: 1px solid #333;
@@ -498,7 +497,7 @@ h1, h2, h3 {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   z-index: 20;
-  overflow: hidden;
+  overflow: hidden !important; 
 }
 
 .ruler-inner {
