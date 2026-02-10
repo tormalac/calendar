@@ -96,7 +96,6 @@
          <button data-grid="1/16">1/16</button>
          <button data-grid="1/16T">1/16T</button>
          <button data-grid="1/32">1/32</button>
-         <button data-grid="1/32T">1/32T</button>
          <button data-grid="1/64">1/64</button>
         </div>
        </div>
@@ -114,12 +113,11 @@
     <main>
 
         <div class="track-list" id="trackList">
-         <div class="timeline-scroll" id="timelineScroll">
-
-         </div>
-
-         <div id="playhead"></div>
-
+           <div class="timeline-ruler" id="timelineRuler">
+               <div class="ruler-inner" id="rulerInner"></div>
+           </div>
+           <div class="timeline-scroll" id="timelineScroll"></div>
+           <div id="playhead"></div>
         </div>
 
     </main>
@@ -321,6 +319,20 @@ tsInput.addEventListener('input', () => {
 });
 
 // Grid választás
+const GRID_MAP = {
+  "1/2": 2,
+  "1/4": 1,
+  "1/4T": 2/3,
+  "1/8": 0.5,
+  "1/8T": 1/3,
+  "1/16": 0.25,
+  "1/16T": 1/6,
+  "1/32": 0.125,
+  "1/64": 0.0625 
+};
+
+let currentGrid = "1/8";
+
 const gridWrap = document.querySelector('.grid-wrap');
 const gridBtn = gridWrap.querySelector('.grid-btn');
 const gridDropdown = gridWrap.querySelector('.grid-dropdown');
@@ -333,6 +345,7 @@ gridBtn.addEventListener('click', e => {
 gridDropdown.querySelectorAll('button').forEach(btn => {
   btn.addEventListener('click', () => {
     const value = btn.dataset.grid;
+    currentGrid = value;
 
     // gomb szöveg frissítése a kiválasztott értékre
     gridBtn.textContent = value;
@@ -343,6 +356,8 @@ gridDropdown.querySelectorAll('button').forEach(btn => {
     btn.classList.add('active');
 
     console.log('Grid set to:', value);
+    drawRuler();
+    drawAllGrids();
   });
 });
 
@@ -442,6 +457,8 @@ picker.addEventListener('click', (e) => {
     populateAudioSources(track);
     populateOutputDevices(track);
     picker.classList.remove('show');
+    drawRuler();
+    drawAllGrids();
 });
 
 // control panel árnyék
@@ -724,7 +741,14 @@ document.addEventListener("pointermove", e => {
 });
 
 // időkezelés
-let PX_PER_SECOND = 100;
+let bpm = 120;
+let timeSig = [4, 4];
+let zoom = 1;
+let PX_PER_SECOND = 100 * zoom;
+
+function secondsPerBar() {
+  return (60 / bpm) * timeSig[0];
+}
 
 function timeToX(time) {
   return time * PX_PER_SECOND;
@@ -738,20 +762,82 @@ function updatePlayheadFromTime(time) {
   updatePlayhead(timeToX(time));
 }
 
-//zoom
-let zoom = 1;
-
 function updateScale() {
   PX_PER_SECOND = 100 * zoom;
 }
 
+// vonalzó
+const ruler = document.getElementById('timelineRuler');
+const rulerInner = document.getElementById('rulerInner');
+
+function drawRuler(durationSeconds = 120) {
+  rulerInner.innerHTML = '';
+
+  const barSeconds = secondsPerBar();
+  const barPx = barSeconds * PX_PER_SECOND;
+  const barCount = Math.ceil(durationSeconds / barSeconds);
+
+  for (let i = 0; i < barCount; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'ruler-bar';
+    bar.style.width = barPx + 'px';
+
+    const label = document.createElement('span');
+    label.textContent = i + 1;
+
+    bar.appendChild(label);
+    rulerInner.appendChild(bar);
+  }
+
+  rulerInner.style.width = (barCount * barPx) + 'px';
+}
+
 //scroll playhead együtt
-list.addEventListener('scroll', e => {
+/*list.addEventListener('scroll', e => {
   if (!e.target.classList.contains('track-area')) return;
 
   playhead.style.transform =
     `translateX(${-e.target.scrollLeft}px)`;
-}, true);
+}, true);*/
+
+timelineScroll.addEventListener('scroll', () => {
+  rulerInner.style.transform =
+    `translateX(${-timelineScroll.scrollLeft}px)`;
+});
+
+function drawAllGrids() {
+    // 1. Alap számítások
+    const secondsPerBeat = 60 / bpm; // Egy negyed hang hossza másodpercben
+    
+    // 2. Bar (Ütem) számítása
+    // timeSig[0] a számláló (pl. 4 a 4/4-ben)
+    // Ha a timeSig változó tömbként van tárolva: [4, 4]
+    const beatsPerBar = timeSig[0]; 
+    const barDuration = secondsPerBeat * beatsPerBar;
+    const barPx = barDuration * PX_PER_SECOND;
+
+    // 3. Grid (Rács) számítása
+    // A GRID_MAP-ből vesszük a szorzót (pl. 1/8 esetén 0.5)
+    const gridMultiplier = GRID_MAP[currentGrid] || 0.5; 
+    
+    // Figyelem: A gridMultiplier a negyedhez (beat) képest van
+    // Pl: 1/16 = 0.25 beat
+    const gridDuration = secondsPerBeat * (gridMultiplier / 0.25) * 0.25; 
+    // Egyszerűbben: const gridDuration = secondsPerBeat * gridMultiplier * 4; 
+    // DE: Mivel a te GRID_MAP-ed így néz ki: "1/4": 1, "1/8": 0.5 -> Ez beat alapú.
+    // Tehát a helyes képlet a te logikádhoz:
+    const gridPx = (secondsPerBeat * gridMultiplier) * PX_PER_SECOND;
+
+    // 4. Stílus alkalmazása minden sávra
+    document.querySelectorAll('.timeline-grid').forEach(el => {
+        // Két méretet adunk meg vesszővel elválasztva.
+        // 1. méret: Bar szélessége
+        // 2. méret: Grid szélessége
+        el.style.backgroundSize = `${barPx}px 100%, ${gridPx}px 100%`;
+    });
+
+    console.log(`Rács frissítve. Bar: ${barPx.toFixed(1)}px, Grid: ${gridPx.toFixed(1)}px (${currentGrid})`);
+}
 
 </script>
 
