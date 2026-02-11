@@ -633,8 +633,8 @@ h1, h2, h3 {
 }
 
 /*monitoring kapcsoló*/
-.daw-btn.monitor {
-  color: var(--accent); /* alap szín a monitoring gombhoz */
+.track-controls .daw-btn.monitor {
+    color: #00ffd5 !important;
 }
 
 .daw-btn.monitor svg {
@@ -799,6 +799,22 @@ h1, h2, h3 {
   height: 100%;
 }
 
+.timeline-scroll.grabbing {
+    cursor: grab;
+    cursor: -webkit-grab;
+}
+
+.timeline-scroll.grabbing:active {
+    cursor: grabbing;
+    cursor: -webkit-grabbing;
+}
+
+.timeline-scroll.grabbing * {
+    user-select: none;
+    pointer-events: none; /* Fontos: így nem a sávokra kattintunk, hanem a konténerre */
+}
+
+
 .track-area {
   position: relative;
   height: 294px;
@@ -814,21 +830,30 @@ h1, h2, h3 {
   overflow: hidden; /* ← KÖTELEZŐ */
 }
 
+/* rácsozás */
 .timeline-grid {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-
-  background-image:
-    repeating-linear-gradient(
-      to right,
-      rgba(255,255,255,0.08) 0,
-      rgba(255,255,255,0.08) 1px,
-      transparent 1px,
-      transparent 100px
-    );
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    height: 100%;
+    width: 100%;
 }
 
+#timelineRuler {
+    cursor: pointer;
+    z-index: 50;
+}
+
+#timelineScroll {
+    cursor: grab;
+    overflow-x: hidden;
+}
+
+#timelineScroll.grabbing {
+    cursor: grabbing; /* Összezárt kéz */
+}
+
+/* lejátszó fej */
 #playhead {
   position: absolute;
   top: 0; 
