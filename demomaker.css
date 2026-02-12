@@ -491,7 +491,7 @@ h1, h2, h3 {
 .timeline-ruler {
   display: none;
   position: sticky;
-  top: 47px;
+  top: 49px;
   margin-left: 164px;
   height: 22px;
   background: #0e0e0e;
