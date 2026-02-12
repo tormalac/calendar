@@ -64,6 +64,7 @@ button svg {
 
 main {
     margin: 0;
+    background: #0e0e0e;
 }
 
 main p {
@@ -208,7 +209,7 @@ h1, h2, h3 {
     position: absolute;
     top: 110%;
     left: 0;
-    z-index: 200;
+    z-index: 800;
     display: none;
     border: 1px solid var(--accent-soft);
     background: rgba(0,0,0,0.9);
@@ -286,11 +287,14 @@ h1, h2, h3 {
 .control-panel {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 500 !important;
     display: flex;
     align-items: center;
     gap: 4px;
     padding: 8px 20px;
+    height: 34px;
+    flex-wrap: nowrap;   
+    white-space: nowrap;
     background: rgba(11,11,11,0.92);
     backdrop-filter: blur(6px);
     border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -439,7 +443,7 @@ h1, h2, h3 {
   transform: translateY(-4px);
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 300;
+  z-index: 100;
 }
 
 .grid-dropdown.open {
@@ -489,17 +493,20 @@ h1, h2, h3 {
 
 /* vonalzó */
 .timeline-ruler {
-  display: none;
+  display: none;     
   position: sticky;
-  top: 49px;
-  margin-left: 164px;
+  top: 50px;         
+  margin-left: 164px;     
+  width: calc(100% - 164px);         
+  box-sizing: border-box; 
+  z-index: 12;    
   height: 22px;
-  background: #0e0e0e;
+  background: #0e0e0e; 
   border-bottom: 1px solid #333;
+  overflow: hidden !important; 
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  z-index: 20;
-  overflow: hidden !important; 
+  cursor: pointer;
 }
 
 .ruler-inner {
@@ -522,6 +529,7 @@ h1, h2, h3 {
   top: 6px;
   left: 4px;
   color: #aaa;
+  z-index: 14;
 }
 
 /* track lista */
@@ -843,7 +851,7 @@ h1, h2, h3 {
 
 #timelineRuler {
     cursor: pointer;
-    z-index: 50;
+    z-index: 110;
 }
 
 #timelineScroll {
@@ -852,7 +860,7 @@ h1, h2, h3 {
 }
 
 #timelineScroll.grabbing {
-    cursor: grabbing; /* Összezárt kéz */
+    cursor: grabbing; 
 }
 
 /* lejátszó fej */
@@ -863,7 +871,7 @@ h1, h2, h3 {
   width: 2px;
   height: 100%; 
   background: rgba(255,50,50,0.9);
-  z-index: 10;
+  z-index: 20;
   pointer-events: none;
 }
 
