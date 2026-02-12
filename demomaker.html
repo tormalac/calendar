@@ -54,6 +54,7 @@
        <button class="project-btn">Export</button>
         
     </div>
+    <input type="file" id="audioImportInput" accept="audio/*" style="display: none;">
     
     <div class="control-panel">
        <button id="enableAudioBtn">Enable Audio</button>
@@ -63,12 +64,6 @@
        <button class="play-btn">
         <svg width="16" height="16" viewBox="0 0 16 16">
          <polygon points="3,2 13,8 3,14" fill="currentColor"/>
-        </svg>
-       </button>
-       <button class="pause-btn">
-        <svg width="16" height="16" viewBox="0 0 16 16">
-         <rect x="2" y="2" width="4" height="12" fill="currentColor"/>
-         <rect x="10" y="2" width="4" height="12" fill="currentColor"/>
         </svg>
        </button>
        <button class="rec-btn">
@@ -106,7 +101,7 @@
        <button class="select-btn">
        Select
        </button>
-       <button class="play-time-btn">00:32.441
+       <button class="play-time-btn">00:00.00
        </button>
     </div>
 
@@ -503,6 +498,7 @@ picker.addEventListener('click', (e) => {
     populateOutputDevices(track);
     picker.classList.remove('show');
     drawAllGrids();
+    drawRuler();
 });
 
 //sliderek értéke látszódjon
@@ -620,7 +616,6 @@ window.addEventListener('mousemove', (e) => {
 
 timelineScroll.addEventListener('scroll', () => {
     rulerInner.parentElement.scrollLeft = timelineScroll.scrollLeft;
-    rulerInner.style.transform = `translateX(${-timelineScroll.scrollLeft}px)`;
     playhead.style.transform = `translateX(${-timelineScroll.scrollLeft}px)`;
 });
 
@@ -640,6 +635,229 @@ ruler.addEventListener('pointerdown', (e) => {
         ruler.onpointerup = null;
     };
 });
+
+// ==========================================================
+// --- LEJÁTSZÁS ÉS IMPORT MOTOR (ÚJ RÉSZ) ---
+// ==========================================================
+
+// 1. Audio Context Inicializálás
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const masterGain = audioCtx.createGain();
+masterGain.connect(audioCtx.destination);
+masterGain.gain.value = 0.8; // Alap hangerő
+
+// Állapot változók
+let isPlaying = false;
+let startPlayTime = 0;      // Mikor nyomtad meg a Play-t (AudioContext idő)
+let startOffset = 0;        // Honnan indult a playhead (másodpercben)
+let animationFrameId;       // A vizuális frissítés ID-ja
+let audioSources = [];      // A jelenleg játszott hangok listája a megállításhoz
+
+// DOM elemek
+const importBtn = document.querySelector('.project-btn:nth-child(6)'); // Az "Import" gomb
+const fileInput = document.getElementById('audioImportInput');
+const playBtn = document.querySelector('.play-btn');
+const pauseBtn = document.querySelector('.pause-btn'); // Ha van külön pause gomb
+const playTimeDisplay = document.querySelector('.play-time-btn');
+
+// --- A. IMPORT LOGIKA ---
+
+// Ha megnyomod az Import gombot, kattintson a rejtett inputra
+importBtn.onclick = () => {
+    // Ellenőrizzük, van-e track. Ha nincs, csináljunk egyet.
+    if (document.querySelectorAll('.track-container').length === 0) {
+        alert("Előbb hozz létre egy Track-et (pl. '+ add track' -> 'vocal')!");
+        return;
+    }
+    fileInput.click();
+};
+
+fileInput.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Betöltés animáció (opcionális, de jó ha van visszajelzés)
+    importBtn.textContent = "Loading...";
+    
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+        
+        // Visszaállítjuk a gomb feliratát
+        importBtn.textContent = "Import";
+
+        // Melyik sávra tegyük? (Most az elsőre tesszük egyszerűség kedvéért)
+        // Később: kijelölt sávra (track-container.selected)
+        const targetTrack = document.querySelector('.track-container'); 
+        const clipsContainer = targetTrack.querySelector('.clips');
+
+        // CLIP LÉTREHOZÁSA (Adat + Vizualizáció)
+        addClipToTrack(clipsContainer, audioBuffer, file.name);
+
+    } catch (err) {
+        console.error(err);
+        alert("Hiba a fájl betöltésekor: " + err.message);
+        importBtn.textContent = "Import";
+    }
+    
+    // Input törlése, hogy ugyanazt a fájlt újra be lehessen tölteni
+    fileInput.value = '';
+};
+
+function addClipToTrack(container, buffer, name) {
+    const clip = document.createElement('div');
+    clip.className = 'audio-clip';
+    
+    // Számítás: 1 másodperc = PX_PER_SECOND pixel (jelenleg 100px)
+    const width = buffer.duration * PX_PER_SECOND;
+    
+    clip.style.width = `${width}px`;
+    clip.style.height = '100%'; // A sáv magassága
+    clip.style.background = 'rgba(0, 255, 213, 0.3)';
+    clip.style.border = '1px solid #00ffd5';
+    clip.style.borderRadius = '4px';
+    clip.style.position = 'absolute';
+    clip.style.left = '0px'; // Az elejére rakjuk (0 sec)
+    clip.style.top = '0px';
+    clip.style.overflow = 'hidden';
+    clip.style.whiteSpace = 'nowrap';
+    clip.style.fontSize = '10px';
+    clip.style.padding = '2px';
+    clip.style.cursor = 'grab';
+    
+    // Adatok mentése a DOM elemre, hogy lejátszáskor megtaláljuk
+    clip.dataset.start = 0; // Másodpercben, hogy hol kezdődik a timeline-on
+    clip.dataset.offset = 0; // Ha megvágnánk az elejét (későbbi funkció)
+    
+    // AudioBuffer csatolása közvetlenül az elemhez (memóriaigényes lehet sok fájlnál, de kezdésnek ok)
+    clip.audioBuffer = buffer;
+
+    clip.textContent = name;
+    container.appendChild(clip);
+}
+
+
+// --- B. LEJÁTSZÁS LOGIKA ---
+
+// Play gomb felülírása
+playBtn.onclick = (e) => {
+    // UI gomb állapot váltás
+    e.target.closest('button').classList.toggle('active');
+    
+    if (isPlaying) {
+        stopPlayback();
+    } else {
+        startPlayback();
+    }
+};
+
+// Pause gomb logika (ha külön van)
+document.querySelector('.pause-btn').onclick = () => {
+    if (isPlaying) stopPlayback();
+    playBtn.classList.remove('active');
+};
+
+
+function startPlayback() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    isPlaying = true;
+    startPlayTime = audioCtx.currentTime;
+    
+    // Kiszámoljuk, hol áll most a playhead (pixel -> másodperc)
+    // A playhead alapból 164px-nél van (sidebar), de a timelineScroll eltolja.
+    // Egyszerűsítve: olvassuk ki a playhead left értékét a timeline tartalmához képest.
+    
+    // Jelenlegi playhead pozíció pixelben (a timeline kezdetétől számítva)
+    let currentLeftPx = parseFloat(playhead.style.left) || 0;
+    // (A te kódodban a playhead a #trackList-ben van abszolút pozícióban, 
+    // a görgetést a transzformáció kezeli. Ezért a left érték jó kiindulópont.)
+    
+    startOffset = currentLeftPx / PX_PER_SECOND; // Másodpercre váltás
+
+    // Minden klipet elindítunk
+    const allClips = document.querySelectorAll('.audio-clip');
+    audioSources = []; // Tiszta lappal indulunk
+
+    allClips.forEach(clipDiv => {
+        const buffer = clipDiv.audioBuffer;
+        const clipStartFilter = parseFloat(clipDiv.dataset.start); // Mikor kezdődik a timeline-on
+        
+        // Csak akkor játsszuk le, ha a playhead még nem hagyta el a klip végét
+        if (startOffset < clipStartFilter + buffer.duration) {
+            
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(masterGain);
+            
+            // Számítás: mikor kell megszólalnia és mennyit kell beletekerni?
+            let whenToStart = 0;
+            let offsetInFile = 0;
+
+            if (startOffset > clipStartFilter) {
+                // A playhead a klip közepén van
+                whenToStart = 0; // Azonnal indul
+                offsetInFile = startOffset - clipStartFilter; // Ennyit tekerünk bele
+            } else {
+                // A klip még a jövőben van
+                whenToStart = clipStartFilter - startOffset; // Ennyit várunk
+                offsetInFile = 0;
+            }
+
+            source.start(audioCtx.currentTime + whenToStart, offsetInFile);
+            audioSources.push(source);
+        }
+    });
+
+    // Indul az animációs hurok
+    requestAnimationFrame(updatePlayhead);
+}
+
+function stopPlayback() {
+    isPlaying = false;
+    // Minden hang leállítása
+    audioSources.forEach(src => {
+        try { src.stop(); } catch(e) {}
+    });
+    audioSources = [];
+    cancelAnimationFrame(animationFrameId);
+    
+    playBtn.classList.remove('active');
+}
+
+function updatePlayhead() {
+    if (!isPlaying) return;
+
+    // Mennyi idő telt el az indítás óta?
+    const elapsed = audioCtx.currentTime - startPlayTime;
+    
+    // Hol tartunk most összesen? (Kezdő pozíció + eltelt idő)
+    const currentTotalTime = startOffset + elapsed;
+
+    // 1. Playhead mozgatása
+    const newLeftPx = currentTotalTime * PX_PER_SECOND;
+    playhead.style.left = `${newLeftPx}px`;
+
+    // 2. Idő kijelző frissítése (00:00.000 formátum)
+    const mins = Math.floor(currentTotalTime / 60).toString().padStart(2, '0');
+    const secs = Math.floor(currentTotalTime % 60).toString().padStart(2, '0');
+    const ms = Math.floor((currentTotalTime % 1) * 1000).toString().padStart(3, '0');
+    playTimeDisplay.textContent = `${mins}:${secs}.${ms}`;
+
+    // 3. Automatikus görgetés (Auto-scroll)
+    // Ha a playhead kimegy a látható részből jobbra
+    const containerWidth = timelineScroll.clientWidth;
+    const currentScroll = timelineScroll.scrollLeft;
+    // A 164px a sidebar szélessége, azt le kell vonni a látható területből
+    const realPlayheadScreenPos = newLeftPx - currentScroll; 
+    
+    // Ha a playhead eléri a képernyő 90%-át, görgessünk
+    if (realPlayheadScreenPos > containerWidth * 0.9) {
+        timelineScroll.scrollLeft += 5; // Finom görgetés
+    }
+
+    animationFrameId = requestAnimationFrame(updatePlayhead);
+}
 
 drawRuler();
 drawAllGrids();
