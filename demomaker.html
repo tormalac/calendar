@@ -365,7 +365,13 @@ list.addEventListener('click', e => {
     
     // 5. Track törlés
     if (e.target.classList.contains('delete-track')) {
-        if (confirm('Törlöd?')) e.target.closest('.track-container').remove();
+        if (confirm('Törlöd?')) {
+            e.target.closest('.track-container').remove();
+            const remainingTracks = document.querySelectorAll('.track-container').length;
+            if (remainingTracks === 0) {
+                document.getElementById('timelineRuler').style.display = 'none';
+            }
+        }                   
     }
 });
 
@@ -489,6 +495,10 @@ picker.addEventListener('click', (e) => {
     `;
 
     list.appendChild(track);
+    const rulerEl = document.getElementById('timelineRuler');
+    if (rulerEl.style.display !== 'flex') {
+        rulerEl.style.display = 'flex';
+    }
     populateAudioSources(track);
     populateOutputDevices(track);
     picker.classList.remove('show');
