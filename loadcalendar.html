@@ -1,24 +1,20 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>demoMaker BETA – Online DAW</title>
+<meta charset="UTF-8">
+<title>Naptár szerkesztő</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="demomaker.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" />
+<link rel="stylesheet" href="styles.css" />
+
 </head>
-
 <body>
- <div class="wrapper">
 
-    <header class="topbar">
-    <div class="logo">
-        <h1>demoMaker <span>BETA</span></h1>
-    </div>
-
-    <div id="authBox">
-    <div id="authStatusButton">Nincs bejelentkezve</div>
+<div id="topBar">
+ <h1>Naptár szerkesztő</h1>
+<!-- Bejelentkezés panel -->
+ <div id="authBox">
+    <div id="authStatusButton">❌ Nincs bejelentkezve</div>
     <div id="authDropdown">
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Jelszó">
@@ -26,113 +22,119 @@
         <button id="registerBtn">Regisztráció</button>
         <button id="logoutBtn" style="display:none;">Kilépés</button>
     </div>
-    </div>
-    </header>
+</div>
 
-   <div class="track-actions">
-        <div class="add-track-wrap">
+<!-- Help információ -->
+<button class="help-btn" id="helpBtn">
+    <span class="material-symbols-rounded">help</span>
+</button>
 
-         <button class="add-track" id="addTrackBtn">
-             <span>+</span>
-             add track
-         </button>
+<!-- Fájl feltöltések -->
+ <div id="fileUploadContainer" style="display:flex; align-items:center; gap:10px;">
+  <button id="selectFileBtn">
+    <span class="material-symbols-rounded">folder_open</span> Megnyitás (.csv)
+  </button>
+  <input type="file" id="csvFile" accept=".csv" style="display:none;">
+  
+  <button id="loadFromCloudBtn" disabled>
+    <span class="material-symbols-rounded">cloud_download</span> Betöltés Firestore-ból
+  </button>
+  
+  <button id="saveFirestoreBtn" disabled>
+    <span class="material-symbols-rounded">cloud_upload</span> Mentés Firestore-ba
+  </button>
+  
+  <button id="saveCsvBtn" style="display:none;">
+    <span class="material-symbols-rounded">save</span> Mentés (.csv)
+  </button>
 
-        <div class="track-picker" id="trackPicker">
-          <button data-type="drum">drum</button>
-          <button data-type="bass">bass</button>
-          <button data-type="synth">synth</button>
-          <button data-type="guitar">guitar</button>
-          <button data-type="vocal">vocal</button>
-        </div>
-       </div>
-
-       <button class="project-btn">New</button>
-       <button class="project-btn">Save</button>
-       <button class="project-btn">Open</button>
-       <button class="project-btn">Cloud</button>
-       <button class="project-btn">Import</button>
-       <button class="project-btn">Export</button>
-        
-    </div>
-    
-    <div class="control-panel">
-       <button id="enableAudioBtn">Enable Audio</button>
-       <button class="loop-btn">
-       Loop
-       </button>
-       <button class="play-btn">
-        <svg width="16" height="16" viewBox="0 0 16 16">
-         <polygon points="3,2 13,8 3,14" fill="currentColor"/>
-        </svg>
-       </button>
-       <button class="pause-btn">
-        <svg width="16" height="16" viewBox="0 0 16 16">
-         <rect x="2" y="2" width="4" height="12" fill="currentColor"/>
-         <rect x="10" y="2" width="4" height="12" fill="currentColor"/>
-        </svg>
-       </button>
-       <button class="rec-btn">
-        <svg width="16" height="16" viewBox="0 0 16 16">
-         <circle cx="8" cy="8" r="6" fill="currentColor"/>
-        </svg>
-       </button>
-       <button class="click-btn">
-       Click
-       </button>
-       <div class="bpm-wrap">
-        <input type="text" class="bpm-input" value="120" maxlength="3">
-       </div>
-       <div class="time-signature-wrap">
-        <input type="text" class="time-signature-input" value="4/4" maxlength="5">
-       </div>
-       <div class="grid-wrap">
-        <button class="grid-btn">1/8</button>
-
-        <div class="grid-dropdown">
-         <button data-grid="1/2">1/2</button>
-         <button data-grid="1/4">1/4</button>
-         <button data-grid="1/4T">1/4T</button>
-         <button data-grid="1/8" class="active">1/8</button>
-         <button data-grid="1/8T">1/8T</button>
-         <button data-grid="1/16">1/16</button>
-         <button data-grid="1/16T">1/16T</button>
-         <button data-grid="1/32">1/32</button>
-         <button data-grid="1/64">1/64</button>
-        </div>
-       </div>
-       <button class="snap-btn">
-       Snap
-       </button>
-       <button class="select-btn">
-       Select
-       </button>
-       <button class="play-time-btn">00:32.441
-       </button>
-    </div>
-
-
-    <main>
-
-        <div class="track-list" id="trackList">
-           <div class="timeline-ruler" id="timelineRuler">
-               <div class="ruler-inner" id="rulerInner"></div>
-           </div>
-           <div class="timeline-scroll" id="timelineScroll"></div>
-           <div id="playhead"></div>
-        </div>
-
-    </main>
-    <footer>
-        © 2026 demoMaker – Tape vibes. Modern tools.
-    </footer>
+  <div id="saveStatus">Nincs mentve</div>
  </div>
 
+</div>
+
+<!-- Sidebar -->
+<div id="sidebarEdge"></div>
+<div id="settingsSidebar">
+<h2>További szerkesztés</h2>
+<button id="closeSidebar">✖ Bezárás</button>
+<h3>Műszakok újragenerálása</h3>
+
+<label>Kezdő dátum (hónap.nap):</label>
+<input type="text" id="startDate" placeholder="pl. 10.11">
+<label>Saját műszak:</label>
+<select id="startShift1">
+  <option value="1">DE</option>
+  <option value="2">DE</option>
+  <option value="3">DU</option>
+  <option value="4">ÉJ</option>
+</select>
+<label>Saját műszak sorrend:</label>
+<select id="myShiftOrder">
+  <option value="1,2,4,3">DE, DE, ÉJ, DU</option>
+  <option value="2,4,3">DE, ÉJ, DU</option>
+  <option value="2,3,4">DE, DU, ÉJ</option>
+</select>
+<label>Párod műszakja:</label>
+<select id="startShift2">
+  <option value="2">DE</option>
+  <option value="3">DU</option>
+  <option value="4">ÉJ</option>
+</select>
+<label>Párod műszak sorrendje:</label>
+<select id="partnerShiftOrder">
+  <option value="1,2,4,3">DE, DE, ÉJ, DU</option>
+  <option value="2,4,3">DE, ÉJ, DU</option>
+  <option value="2,3,4">DE, DU, ÉJ</option>
+</select>
+<button id="generateShifts">Műszakok generálása</button>
+</div>
+
+
+<div id="calendar">
+  <div id="calendarPlaceholder">
+     Ha még nincs az idei évre munkaidő naptárad, <br />
+     kattints a jobb felső sarokban lévő kérdőjelre a részletekért...
+  </div>
+</div>
+<div id="calendarLegend" style="display:none;">
+  <strong>Jelmagyarázat:</strong>
+  <span style="background:#e6e6e6; padding:2px 6px; border-radius:3px; margin-left:5px;">Ledolgozott</span>
+  <span style="background:#99ccff; padding:2px 6px; border-radius:3px; margin-left:5px;">Ledolgozás</span>
+  <span style="background:#ffff99; padding:2px 6px; border-radius:3px; margin-left:5px;">Szabadság</span>
+  <span style="background:#cc99ff; padding:2px 6px; border-radius:3px; margin-left:5px;">Táppénz</span>
+  <span style="background:#ffeb99; padding:2px 6px; border-radius:3px; margin-left:5px;">Pihenő</span>
+  <span style="background:#f88; padding:2px 6px; border-radius:3px; margin-left:5px;">Ünnep</span>
+</div>
+
+<div class="modal" id="helpModal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeModal">
+        <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <h2>Hogyan működik ez az oldal?</h2>
+<p class="descr">
+Ez az oldal a saját éves munkaidő-naptárad szerkesztésére szolgál.  
+Ha még nincs naptárad, a főoldalon az <strong>„Új naptár”</strong> menüpont alatt tudsz létrehozni egyet.
+</p><p class="descr">
+A naptár CSV-fájlban tárolja az adott év minden napját, beleértve az ünnepnapokat, pihenőnapokat és ledolgozásokat is.  
+Beállíthatod benne a saját és a párod (vagy bármely fontos személy) műszakbeosztását, amely megjelenik a naptárban, és év közben bármikor újragenerálható.
+</p><p class="descr">
+A naptár minden napját külön szerkesztheted: rögzíthetsz ledolgozott órákat, túlórát, szabadságot, táppénzt, pihenőt vagy akár személyes megjegyzéseket, eseményeket.
+</p><p class="descr">
+A fájl automatikusan menthető CSV-be, vagy – bejelentkezés után – a felhőbe (Firestore) is elmentheted, így számítógépen és mobilon is bármikor elérheted.
+</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
-// --- Firebase Konfiguráció (A Te adataid) ---
+// --- Firebase konfiguráció ---
 const firebaseConfig = {
   apiKey: "AIzaSyDFK6o6sJnFJImBhkX_ZfQq6fXldLZt7vA",
   authDomain: "calendarformeapp.firebaseapp.com",
@@ -142,498 +144,605 @@ const firebaseConfig = {
   appId: "1:421913143205:web:24dc04f3c768f99356aa4c"
 };
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const auth = getAuth(app);
 
-// --- DOM Elemek ---
-const authBox = document.getElementById("authBox");
-const addBtn = document.getElementById('addTrackBtn');
-const picker = document.getElementById('trackPicker');
-const list = document.getElementById('trackList');
-const timelineScroll = document.getElementById("timelineScroll");
-const ruler = document.getElementById('timelineRuler');
-const rulerInner = document.getElementById('rulerInner');
-const playhead = document.getElementById("playhead");
-const gridBtn = document.querySelector('.grid-btn');
-const gridDropdown = document.querySelector('.grid-dropdown');
-const enableAudioBtn = document.getElementById('enableAudioBtn');
+// --- Globális változók ---
+let data = [];
 
-// --- Auth ---
+// oldal betöltésekor
+/*const saved = localStorage.getItem('calendarData');
+if (saved) {
+  try {
+    // Ha van mentett adat, próbáld meg betölteni
+    data = JSON.parse(saved);
+  } catch (e) {
+    // Ha hiba történik a parse során, csak üres tömböt használj
+    console.error('Hiba történt az adatok betöltésekor:', e);
+    data = [];
+  }
+}*/
+
+
+let localTimestamp = 0;
+let lastSavedTimestamp = localTimestamp || 0;
+let hasUnsavedChanges = false;
+
+const saved = localStorage.getItem('calendarData');
+if (saved) {
+  try {
+    const parsed = JSON.parse(saved);
+    data = parsed.data || [];
+    localTimestamp = parsed.timestamp || 0;
+    lastSavedTimestamp = localTimestamp;
+  } catch {
+    data = [];
+  }
+}
+
+function updateSaveStatus() {
+  const el = document.getElementById('saveStatus');
+
+  if (hasUnsavedChanges) {
+    el.textContent = "Módosítva – nincs mentve";
+    el.style.color = "#c0392b";
+    return;
+  }
+
+  if (!lastSavedTimestamp) {
+    el.textContent = "Nincs mentve";
+    el.style.color = "#555";
+    return;
+  }
+
+  const d = new Date(lastSavedTimestamp);
+  const txt = d.toLocaleString('hu-HU', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  el.textContent = `Utolsó mentés: ${txt}`;
+  el.style.color = "#2c3e50";
+}
+
+const honapNevek = ['', 'Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
+const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
+
+// Sidebar elemek
+const settingsSidebar = document.getElementById("settingsSidebar");
+const sidebarEdge = document.getElementById("sidebarEdge");
+const closeSidebar = document.getElementById("closeSidebar");
+
+// --- A keskeny élre kattintva nyílik ki ---
+sidebarEdge.onclick = () => {
+    settingsSidebar.classList.add("open");
+};
+
+// --- Sidebar bezárása, ha a bezárás gombra kattintasz ---
+closeSidebar.onclick = (e) => {
+    e.stopPropagation();
+    settingsSidebar.classList.remove("open");
+};
+
+// --- Sidebaron kívülre kattintva csukódik ---
+document.addEventListener("click", (e) => {
+    if (
+        settingsSidebar.classList.contains("open") &&
+        !settingsSidebar.contains(e.target) &&
+        e.target !== sidebarEdge
+    ) {
+        settingsSidebar.classList.remove("open");
+    }
+});
+
+/*renderCalendarFS();
+updateSaveButtonVisibility();
+
+// --- Mentés localStorage-be ---
+function saveData() {
+  localStorage.setItem('calendarData', JSON.stringify(data));
+}*/
+
+function saveData(timestamp = Date.now()) {
+  localStorage.setItem('calendarData', JSON.stringify({
+    data,
+    timestamp
+  }));
+}
+
+// --- Műszak újraszámláló ---
+
+// --- Auth állapot figyelése ---
 const emailInput = document.getElementById('email');
 const passInput = document.getElementById('password');
+const loginStatus = document.getElementById('loginStatus');
 const logoutBtn = document.getElementById('logoutBtn');
-const authStatusButton = document.getElementById("authStatusButton");
-const authDropdown = document.getElementById("authDropdown");
+const loadBtn = document.getElementById('loadFromCloudBtn');
+const saveBtn = document.getElementById('saveFirestoreBtn');
 
 document.getElementById('loginBtn').onclick = async () => {
   try { await signInWithEmailAndPassword(auth, emailInput.value, passInput.value); } 
   catch(e){ alert("Hiba: "+e.message); }
 };
 document.getElementById('registerBtn').onclick = async () => {
-  try { await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value); alert("Regisztráció sikeres"); } 
+  try { await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value); alert("✅ Regisztráció sikeres"); } 
   catch(e){ alert("Hiba: "+e.message); }
 };
 logoutBtn.onclick = async () => { await signOut(auth); };
 
-authStatusButton.onclick = () => { authDropdown.classList.toggle("open"); };
+const authStatusButton = document.getElementById("authStatusButton");
+const authDropdown = document.getElementById("authDropdown");
+
+// --- Dropdown nyitása/csukása ---
+authStatusButton.onclick = () => {
+    authDropdown.classList.toggle("open");
+};
+
 document.addEventListener("click", (e) => {
-    if (!authBox.contains(e.target)) authDropdown.classList.remove("open");
-});
-onAuthStateChanged(auth, user => {
-    if (user) {
-        authStatusButton.textContent = user.email;
-        logoutBtn.style.display = "block";
-    } else {
-        authStatusButton.textContent = "Nincs bejelentkezve";
-        logoutBtn.style.display = "none";
+    if (!authBox.contains(e.target)) {
+        authDropdown.classList.remove("open");
     }
 });
 
-// ==========================================================
-// --- AUDIO RENDSZER ---
-// ==========================================================
-let audioEnabled = false;
-let availableInputs = [];
-let availableOutputs = [];
+/*onAuthStateChanged(auth, user => {
+    if (user) {
+        authStatusButton.textContent = "👤 " + user.email;
+        logoutBtn.style.display = "block";
+        loadBtn.disabled = false;
+        saveBtn.disabled = false;
+    } else {
+        authStatusButton.textContent = "❌ Nincs bejelentkezve";
+        logoutBtn.style.display = "none";
+        loadBtn.disabled = true;
+        saveBtn.disabled = true;
+    }
+});
 
-async function enableAudio() {
-  if (audioEnabled) return;
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    availableInputs = devices.filter(d => d.kind === 'audioinput');
-    availableOutputs = devices.filter(d => d.kind === 'audiooutput');
-    audioEnabled = true;
-    
-    // Frissítjük a meglévő sávokat
-    document.querySelectorAll('.track-container').forEach(track => {
-      populateAudioSources(track);
-      populateOutputDevices(track);
-    });
+*/
 
-    enableAudioBtn.textContent = 'Audio Ready';
-    enableAudioBtn.disabled = true;
-    enableAudioBtn.style.opacity = "0.5";
-    
-    // Leállítjuk a teszt streamet
-    stream.getTracks().forEach(t => t.stop());
-  } catch (err) {
-    console.error("Audio Hiba:", err);
-    alert('Audio hiba: ' + err.message);
-  }
-}
-enableAudioBtn.onclick = enableAudio;
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    authStatusButton.textContent = "❌ Nincs bejelentkezve";
+    logoutBtn.style.display = "none";
+    loadBtn.disabled = true;
+    saveBtn.disabled = true;
 
-function populateAudioSources(track) {
-  const inputPicker = track.querySelector('.audio-source-picker');
-  if (!inputPicker) return;
-  inputPicker.innerHTML = ''; 
-
-  const virtualBtn = document.createElement('button');
-  virtualBtn.textContent = 'Virtual';
-  virtualBtn.dataset.deviceId = 'virtual';
-  // Virtual kiválasztása alapértelmezett logika
-  virtualBtn.onclick = () => selectSource(track, virtualBtn, inputPicker);
-  inputPicker.appendChild(virtualBtn);
-
-  if (!audioEnabled) {
-    const btn = document.createElement('button');
-    btn.textContent = 'Enable Audio first';
-    btn.disabled = true;
-    btn.style.color = '#ff4c4c';
-    inputPicker.appendChild(btn);
+    renderCalendarFS();
+    updateSaveButtonVisibility();
     return;
   }
 
-  availableInputs.forEach((input, index) => {
-    const btn = document.createElement('button');
-    btn.textContent = input.label ? input.label : `Input ${index + 1}`;
-    btn.dataset.deviceId = input.deviceId;
-    
-    // KIVÁLASZTÁS ESEMÉNY
-    btn.onclick = (e) => {
-        e.stopPropagation(); // Ne buborékoljon fel
-        selectSource(track, btn, inputPicker);
-    };
-    inputPicker.appendChild(btn);
-  });
-}
+  authStatusButton.textContent = "👤 " + user.email;
+  logoutBtn.style.display = "block";
+  loadBtn.disabled = false;
+  saveBtn.disabled = false;
 
-function selectSource(track, btn, picker) {
-    const span = track.querySelector('.audio-source');
-    span.textContent = btn.textContent;
-    picker.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    picker.style.display = 'none';
-    
-    // Ha be van kapcsolva a monitor, újra kell indítani a streamet az új forrással
-    const monitorBtn = track.querySelector('.daw-btn.monitor');
-    if(monitorBtn && monitorBtn.classList.contains('active')) {
-        // Gyors újraindítás trick: kikapcs-bekapcs
-        monitorBtn.click(); 
-        setTimeout(() => monitorBtn.click(), 50);
+  const snap = await getDoc(doc(db, "naptarak", user.uid));
+
+  // 🔥 HA VAN Firestore adat
+  if (snap.exists()) {
+    const fsTimestamp = snap.data().timestamp || 0;
+
+    if (fsTimestamp > localTimestamp) {
+      console.log("☁️ Firestore újabb → betölt");
+      const csvText = snap.data().csv;
+      const results = Papa.parse(csvText, { header: true, delimiter: ';' });
+
+      data = results.data.map(d => ({
+        honap:+d.honap, nap:+d.nap, napIndex:+d.napIndex,
+        muszak1:+d.muszak1, muszak2:+d.muszak2,
+        unnep:d.unnep === 'true',
+        szabadsag:d.szabadsag === 'true',
+        tappenz:d.tappenz === 'true',
+        piheno:d.piheno === 'true',
+        ledolgozas:d.ledolgozas === 'true',
+        ledolgozott:d.ledolgozott === 'true',
+        ledolgozottOra:+d.ledolgozottOra,
+        tulora:+d.tulora,
+        komment:d.komment || ''
+      }));
+
+      localTimestamp = fsTimestamp;
+      lastSavedTimestamp = fsTimestamp;
+      hasUnsavedChanges = false;
+      saveData(fsTimestamp);
+      updateSaveStatus();
+    } else {
+      console.log("📦 Local frissebb vagy egyenlő → marad");
+    }
+  } else {
+    console.log("📭 Nincs Firestore adat → local marad");
+  }
+
+  renderCalendarFS();
+  updateSaveButtonVisibility();
+});
+
+//---Mentés gomb láthatósága---
+function updateSaveButtonVisibility() {
+    const saveCsvBtn = document.getElementById('saveCsvBtn');
+    if (data && data.length > 0) {
+        saveCsvBtn.style.display = 'inline-block';
+    } else {
+        saveCsvBtn.style.display = 'none';
     }
 }
 
-function populateOutputDevices(track) {
-  const outputPicker = track.querySelector('.output-picker');
-  if (!outputPicker) return;
-  outputPicker.innerHTML = '';
-
-  const virtualBtn = document.createElement('button');
-  virtualBtn.textContent = 'Virtual';
-  virtualBtn.dataset.deviceId = 'virtual';
-  virtualBtn.onclick = () => selectOutput(track, virtualBtn, outputPicker);
-  outputPicker.appendChild(virtualBtn);
-
-  if (!audioEnabled) return;
-
-  availableOutputs.forEach((device, index) => {
-    const btn = document.createElement('button');
-    btn.textContent = device.label ? device.label : `Output ${index + 1}`;
-    btn.dataset.outputId = device.deviceId;
-    
-    btn.onclick = (e) => {
-        e.stopPropagation();
-        selectOutput(track, btn, outputPicker);
-    };
-    outputPicker.appendChild(btn);
-  });
-}
-
-function selectOutput(track, btn, picker) {
-    const span = track.querySelector('.output');
-    span.textContent = btn.textContent;
-    picker.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    picker.style.display = 'none';
-    
-    const audioEl = track.querySelector('audio');
-    if (audioEl && typeof audioEl.setSinkId === 'function' && btn.dataset.outputId !== 'virtual') {
-        audioEl.setSinkId(btn.dataset.outputId).catch(console.error);
-    }
-}
-
-// ==========================================================
-// --- DAW LOGIKA ---
-// ==========================================================
-let bpm = 120;
-let timeSig = [4, 4];
-let zoom = 1;
-let PX_PER_SECOND = 100 * zoom;
-let currentGrid = "1/8";
-
-const GRID_MAP = {
-  "1/2": 2, "1/4": 1, "1/4T": 1/3, "1/8": 0.5,
-  "1/8T": 1/6, "1/16": 0.25, "1/16T": 1/12,
-  "1/32": 0.125, "1/64": 0.0625 
+// --- CSV megnyitása---
+const fileInput = document.getElementById('csvFile');
+document.getElementById('selectFileBtn').onclick = () => fileInput.click();
+fileInput.onchange = e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  Papa.parse(file, { header:true, delimiter:';', complete: (results) => {
+  data = results.data.map(d => ({
+  honap:+d.honap, nap:+d.nap, napIndex:+d.napIndex,
+  muszak1:+d.muszak1, muszak2:+d.muszak2,
+  unnep:d.unnep === 'true',
+  szabadsag:d.szabadsag === 'true',
+  tappenz:d.tappenz === 'true',
+  piheno:d.piheno === 'true',
+  ledolgozas:d.ledolgozas === 'true',
+  ledolgozott:d.ledolgozott === 'true',
+  ledolgozottOra:+d.ledolgozottOra,
+  tulora:+d.tulora,
+  komment:d.komment || ''
+}));
+    updateSaveButtonVisibility();
+    const now = Date.now();
+    localTimestamp = now;
+    hasUnsavedChanges = true;
+    saveData(now);
+    updateSaveStatus();
+    renderCalendarFS();
+  }});
 };
 
-// Picker Nyitás/Csukás (Egyetlen helyen kezelve!)
-list.addEventListener('click', e => {
-    // 1. Input picker nyitás
-    const sourceSpan = e.target.closest('.audio-source');
-    if (sourceSpan) {
-        const p = sourceSpan.nextElementSibling;
-        closeAllPickers(); // Bezárjuk a többit
-        p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
-        e.stopPropagation();
-        return;
-    }
+// --- Firestore mentés ---
+saveBtn.onclick = async () => {
+  if(!auth.currentUser){ alert("Jelentkezz be!"); return; }
+  if(!data.length){ alert("Nincs adat!"); return; }
 
-    // 2. Output picker nyitás
-    const outSpan = e.target.closest('.output');
-    if (outSpan) {
-        const p = outSpan.nextElementSibling;
-        closeAllPickers();
-        p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
-        e.stopPropagation();
-        return;
-    }
-    
-    // 3. Monitor Gomb (Audio Stream Indítása)
-    const monitorBtn = e.target.closest('.daw-btn.monitor');
-    if (monitorBtn) {
-        handleMonitorClick(monitorBtn);
-        return;
-    }
-    
-    // 4. Egyéb gombok (Mute, Solo, Rec)
-    const btn = e.target.closest('.daw-btn');
-    if (btn && !btn.classList.contains('monitor')) {
-        btn.classList.toggle('active');
-    }
-    
-    // 5. Track törlés
-    if (e.target.classList.contains('delete-track')) {
-        if (confirm('Törlöd?')) e.target.closest('.track-container').remove();
-    }
-});
+  const now = Date.now();
 
-// Klikk bárhova máshova -> Pickerek bezárása
-document.addEventListener('click', () => closeAllPickers());
-
-function closeAllPickers() {
-    document.querySelectorAll('.audio-source-picker, .output-picker').forEach(p => {
-        p.style.display = 'none';
-    });
-}
-
-// --- MONITORING LOGIKA (MIKROFON BEKAPCSOLÁSA) ---
-async function handleMonitorClick(btn) {
-    btn.classList.toggle('active');
-    const track = btn.closest('.track-container');
-    const trackName = track.querySelector('.track-name').textContent;
-    
-    // Megkeressük a kiválasztott eszköz ID-t
-    const inputPicker = track.querySelector('.audio-source-picker');
-    const selectedInputBtn = inputPicker.querySelector('button.selected');
-    const inputId = selectedInputBtn ? selectedInputBtn.dataset.deviceId : 'virtual';
-    
-    // Output ID
-    const outputPicker = track.querySelector('.output-picker');
-    const selectedOutputBtn = outputPicker.querySelector('button.selected');
-    const outputId = selectedOutputBtn ? selectedOutputBtn.dataset.outputId : 'virtual';
-
-    let audioEl = track.querySelector('audio');
-    if (!audioEl) {
-        audioEl = document.createElement('audio');
-        audioEl.style.display = 'none'; // Rejtett lejátszó
-        track.appendChild(audioEl);
-    }
-
-    if (btn.classList.contains('active')) {
-        // --- BEKAPCSOLÁS ---
-        console.log(`Monitoring START: ${trackName} (Input: ${inputId})`);
-        
-        if (inputId !== 'virtual') {
-            try {
-                // Itt kérjük le a streamet a kiválasztott ID alapján
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: { deviceId: { exact: inputId } } 
-                });
-                audioEl.srcObject = stream;
-                audioEl.play();
-                
-                // Kimenet beállítása (ha nem default)
-                if (outputId !== 'virtual' && typeof audioEl.setSinkId === 'function') {
-                    audioEl.setSinkId(outputId).catch(console.warn);
-                }
-            } catch(err) {
-                alert("Nem sikerült elindítani a mikrofont: " + err.message);
-                btn.classList.remove('active');
-            }
-        } else {
-            alert("Válassz egy valós bemenetet (Input) a 'Virtual' helyett!");
-            btn.classList.remove('active');
-        }
-    } else {
-        // --- KIKAPCSOLÁS ---
-        console.log(`Monitoring STOP: ${trackName}`);
-        if (audioEl.srcObject) {
-            audioEl.srcObject.getTracks().forEach(t => t.stop());
-            audioEl.srcObject = null;
-        }
-    }
-}
-
-// --- TRACK LÉTREHOZÁS ---
-addBtn.addEventListener('click', () => picker.classList.toggle('show'));
-
-picker.addEventListener('click', (e) => {
-    if (!e.target.dataset.type) return;
-    const type = e.target.dataset.type;
-
-    const track = document.createElement('div');
-    track.className = `track-container ${type}`;
-    track.innerHTML = `
-      <div class="track-inspector">
-        <span class="track-type">${type}</span>
-        <span class="track-name" contenteditable="true">Track ${list.children.length + 1}</span>
-        <button class="delete-track">×</button>
-        <div class="track-controls">
-          <button class="daw-btn mute">M</button>
-          <button class="daw-btn solo">S</button>
-          <button class="daw-btn record">●</button>
-          <button class="daw-btn monitor">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                 <path d="M3 9v6h4l5 4V5L7 9H3z"/>        
-                 <path class="wave" d="M16 8c1.5 1.5 1.5 6 0 7.5"/>
-            </svg>
-          </button>
-          <button class="daw-btn edit">e</button>
-        </div>
-        <div class="track-sliders">
-          <label>Vol
-            <input type="range" min="0" max="100" value="80">
-            <span class="slider-value">80%</span>
-          </label>
-          <label>Pan
-            <input type="range" min="-50" max="50" value="0">
-            <span class="slider-value">0</span>
-          </label>
-        </div>
-        <div class="track-meta">
-          <span class="audio-source">No Input</span>
-          <div class="audio-source-picker"></div>
-          <span class="output">No Output</span>
-          <div class="output-picker"></div>
-        </div>
-        <div class="track-inserts">Audio Inserts</div>
-      </div>
-      <div class="track-area">
-        <div class="timeline">
-         <div class="timeline-grid"></div>
-         <div class="clips"></div>
-        </div>
-      </div>
-    `;
-
-    list.appendChild(track);
-    populateAudioSources(track);
-    populateOutputDevices(track);
-    picker.classList.remove('show');
-    drawAllGrids();
-});
-
-//sliderek értéke látszódjon
-document.addEventListener('input', e => {
-  if (e.target.matches('.track-sliders input[type="range"]')) {
-    const valueSpan = e.target.nextElementSibling;
-    if (valueSpan) {
-      // Ha Volume, mutass % jelet, ha Pan, csak szám
-      if (e.target.parentElement.textContent.includes('Vol')) {
-        valueSpan.textContent = e.target.value + '%';
-      } else {
-        valueSpan.textContent = e.target.value;
-      }
-    }
-  }
-});
-
-// --- UI GOMBOK (Felső sáv) ---
-document.querySelectorAll('.loop-btn, .play-btn, .rec-btn, .click-btn, .snap-btn, .select-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.target.closest('button').classList.toggle('active');
-    });
-});
-
-// BPM
-const bpmInput = document.querySelector('.bpm-input');
-bpmInput.addEventListener('input', () => {
-  bpmInput.value = bpmInput.value.replace(/\D/g, '');
-  let val = parseInt(bpmInput.value);
-  if (val > 999) bpmInput.value = '999';
-  if (val < 1 && bpmInput.value !== '') bpmInput.value = '1';
-  bpm = val || 120;
-  drawRuler();
-  drawAllGrids();
-});
-
-// Grid UI
-gridBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  gridDropdown.classList.toggle('open');
-});
-gridDropdown.querySelectorAll('button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    currentGrid = btn.dataset.grid;
-    gridBtn.textContent = currentGrid;
-    gridDropdown.classList.remove('open');
-    gridDropdown.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    drawAllGrids();
+  let csv="honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
+  data.forEach(d=>{
+    csv+=`${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};"${(d.komment||'').replace(/"/g,'""')}"\n`;
   });
-});
-
-
-// --- RAJZOLÁS & SCROLL ---
-function secondsPerBar() { return (60 / bpm) * timeSig[0]; }
-
-function drawRuler(durationSeconds = 120) {
-  rulerInner.innerHTML = '';
-  const barSeconds = secondsPerBar();
-  const barPx = barSeconds * PX_PER_SECOND;
-  const barCount = Math.ceil(durationSeconds / barSeconds);
-  for (let i = 0; i < barCount; i++) {
-    const bar = document.createElement('div');
-    bar.className = 'ruler-bar';
-    bar.style.width = barPx + 'px';
-    const label = document.createElement('span');
-    label.textContent = i + 1; 
-    bar.appendChild(label);
-    rulerInner.appendChild(bar);
+  try{ await setDoc(doc(db,"naptarak",auth.currentUser.uid),{
+   csv,
+   owner: auth.currentUser.uid,
+   timestamp: now
+  });
+  localTimestamp = now;
+  lastSavedTimestamp = now;
+  hasUnsavedChanges = false;
+  saveData(now);
+  updateSaveStatus();
+  alert("✅ Mentve!");
   }
-  rulerInner.style.width = (barCount * barPx) + 'px';
-}
+  catch(e){ alert("Mentési hiba: "+e.message); }
+};
 
-function drawAllGrids() {
-    const secondsPerBeat = 60 / bpm;
-    const barPx = (secondsPerBeat * timeSig[0]) * PX_PER_SECOND; 
-    const gridMultiplier = GRID_MAP[currentGrid] || 0.5;
-    const gridPx = (secondsPerBeat * gridMultiplier) * PX_PER_SECOND;
+// --- Firestore betöltés ---
+loadBtn.onclick = async () => {
+  if(!auth.currentUser){ alert("Jelentkezz be!"); return; }
+  const snap = await getDoc(doc(db,"naptarak",auth.currentUser.uid));
+  if(snap.exists()){
+    const csvText = snap.data().csv;
+    const results = Papa.parse(csvText,{header:true,delimiter:';'});
+    data = results.data.map(d => ({
+      honap:+d.honap, nap:+d.nap, napIndex:+d.napIndex,
+      muszak1:+d.muszak1, muszak2:+d.muszak2,
+      unnep:d.unnep === 'true',
+      szabadsag:d.szabadsag === 'true',
+      tappenz:d.tappenz === 'true',
+      piheno:d.piheno === 'true',
+      ledolgozas:d.ledolgozas === 'true',
+      ledolgozott:d.ledolgozott === 'true',
+      ledolgozottOra:+d.ledolgozottOra,
+      tulora:+d.tulora,
+      komment:d.komment || ''
+    }));
+    updateSaveButtonVisibility();
 
-    document.querySelectorAll('.timeline-grid').forEach(el => {
-        el.style.backgroundImage = `
-            linear-gradient(90deg, rgba(255,255,255,0.18) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)
-        `;
-        el.style.backgroundSize = `${barPx}px 100%, ${gridPx}px 100%`;
+    const fsTimestamp = snap.data().timestamp || Date.now();
+    localTimestamp = fsTimestamp;
+    lastSavedTimestamp = fsTimestamp;
+    hasUnsavedChanges = false;
+    saveData(fsTimestamp);
+    updateSaveStatus();
+
+    renderCalendarFS();
+  } else alert("Nincs mentett naptár!");
+};
+
+// --- CSV mentés ---
+const saveCsvBtn = document.getElementById('saveCsvBtn');
+
+saveCsvBtn.onclick = () => {
+    if(!data.length) { alert("Nincs menteni való adat!"); return; }
+
+    let csv = "honap;nap;napIndex;muszak1;muszak2;unnep;piheno;ledolgozas;szabadsag;tappenz;ledolgozott;ledolgozottOra;tulora;komment\n";
+    data.forEach(d => {
+        csv += `${d.honap};${d.nap};${d.napIndex};${d.muszak1};${d.muszak2};${d.unnep};${d.piheno};${d.ledolgozas};${d.szabadsag};${d.tappenz};${d.ledolgozott};${d.ledolgozottOra};${d.tulora};"${(d.komment||'').replace(/"/g,'""')}"\n`;
     });
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hour = String(now.getHours()).padStart(2, '0');
+    const minute = String(now.getMinutes()).padStart(2, '0');
+
+    const filename = `naptar_${year}-${month}-${day}_${hour}-${minute}.csv`;
+
+    // Létrehozunk egy letöltés linket
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+};
+
+// --- Naptár kirajzolás ---
+function renderCalendarFS() {
+  const cal = document.getElementById('calendar');
+  cal.innerHTML = '';
+  if (!data.length) {
+    cal.innerHTML = `<div id="calendarPlaceholder">
+       Ha még nincs az idei évre munkaidő naptárad, <br />
+       kattints a jobb felső sarokban lévő kérdőjelre a részletekért...
+    </div>
+    `;
+    return;
+  }
+
+  for (let honap = 1; honap <= 12; honap++) {
+    const monthData = data.filter(d => d.honap === honap);
+    if (!monthData.length) continue;
+
+    const monthDiv = document.createElement('div');
+    monthDiv.className = 'month';
+    monthDiv.innerHTML = `<h2>${honapNevek[honap]}</h2>`;
+
+    const tbl = document.createElement('table');
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['H','K','Sze','Cs','P','Szo','V'].forEach(d => {
+      const th = document.createElement('th');
+      th.textContent = d;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    tbl.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    let currentRow = document.createElement('tr');
+
+    //Üres cellák az első nap előtt
+    const firstDay = monthData[0];
+    for (let i = 1; i < firstDay.napIndex; i++) {
+      currentRow.appendChild(document.createElement('td'));
+    }
+
+    monthData.forEach((day, idx) => {
+      const td = document.createElement('td');
+
+      const napDiv = document.createElement('div');
+      napDiv.textContent = day.nap;
+      napDiv.style.fontWeight = 'bold';
+
+      const muszakDiv = document.createElement('div');
+      muszakDiv.style.fontSize = '12px';
+      muszakDiv.style.color = '#333';
+      const m1 = muszakNevek[day.muszak1] || (day.muszak1 ? day.muszak1 : '');
+      const m2 = muszakNevek[day.muszak2] || (day.muszak2 ? day.muszak2 : '');
+      muszakDiv.textContent = `${m1 || ''}${m1 && m2 ? '/' : ''}${m2 || ''}`;
+      if(day.komment && day.komment.trim() !== '') {
+      const icon = document.createElement('span');
+      icon.className = 'commentIcon';
+      icon.innerHTML = '✏️'; // ceruza emoji
+      icon.title = day.komment; // hoverkor megjelenik a komment
+      td.appendChild(icon);
+      }
+
+      td.appendChild(napDiv);
+      td.appendChild(muszakDiv);
+
+      if (day.unnep) td.classList.add('unnep'); 
+      if (day.szabadsag) td.classList.add('szabadsag');
+      if (day.piheno) td.classList.add('piheno');
+      if (day.ledolgozas) td.classList.add('ledolgozas');
+      if (day.tappenz) td.classList.add('tappenz');
+      if (day.ledolgozott) td.classList.add('ledolgozott');
+
+      td.onclick = () => openDayEditor(day);
+      currentRow.appendChild(td);
+
+      if (day.napIndex === 7) {
+        tbody.appendChild(currentRow);
+        currentRow = document.createElement('tr');
+      }
+    });
+    if(currentRow.children.length) tbody.appendChild(currentRow);
+    tbl.appendChild(tbody);
+    monthDiv.appendChild(tbl);
+    cal.appendChild(monthDiv);
+    if(data && data.length > 0){
+        document.getElementById('calendarLegend').style.display = 'block';
+    } else {
+        document.getElementById('calendarLegend').style.display = 'none';
+    }
+  }
 }
 
-// Görgetés
-let isPanning = false;
-let startX;
-let scrollStartLeft;
+// --- Műszak újragenerálás ---
+document.getElementById('generateShifts').addEventListener('click', () => {
+    const startDateStr = document.getElementById('startDate').value; // pl. "10.11"
+    const [startMonth, startDay] = startDateStr.split('.').map(Number);
 
-timelineScroll.addEventListener('mousedown', (e) => {
-    if (e.button !== 0 && e.button !== 1) return;
-    isPanning = true;
-    timelineScroll.classList.add('grabbing');
-    startX = e.pageX;
-    scrollStartLeft = timelineScroll.scrollLeft;
-    e.preventDefault();
+    const myShiftStart = parseInt(document.getElementById('startShift1').value);
+    const partnerShiftStart = parseInt(document.getElementById('startShift2').value);
+
+    const myShiftOrder = document.getElementById("myShiftOrder").value.split(',').map(Number);
+    const partnerShiftOrder = document.getElementById("partnerShiftOrder").value.split(',').map(Number);
+
+    // Megkeressük a kezdő napot a data tömbben
+    let startIndex = data.findIndex(d => d.honap === startMonth && d.nap === startDay);
+    if(startIndex === -1){
+        alert('A kezdő dátum nem található a naptárban!');
+        return;
+    }
+
+    // Megállapítjuk a kezdő shift indexet a sorrendekben
+    let myShiftIndex = myShiftOrder.indexOf(myShiftStart);
+    if(myShiftIndex === -1) myShiftIndex = 0;
+
+    let partnerShiftIndex = partnerShiftOrder.indexOf(partnerShiftStart);
+    if(partnerShiftIndex === -1) partnerShiftIndex = 0;
+
+    let currentMyShift = myShiftOrder[myShiftIndex];
+    let currentPartnerShift = partnerShiftOrder[partnerShiftIndex];
+
+    for(let i = startIndex; i < data.length; i++){
+        data[i].muszak1 = currentMyShift;
+        data[i].muszak2 = currentPartnerShift;
+
+        // Ha vasárnap, váltunk a következő műszakra
+        if(data[i].napIndex === 7){
+            myShiftIndex = (myShiftIndex + 1) % myShiftOrder.length;
+            partnerShiftIndex = (partnerShiftIndex + 1) % partnerShiftOrder.length;
+
+            currentMyShift = myShiftOrder[myShiftIndex];
+            currentPartnerShift = partnerShiftOrder[partnerShiftIndex];
+        }
+    }
+    updateSaveButtonVisibility();
+    
+    const now = Date.now();
+    localTimestamp = now;
+    hasUnsavedChanges = true;
+    saveData(now);
+    updateSaveStatus();
+
+    renderCalendarFS();
+
+    alert('Műszakok újragenerálva!');
+    console.log(data); // teszteléshez
 });
 
-window.addEventListener('mouseup', () => {
-    isPanning = false;
-    timelineScroll.classList.remove('grabbing');
-});
+// --- Nap szerkesztő popup ---
+let editingDay = null;
+const overlay = document.createElement('div'); overlay.id='overlay';
+const dayEditor = document.createElement('div'); dayEditor.id='dayEditor';
+overlay.appendChild(dayEditor);
+document.body.appendChild(overlay);
 
-window.addEventListener('mousemove', (e) => {
-    if (!isPanning) return;
-    e.preventDefault();
-    const x = e.pageX;
-    const walk = (x - startX);
-    timelineScroll.scrollLeft = scrollStartLeft - walk;
-});
+dayEditor.innerHTML = `
+<h3><span id="dayDate"></span> szerkesztése</h3>
+<label for="muszak1Select">Saját műszak:</label>
+<select id="muszak1Select">
+  <option value="1">DE</option>
+  <option value="2">DE</option>
+  <option value="3">DU</option>
+  <option value="4">ÉJ</option>
+</select>
+<label for="muszak2Select">Párod műszakja:</label>
+<select id="muszak2Select">
+  <option value="2">DE</option>
+  <option value="3">DU</option>
+  <option value="4">ÉJ</option>
+</select>
+<label for="ledolgozottOra">Ledolgozott órák:</label>
+<input type="number" id="ledolgozottOra" min="0" value="8">
+<label for="tulora">Túlóra órák:</label>
+<input type="number" id="tulora" min="0" value="0">
+<label>Státuszok:</label>
+<div id="statusCheckboxes">
+  <label><input type="checkbox" id="ledolgozott"> Ledolgozott</label>
+  <label><input type="checkbox" id="ledolgozas"> Ledolgozás</label>
+  <label><input type="checkbox" id="szabadsag"> Szabadság</label>
+  <label><input type="checkbox" id="tappenz"> Táppénz</label>
+  <label><input type="checkbox" id="piheno"> Pihenő</label>
+  <label><input type="checkbox" id="unnep"> Ünnep</label>
+</div>
+<label for="komment">Komment:</label>
+<textarea id="komment"></textarea>
+<div id="dayEditorButtons">
+  <button id="cancelEdit">Mégse</button>
+  <button id="saveEdit">Mentés</button>
+</div>
+`;
 
-timelineScroll.addEventListener('scroll', () => {
-    rulerInner.parentElement.scrollLeft = timelineScroll.scrollLeft;
-    rulerInner.style.transform = `translateX(${-timelineScroll.scrollLeft}px)`;
-    playhead.style.transform = `translateX(${-timelineScroll.scrollLeft}px)`;
-});
+const ledolgozottOraInput = document.getElementById('ledolgozottOra');
+const tuloraInput = document.getElementById('tulora');
+const kommentInput = document.getElementById('komment');
+const statusInputs = {
+  ledolgozott: document.getElementById('ledolgozott'),
+  ledolgozas: document.getElementById('ledolgozas'),
+  szabadsag: document.getElementById('szabadsag'),
+  tappenz: document.getElementById('tappenz'),
+  piheno: document.getElementById('piheno'),
+  unnep: document.getElementById('unnep')
+};
 
-// Playhead
-function movePlayheadToEvent(e) {
-    const rect = timelineScroll.getBoundingClientRect();
-    let x = e.clientX - rect.left + timelineScroll.scrollLeft;
-    if (x < 0) x = 0;
-    playhead.style.left = x + 'px';
+document.getElementById('cancelEdit').onclick = () => { 
+  overlay.style.display='none'; 
+  dayEditor.style.display='none';
+};
+document.getElementById('saveEdit').onclick = () => {
+  if(!editingDay) return;
+  editingDay.muszak1 = muszak1Select.value ? +muszak1Select.value : 0;
+  editingDay.muszak2 = muszak2Select.value ? +muszak2Select.value : 0;
+  editingDay.ledolgozottOra = +ledolgozottOraInput.value || 0;
+  editingDay.tulora = +tuloraInput.value || 0;
+  editingDay.komment = kommentInput.value || '';
+  Object.keys(statusInputs).forEach(k => editingDay[k] = statusInputs[k].checked);
+  overlay.style.display='none';
+  dayEditor.style.display='none';
+  
+  const now = Date.now();
+  localTimestamp = now;
+  hasUnsavedChanges = true;
+  saveData(now);
+  updateSaveStatus();
+
+  renderCalendarFS();
+};
+
+function openDayEditor(day){
+  editingDay = day;
+
+  const dayDateSpan = document.getElementById('dayDate');
+  dayDateSpan.textContent = `${day.honap.toString().padStart(2,'0')}.${day.nap.toString().padStart(2,'0')}.`;
+
+  muszak1Select.value = day.muszak1 || '';
+  muszak2Select.value = day.muszak2 || '';
+  ledolgozottOraInput.value = day.ledolgozottOra ?? 8;
+  tuloraInput.value = day.tulora || 0;
+  kommentInput.value = day.komment || '';
+  Object.keys(statusInputs).forEach(k => statusInputs[k].checked = !!day[k]);
+  overlay.style.display='block';
+  dayEditor.style.display='block';
 }
-ruler.addEventListener('pointerdown', (e) => {
-    movePlayheadToEvent(e);
-    ruler.setPointerCapture(e.pointerId);
-    ruler.onpointermove = (ev) => movePlayheadToEvent(ev);
-    ruler.onpointerup = () => {
-        ruler.onpointermove = null;
-        ruler.onpointerup = null;
-    };
-});
 
-drawRuler();
-drawAllGrids();
+const helpBtn = document.getElementById("helpBtn");
+const helpModal = document.getElementById("helpModal");
+const closeModal = document.getElementById("closeModal");
+
+helpBtn.onclick = () => helpModal.classList.add("show");
+closeModal.onclick = () => helpModal.classList.remove("show");
+
+helpModal.onclick = e => {
+    if (e.target === helpModal) helpModal.classList.remove("show");
+};
+
 </script>
-
 </body>
 </html>
