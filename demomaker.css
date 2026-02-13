@@ -507,6 +507,7 @@ h1, h2, h3 {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   cursor: pointer;
+  overflow-x: hidden !important;
 }
 
 .ruler-inner {
@@ -546,18 +547,32 @@ h1, h2, h3 {
   display: flex;
   width: 100%;
   position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.track-container.dragging {
+    opacity: 0.5;
+    background: rgba(0,0,0,0.5);
+    border: 1px dashed var(--accent);
 }
 
 .track-inspector {
   position: relative;
   padding: 6px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.01);
   display: flex;
   flex-direction: column;
   gap: 5px;
   flex: 0 0 146px;
   font-family: var(--font-mono);
   border-left: 6px solid var(--accent);
+}
+
+.track-inspector {
+    cursor: grab; 
+}
+.track-inspector:active {
+    cursor: grabbing;
 }
 
 .track-inspector .track-name {
@@ -572,6 +587,11 @@ h1, h2, h3 {
   border-bottom: 1px solid #fff;
   outline: none;             
   box-shadow: none; 
+}
+
+.track-container.selected .track-inspector {
+    background: rgba(255, 255, 255, 0.05); /* Enyhe accent háttér */
+    border-left: 6px solid #fff; /* Fehér csík jelzi, hogy ez az aktív */
 }
 
 .delete-track {
@@ -807,6 +827,9 @@ h1, h2, h3 {
   overflow-y: hidden;
   padding-left: 200px;
   height: 100%;
+  -webkit-overflow-scrolling: touch; 
+   scroll-behavior: smooth;
+   will-change: scroll-position;
 }
 
 .timeline-scroll.grabbing {
