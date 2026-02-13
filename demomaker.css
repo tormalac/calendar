@@ -853,6 +853,8 @@ h1, h2, h3 {
   height: 294px;
   overflow: hidden;
   background: rgba(255,255,255,0.01);
+  flex: 1;
+  min-width: 0;
 }
 
 .timeline {
@@ -907,6 +909,17 @@ h1, h2, h3 {
   height: 100%;
 }
 
+.audio-clip {
+    transition: box-shadow 0.15s ease;
+    box-sizing: border-box;
+}
+
+.audio-clip.selected-clip {
+   border: 1px solid #fff !important;
+   box-shadow: 0 0 10px rgba(0, 255, 213, 0.6);
+   z-index: 50;
+}
+
 /*track type színek*/
 .track-container.drum   .track-inspector { border-color: #3fa9f5; } /* kék */
 .track-container.bass   .track-inspector { border-color: #ffd93d; } /* sárga */
@@ -919,23 +932,3 @@ h1, h2, h3 {
 .track-container.bass   .track-type { color: #ffd93d; }
 .track-container.synth  .track-type { color: #b084f7; }
 .track-container.vocal  .track-type { color: #ff7ac8; }
-
-/*.track-container.drum .track-inspector {
-  box-shadow: inset 0 0 0 1px rgba(63,169,245,0.45);
-}
-
-.track-container.bass .track-inspector {
-  box-shadow: inset 0 0 0 1px rgba(255,217,61,0.45);
-}
-
-.track-container.synth .track-inspector {
-  box-shadow: inset 0 0 0 1px rgba(176,132,247,0.45);
-}
-
-.track-container.guitar .track-inspector {
-  box-shadow: inset 0 0 0 1px rgba(0,255,213,0.45);
-}
-
-.track-container.vocal .track-inspector {
-  box-shadow: inset 0 0 0 1px rgba(255,122,200,0.45);
-}*/
