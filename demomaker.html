@@ -122,6 +122,23 @@
     </footer>
  </div>
 
+<style>
+  /* HOTFIX: Ez a CSS elengedhetetlen, hogy a sávok és a vonalzó együtt görögjenek! */
+  .track-area {
+    flex: 1;
+    min-width: 0;
+  }
+  .audio-clip {
+    transition: box-shadow 0.15s ease;
+    box-sizing: border-box;
+  }
+  .audio-clip.selected-clip {
+    border: 1px solid #fff !important;
+    box-shadow: 0 0 10px rgba(0, 255, 213, 0.6);
+    z-index: 50;
+  }
+</style>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
@@ -226,14 +243,7 @@ function populateAudioSources(track) {
   virtualBtn.onclick = () => selectSource(track, virtualBtn, inputPicker);
   inputPicker.appendChild(virtualBtn);
 
-  if (!audioEnabled) {
-    const btn = document.createElement('button');
-    btn.textContent = 'Enable Audio first';
-    btn.disabled = true;
-    btn.style.color = '#ff4c4c';
-    inputPicker.appendChild(btn);
-    return;
-  }
+  if (!audioEnabled) return;
 
   availableInputs.forEach((input, index) => {
     const btn = document.createElement('button');
@@ -302,7 +312,7 @@ function selectOutput(track, btn, picker) {
 }
 
 // ==========================================================
-// --- DAW LOGIKA ---
+// --- DAW LOGIKA & ESEMÉNYEK ---
 // ==========================================================
 let bpm = 120;
 let timeSig = [4, 4];
@@ -316,7 +326,7 @@ const GRID_MAP = {
   "1/32": 0.125, "1/64": 0.0625 
 };
 
-// Picker Nyitás/Csukás és egyéb események
+// Picker Nyitás/Csukás
 list.addEventListener('click', e => {
     const sourceSpan = e.target.closest('.audio-source');
     if (sourceSpan) {
@@ -366,7 +376,7 @@ function closeAllPickers() {
     });
 }
 
-// --- MONITORING LOGIKA ---
+// --- MONITORING ---
 async function handleMonitorClick(btn) {
     btn.classList.toggle('active');
     const track = btn.closest('.track-container');
@@ -395,7 +405,6 @@ async function handleMonitorClick(btn) {
                 });
                 audioEl.srcObject = stream;
                 audioEl.play();
-                
                 if (outputId !== 'virtual' && typeof audioEl.setSinkId === 'function') {
                     audioEl.setSinkId(outputId).catch(console.warn);
                 }
@@ -403,9 +412,6 @@ async function handleMonitorClick(btn) {
                 alert("Nem sikerült elindítani a mikrofont: " + err.message);
                 btn.classList.remove('active');
             }
-        } else {
-            alert("Válassz egy valós bemenetet (Input) a 'Virtual' helyett!");
-            btn.classList.remove('active');
         }
     } else {
         if (audioEl.srcObject) {
@@ -418,7 +424,6 @@ async function handleMonitorClick(btn) {
 // --- TRACK LÉTREHOZÁS ---
 addBtn.addEventListener('click', () => picker.classList.toggle('show'));
 
-// 1. A sáv létrehozó logika
 picker.addEventListener('click', (e) => {
     if (!e.target.dataset.type) return;
     const type = e.target.dataset.type;
@@ -430,35 +435,22 @@ picker.addEventListener('click', (e) => {
     track.innerHTML = `
       <div class="track-inspector">
         <span class="track-type">${type}</span>
-        <span class="track-name" contenteditable="true">Track ${list.querySelectorAll('.track-container').length + 1}</span>
+        <span class="track-name" contenteditable="true">Track ${document.querySelectorAll('.track-container').length + 1}</span>
         <button class="delete-track">×</button>
         <div class="track-controls">
           <button class="daw-btn mute">M</button>
           <button class="daw-btn solo">S</button>
           <button class="daw-btn record">●</button>
-          <button class="daw-btn monitor">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                 <path d="M3 9v6h4l5 4V5L7 9H3z"/>        
-                 <path class="wave" d="M16 8c1.5 1.5 1.5 6 0 7.5"/>
-            </svg>
-          </button>
+          <button class="daw-btn monitor"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path class="wave" d="M16 8c1.5 1.5 1.5 6 0 7.5"/></svg></button>
           <button class="daw-btn edit">e</button>
         </div>
         <div class="track-sliders">
-          <label>Vol
-            <input type="range" min="0" max="100" value="80">
-            <span class="slider-value">80%</span>
-          </label>
-          <label>Pan
-            <input type="range" min="-50" max="50" value="0">
-            <span class="slider-value">0</span>
-          </label>
+          <label>Vol<input type="range" min="0" max="100" value="80"><span class="slider-value">80%</span></label>
+          <label>Pan<input type="range" min="-50" max="50" value="0"><span class="slider-value">0</span></label>
         </div>
         <div class="track-meta">
-          <span class="audio-source">No Input</span>
-          <div class="audio-source-picker"></div>
-          <span class="output">No Output</span>
-          <div class="output-picker"></div>
+          <span class="audio-source">No Input</span><div class="audio-source-picker"></div>
+          <span class="output">No Output</span><div class="output-picker"></div>
         </div>
         <div class="track-inserts">Audio Inserts</div>
       </div>
@@ -470,7 +462,7 @@ picker.addEventListener('click', (e) => {
       </div>
     `;
 
-    // --- Kijelölés logika ---
+    // Kijelölés logika az inspectoron
     const inspector = track.querySelector('.track-inspector');
     inspector.addEventListener('click', (ev) => {
         if(ev.target.tagName === 'BUTTON' || ev.target.tagName === 'INPUT') return;
@@ -478,13 +470,9 @@ picker.addEventListener('click', (e) => {
         track.classList.add('selected');
     });
 
-    // --- Drag and Drop ---
     addTrackDragEvents(track);
-
-    // --- Track hozzáadása ---
     list.appendChild(track);
     
-    // Automatikusan jelöljük ki az újat
     document.querySelectorAll('.track-container').forEach(t => t.classList.remove('selected'));
     track.classList.add('selected');
 
@@ -497,10 +485,10 @@ picker.addEventListener('click', (e) => {
     populateOutputDevices(track);
     picker.classList.remove('show');
     drawAllGrids();
-    drawRuler();
+    drawRuler(); // Ez fontos: beállítja a pontos timeline szélességet is!
 });
 
-// Globális Input listener a slider értékekhez
+// Slider érték vizualizáció
 document.addEventListener('input', e => {
   if (e.target.matches('.track-sliders input[type="range"]')) {
     const valueSpan = e.target.nextElementSibling;
@@ -514,8 +502,7 @@ document.addEventListener('input', e => {
   }
 });
 
-
-// --- SÁVOK (TRACK) DRAG ÉS DROP LOGIKÁJA ---
+// --- TRACK (SÁV) DRAG & DROP LOGIKA ---
 let draggedTrack = null;
 
 function addTrackDragEvents(item) {
@@ -535,9 +522,7 @@ function addTrackDragEvents(item) {
 list.addEventListener('dragover', (e) => {
     e.preventDefault(); 
     if(!draggedTrack) return;
-
     const afterElement = getDragAfterElement(list, e.clientY);
-    
     if (afterElement == null) {
         list.appendChild(draggedTrack);
     } else {
@@ -547,11 +532,9 @@ list.addEventListener('dragover', (e) => {
 
 function getDragAfterElement(container, y) {
     const draggableElements = [...container.querySelectorAll('.track-container:not(.dragging)')];
-
     return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
         const offset = y - box.top - box.height / 2;
-        
         if (offset < 0 && offset > closest.offset) {
             return { offset: offset, element: child };
         } else {
@@ -560,14 +543,13 @@ function getDragAfterElement(container, y) {
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-// --- UI GOMBOK ---
+// --- UI GOMBOK (BPM, Grid) ---
 document.querySelectorAll('.loop-btn, .play-btn, .rec-btn, .click-btn, .snap-btn, .select-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.target.closest('button').classList.toggle('active');
     });
 });
 
-// BPM
 const bpmInput = document.querySelector('.bpm-input');
 bpmInput.addEventListener('input', () => {
   bpmInput.value = bpmInput.value.replace(/\D/g, '');
@@ -579,7 +561,6 @@ bpmInput.addEventListener('input', () => {
   drawAllGrids();
 });
 
-// Grid UI
 gridBtn.addEventListener('click', e => {
   e.stopPropagation();
   gridDropdown.classList.toggle('open');
@@ -597,10 +578,10 @@ gridDropdown.querySelectorAll('button').forEach(btn => {
 
 
 // ==========================================================
-// --- UNIVERZÁLIS GÖRGETÉS ÉS PLAYHEAD LOGIKA ---
+// --- GÖRGETÉS ÉS PLAYHEAD (SZINKRONIZÁLT) ---
 // ==========================================================
 let globalScrollX = 0;
-let currentPlayTime = 0; // Jelenlegi idő másodpercben
+let currentPlayTime = 0; 
 const playTimeDisplay = document.querySelector('.play-time-btn');
 
 function secondsPerBar() { return (60 / bpm) * timeSig[0]; }
@@ -619,7 +600,13 @@ function drawRuler(durationSeconds = 120) {
     bar.appendChild(label);
     rulerInner.appendChild(bar);
   }
-  rulerInner.style.width = (barCount * barPx) + 'px';
+  
+  // FIX: A timeline és a vonalzó kötelezően ugyanakkora legyen!
+  const totalWidthPx = barCount * barPx;
+  rulerInner.style.width = totalWidthPx + 'px';
+  document.querySelectorAll('.timeline').forEach(tl => {
+      tl.style.width = totalWidthPx + 'px';
+  });
 }
 
 function drawAllGrids() {
@@ -639,16 +626,21 @@ function drawAllGrids() {
 
 function setScroll(x) {
     if (x < 0) x = 0;
-    const maxScroll = 5000;
+    const timelineEl = document.querySelector('.timeline');
+    let maxScroll = 10000;
+    
+    // Max görgetés kiszámítása, hogy ne csússzunk a semmibe
+    if (timelineEl && rulerInner.parentElement) {
+        maxScroll = timelineEl.clientWidth - rulerInner.parentElement.clientWidth + 100;
+    }
     if (x > maxScroll) x = maxScroll;
+    
     globalScrollX = x;
 
-    // Vonalzó görgetése (A szülő konténerben, hogy ne lógjon ki)
     if(rulerInner.parentElement) {
         rulerInner.parentElement.scrollLeft = globalScrollX;
     }
 
-    // Minden hangsáv vizuális görgetése
     document.querySelectorAll('.track-area').forEach(area => {
         area.scrollLeft = globalScrollX;
     });
@@ -657,13 +649,11 @@ function setScroll(x) {
 }
 
 function updatePlayheadVisuals() {
-    // 164px az inspector szélessége a CSS-ben
     const leftPx = 164 + (currentPlayTime * PX_PER_SECOND) - globalScrollX;
     playhead.style.left = `${leftPx}px`;
 
-    // Ha balra kigörgetjük a képernyőről, elrejtjük, hogy ne fedje az inspectort
     if (leftPx < 164) {
-        playhead.style.opacity = '0';
+        playhead.style.opacity = '0'; // Ne látszódjon az inspector alatt
     } else {
         playhead.style.opacity = '1';
     }
@@ -674,13 +664,13 @@ function updatePlayheadVisuals() {
     playTimeDisplay.textContent = `${mins}:${secs}.${ms}`;
 }
 
-// Ha a vonalzóra kattintunk, oda ugrik a playhead
+// Playhead mozgatása kattintással a vonalzón
 ruler.addEventListener('pointerdown', (e) => {
     const rect = rulerInner.getBoundingClientRect();
-    let x = e.clientX - rect.left; // Pixel az idővonal kezdetétől!
+    let x = e.clientX - rect.left; 
     if (x < 0) x = 0;
     currentPlayTime = x / PX_PER_SECOND;
-    startOffset = currentPlayTime; // Frissítjük a lejátszó kezdőpontját is
+    startOffset = currentPlayTime; 
     updatePlayheadVisuals();
     
     ruler.setPointerCapture(e.pointerId);
@@ -697,7 +687,7 @@ ruler.addEventListener('pointerdown', (e) => {
     };
 });
 
-// --- KLIP DRAG & GÖRGETÉS LOGIKA (EGÉR ÉS ÉRINTŐKÉPERNYŐ) ---
+// --- KLIP KIJELÖLÉS, DRAG & IDŐVONAL GÖRGETÉS LOGIKA ---
 let isPanning = false;
 let panStartX = 0;
 let panStartScroll = 0;
@@ -706,19 +696,28 @@ let isDraggingClip = false;
 let draggedClip = null;
 let clipStartLeft = 0;
 let clipMouseStartX = 0;
+let selectedClip = null;
 
-function handleClipDragStart(clientX, target) {
+function handleClipInteraction(clientX, target) {
     const selectBtn = document.querySelector('.select-btn');
     if (!selectBtn || !selectBtn.classList.contains('active')) return false;
 
     const clip = target.closest('.audio-clip');
+    
+    // Töröljük minden klippről a kijelölést
+    document.querySelectorAll('.audio-clip').forEach(c => c.classList.remove('selected-clip'));
+
     if (clip) {
         isDraggingClip = true;
         draggedClip = clip;
+        selectedClip = clip;
+        clip.classList.add('selected-clip'); // Fehér keretes kijelölés
+        
         clipMouseStartX = clientX;
         clipStartLeft = parseFloat(clip.style.left) || 0;
-        draggedClip.style.zIndex = "100";
         return true;
+    } else {
+        selectedClip = null;
     }
     return false;
 }
@@ -730,18 +729,17 @@ function handleClipDragMove(clientX) {
     if (newLeft < 0) newLeft = 0;
 
     draggedClip.style.left = newLeft + 'px';
-    draggedClip.dataset.start = newLeft / PX_PER_SECOND; // Időbélyeg frissítése
+    draggedClip.dataset.start = newLeft / PX_PER_SECOND; 
 }
 
 function handleClipDragEnd() {
-    if (draggedClip) draggedClip.style.zIndex = "";
     isDraggingClip = false;
     draggedClip = null;
 }
 
-// PC (Egér)
+// PC
 document.addEventListener('mousedown', (e) => {
-    if (handleClipDragStart(e.clientX, e.target)) {
+    if (handleClipInteraction(e.clientX, e.target)) {
         e.preventDefault(); 
         return;
     }
@@ -776,10 +774,10 @@ document.addEventListener('mouseup', () => {
     }
 });
 
-// Mobil (Érintőképernyő)
+// Mobil
 document.addEventListener('touchstart', (e) => {
     if (e.touches.length > 1) return; 
-    if (handleClipDragStart(e.touches[0].clientX, e.target)) return;
+    if (handleClipInteraction(e.touches[0].clientX, e.target)) return;
 
     if (e.target.closest('.track-area') || e.target.closest('.timeline-ruler')) {
         if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
@@ -807,12 +805,11 @@ document.addEventListener('touchend', () => {
     isPanning = false;
 });
 
-// Egérgörgő (PC - Touchpad / Scroll wheel)
+// Egérgörgő/Touchpad
 document.addEventListener('wheel', (e) => {
     if (e.target.closest('.track-area') || e.target.closest('.timeline-ruler')) {
         if (Math.abs(e.deltaX) > 0 || Math.abs(e.deltaY) > 0) {
             e.preventDefault();
-            // A touchpad vízszintes görgetése deltaX, a sima egéré deltaY. A nagyobbat vesszük.
             const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
             setScroll(globalScrollX + delta);
         }
@@ -924,7 +921,7 @@ function startPlayback() {
     isPlaying = true;
     startPlayTime = audioCtx.currentTime;
     
-    // A lejátszás az aktuális lejátszófej pozíciótól indul
+    // Indítás a Playheadtől
     startOffset = currentPlayTime; 
 
     const allClips = document.querySelectorAll('.audio-clip');
@@ -974,7 +971,7 @@ function updatePlayheadAnim() {
     const elapsed = audioCtx.currentTime - startPlayTime;
     currentPlayTime = startOffset + elapsed;
 
-    // Automatikus görgetés jobbra, ha a lejátszófej kimegy a képernyő 90%-ára
+    // Automatikus görgetés
     const screenX = 164 + (currentPlayTime * PX_PER_SECOND) - globalScrollX;
     const containerWidth = window.innerWidth;
     if (screenX > containerWidth * 0.9) {
