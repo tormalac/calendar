@@ -144,7 +144,6 @@ const authBox = document.getElementById("authBox");
 const addBtn = document.getElementById('addTrackBtn');
 const picker = document.getElementById('trackPicker');
 const list = document.getElementById('trackList');
-const timelineScroll = document.getElementById("timelineScroll");
 const ruler = document.getElementById('timelineRuler');
 const rulerInner = document.getElementById('rulerInner');
 const playhead = document.getElementById("playhead");
@@ -317,7 +316,7 @@ const GRID_MAP = {
   "1/32": 0.125, "1/64": 0.0625 
 };
 
-// Picker Nyitás/Csukás
+// Picker Nyitás/Csukás és egyéb események
 list.addEventListener('click', e => {
     const sourceSpan = e.target.closest('.audio-source');
     if (sourceSpan) {
@@ -389,8 +388,6 @@ async function handleMonitorClick(btn) {
     }
 
     if (btn.classList.contains('active')) {
-        console.log(`Monitoring START: ${trackName} (Input: ${inputId})`);
-        
         if (inputId !== 'virtual') {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -411,7 +408,6 @@ async function handleMonitorClick(btn) {
             btn.classList.remove('active');
         }
     } else {
-        console.log(`Monitoring STOP: ${trackName}`);
         if (audioEl.srcObject) {
             audioEl.srcObject.getTracks().forEach(t => t.stop());
             audioEl.srcObject = null;
@@ -422,21 +418,7 @@ async function handleMonitorClick(btn) {
 // --- TRACK LÉTREHOZÁS ---
 addBtn.addEventListener('click', () => picker.classList.toggle('show'));
 
-// Sliderek kijelzése
-document.addEventListener('input', e => {
-  if (e.target.matches('.track-sliders input[type="range"]')) {
-    const valueSpan = e.target.nextElementSibling;
-    if (valueSpan) {
-      if (e.target.parentElement.textContent.includes('Vol')) {
-        valueSpan.textContent = e.target.value + '%';
-      } else {
-        valueSpan.textContent = e.target.value;
-      }
-    }
-  }
-});
-
-// A Track létrehozó logika
+// 1. A sáv létrehozó logika
 picker.addEventListener('click', (e) => {
     if (!e.target.dataset.type) return;
     const type = e.target.dataset.type;
@@ -448,7 +430,7 @@ picker.addEventListener('click', (e) => {
     track.innerHTML = `
       <div class="track-inspector">
         <span class="track-type">${type}</span>
-        <span class="track-name" contenteditable="true">Track ${list.children.length + 1}</span>
+        <span class="track-name" contenteditable="true">Track ${list.querySelectorAll('.track-container').length + 1}</span>
         <button class="delete-track">×</button>
         <div class="track-controls">
           <button class="daw-btn mute">M</button>
@@ -488,7 +470,7 @@ picker.addEventListener('click', (e) => {
       </div>
     `;
 
-    // --- Kijelölés logika (Inspector click) ---
+    // --- Kijelölés logika ---
     const inspector = track.querySelector('.track-inspector');
     inspector.addEventListener('click', (ev) => {
         if(ev.target.tagName === 'BUTTON' || ev.target.tagName === 'INPUT') return;
@@ -497,7 +479,7 @@ picker.addEventListener('click', (e) => {
     });
 
     // --- Drag and Drop ---
-    addDragEvents(track);
+    addTrackDragEvents(track);
 
     // --- Track hozzáadása ---
     list.appendChild(track);
@@ -518,13 +500,27 @@ picker.addEventListener('click', (e) => {
     drawRuler();
 });
 
+// Globális Input listener a slider értékekhez
+document.addEventListener('input', e => {
+  if (e.target.matches('.track-sliders input[type="range"]')) {
+    const valueSpan = e.target.nextElementSibling;
+    if (valueSpan) {
+      if (e.target.parentElement.textContent.includes('Vol')) {
+        valueSpan.textContent = e.target.value + '%';
+      } else {
+        valueSpan.textContent = e.target.value;
+      }
+    }
+  }
+});
 
-// --- DRAG AND DROP LOGIKA ---
-let draggedItem = null;
 
-function addDragEvents(item) {
+// --- SÁVOK (TRACK) DRAG ÉS DROP LOGIKÁJA ---
+let draggedTrack = null;
+
+function addTrackDragEvents(item) {
     item.addEventListener('dragstart', (e) => {
-        draggedItem = item;
+        draggedTrack = item;
         item.classList.add('dragging');
         setTimeout(() => item.style.display = 'none', 0);
     });
@@ -532,22 +528,20 @@ function addDragEvents(item) {
     item.addEventListener('dragend', () => {
         item.classList.remove('dragging');
         setTimeout(() => item.style.display = 'flex', 0);
-        draggedItem = null;
+        draggedTrack = null;
     });
 }
 
-const trackList = document.getElementById('trackList');
-
-trackList.addEventListener('dragover', (e) => {
+list.addEventListener('dragover', (e) => {
     e.preventDefault(); 
-    if(!draggedItem) return;
+    if(!draggedTrack) return;
 
-    const afterElement = getDragAfterElement(trackList, e.clientY);
+    const afterElement = getDragAfterElement(list, e.clientY);
     
     if (afterElement == null) {
-        trackList.appendChild(draggedItem);
+        list.appendChild(draggedTrack);
     } else {
-        trackList.insertBefore(draggedItem, afterElement);
+        list.insertBefore(draggedTrack, afterElement);
     }
 });
 
@@ -602,7 +596,13 @@ gridDropdown.querySelectorAll('button').forEach(btn => {
 });
 
 
-// --- RAJZOLÁS & SCROLL ---
+// ==========================================================
+// --- UNIVERZÁLIS GÖRGETÉS ÉS PLAYHEAD LOGIKA ---
+// ==========================================================
+let globalScrollX = 0;
+let currentPlayTime = 0; // Jelenlegi idő másodpercben
+const playTimeDisplay = document.querySelector('.play-time-btn');
+
 function secondsPerBar() { return (60 / bpm) * timeSig[0]; }
 
 function drawRuler(durationSeconds = 120) {
@@ -637,69 +637,192 @@ function drawAllGrids() {
     });
 }
 
-// Görgetés
-let isPanning = false;
-let startX;
-let scrollStartLeft;
-let isSyncingScroll = false;
-
-timelineScroll.addEventListener('mousedown', (e) => {
-    if (e.button !== 0 && e.button !== 1) return;
-    isPanning = true;
-    timelineScroll.classList.add('grabbing');
-    startX = e.pageX;
-    scrollStartLeft = timelineScroll.scrollLeft;
-    e.preventDefault();
-});
-
-window.addEventListener('mouseup', () => {
-    isPanning = false;
-    timelineScroll.classList.remove('grabbing');
-});
-
-window.addEventListener('mousemove', (e) => {
-    if (!isPanning) return;
-    e.preventDefault();
-    const x = e.pageX;
-    const walk = (x - startX);
-    timelineScroll.scrollLeft = scrollStartLeft - walk;
-});
-
-// görgetés szinkronizálása
-timelineScroll.addEventListener('scroll', () => {
-    if (!isSyncingScroll) {
-        window.requestAnimationFrame(() => {
-            if(rulerInner.parentElement) {
-                rulerInner.parentElement.scrollLeft = timelineScroll.scrollLeft;
-            }
-            playhead.style.transform = `translateX(${-timelineScroll.scrollLeft}px)`;
-            isSyncingScroll = false;
-        });
-        isSyncingScroll = true;
-    }
-}, { passive: true });
-
-// Playhead
-function movePlayheadToEvent(e) {
-    const rect = timelineScroll.getBoundingClientRect();
-    let x = e.clientX - rect.left + timelineScroll.scrollLeft;
+function setScroll(x) {
     if (x < 0) x = 0;
-    playhead.style.left = x + 'px';
+    const maxScroll = 5000;
+    if (x > maxScroll) x = maxScroll;
+    globalScrollX = x;
+
+    // Vonalzó görgetése (A szülő konténerben, hogy ne lógjon ki)
+    if(rulerInner.parentElement) {
+        rulerInner.parentElement.scrollLeft = globalScrollX;
+    }
+
+    // Minden hangsáv vizuális görgetése
+    document.querySelectorAll('.track-area').forEach(area => {
+        area.scrollLeft = globalScrollX;
+    });
+
+    updatePlayheadVisuals();
 }
+
+function updatePlayheadVisuals() {
+    // 164px az inspector szélessége a CSS-ben
+    const leftPx = 164 + (currentPlayTime * PX_PER_SECOND) - globalScrollX;
+    playhead.style.left = `${leftPx}px`;
+
+    // Ha balra kigörgetjük a képernyőről, elrejtjük, hogy ne fedje az inspectort
+    if (leftPx < 164) {
+        playhead.style.opacity = '0';
+    } else {
+        playhead.style.opacity = '1';
+    }
+
+    const mins = Math.floor(currentPlayTime / 60).toString().padStart(2, '0');
+    const secs = Math.floor(currentPlayTime % 60).toString().padStart(2, '0');
+    const ms = Math.floor((currentPlayTime % 1) * 1000).toString().padStart(3, '0');
+    playTimeDisplay.textContent = `${mins}:${secs}.${ms}`;
+}
+
+// Ha a vonalzóra kattintunk, oda ugrik a playhead
 ruler.addEventListener('pointerdown', (e) => {
-    movePlayheadToEvent(e);
+    const rect = rulerInner.getBoundingClientRect();
+    let x = e.clientX - rect.left; // Pixel az idővonal kezdetétől!
+    if (x < 0) x = 0;
+    currentPlayTime = x / PX_PER_SECOND;
+    startOffset = currentPlayTime; // Frissítjük a lejátszó kezdőpontját is
+    updatePlayheadVisuals();
+    
     ruler.setPointerCapture(e.pointerId);
-    ruler.onpointermove = (ev) => movePlayheadToEvent(ev);
+    ruler.onpointermove = (ev) => {
+        let mx = ev.clientX - rect.left;
+        if (mx < 0) mx = 0;
+        currentPlayTime = mx / PX_PER_SECOND;
+        startOffset = currentPlayTime;
+        updatePlayheadVisuals();
+    };
     ruler.onpointerup = () => {
         ruler.onpointermove = null;
         ruler.onpointerup = null;
     };
 });
 
+// --- KLIP DRAG & GÖRGETÉS LOGIKA (EGÉR ÉS ÉRINTŐKÉPERNYŐ) ---
+let isPanning = false;
+let panStartX = 0;
+let panStartScroll = 0;
+
+let isDraggingClip = false;
+let draggedClip = null;
+let clipStartLeft = 0;
+let clipMouseStartX = 0;
+
+function handleClipDragStart(clientX, target) {
+    const selectBtn = document.querySelector('.select-btn');
+    if (!selectBtn || !selectBtn.classList.contains('active')) return false;
+
+    const clip = target.closest('.audio-clip');
+    if (clip) {
+        isDraggingClip = true;
+        draggedClip = clip;
+        clipMouseStartX = clientX;
+        clipStartLeft = parseFloat(clip.style.left) || 0;
+        draggedClip.style.zIndex = "100";
+        return true;
+    }
+    return false;
+}
+
+function handleClipDragMove(clientX) {
+    if (!isDraggingClip || !draggedClip) return;
+    const walk = clientX - clipMouseStartX;
+    let newLeft = clipStartLeft + walk;
+    if (newLeft < 0) newLeft = 0;
+
+    draggedClip.style.left = newLeft + 'px';
+    draggedClip.dataset.start = newLeft / PX_PER_SECOND; // Időbélyeg frissítése
+}
+
+function handleClipDragEnd() {
+    if (draggedClip) draggedClip.style.zIndex = "";
+    isDraggingClip = false;
+    draggedClip = null;
+}
+
+// PC (Egér)
+document.addEventListener('mousedown', (e) => {
+    if (handleClipDragStart(e.clientX, e.target)) {
+        e.preventDefault(); 
+        return;
+    }
+
+    if (e.target.closest('.track-area') || e.target.closest('.timeline-ruler')) {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+        isPanning = true;
+        panStartX = e.clientX;
+        panStartScroll = globalScrollX;
+        document.body.style.cursor = 'grabbing';
+    }
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (isDraggingClip) {
+        e.preventDefault();
+        handleClipDragMove(e.clientX);
+        return;
+    }
+    if (isPanning) {
+        e.preventDefault();
+        const walk = panStartX - e.clientX;
+        setScroll(panStartScroll + walk);
+    }
+});
+
+document.addEventListener('mouseup', () => {
+    handleClipDragEnd();
+    if (isPanning) {
+        isPanning = false;
+        document.body.style.cursor = '';
+    }
+});
+
+// Mobil (Érintőképernyő)
+document.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) return; 
+    if (handleClipDragStart(e.touches[0].clientX, e.target)) return;
+
+    if (e.target.closest('.track-area') || e.target.closest('.timeline-ruler')) {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+        isPanning = true;
+        panStartX = e.touches[0].clientX;
+        panStartScroll = globalScrollX;
+    }
+}, {passive: false});
+
+document.addEventListener('touchmove', (e) => {
+    if (isDraggingClip) {
+        e.preventDefault();
+        handleClipDragMove(e.touches[0].clientX);
+        return;
+    }
+    if (isPanning) {
+        e.preventDefault();
+        const walk = panStartX - e.touches[0].clientX;
+        setScroll(panStartScroll + walk);
+    }
+}, {passive: false});
+
+document.addEventListener('touchend', () => {
+    handleClipDragEnd();
+    isPanning = false;
+});
+
+// Egérgörgő (PC - Touchpad / Scroll wheel)
+document.addEventListener('wheel', (e) => {
+    if (e.target.closest('.track-area') || e.target.closest('.timeline-ruler')) {
+        if (Math.abs(e.deltaX) > 0 || Math.abs(e.deltaY) > 0) {
+            e.preventDefault();
+            // A touchpad vízszintes görgetése deltaX, a sima egéré deltaY. A nagyobbat vesszük.
+            const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+            setScroll(globalScrollX + delta);
+        }
+    }
+}, {passive: false});
+
+
 // ==========================================================
 // --- LEJÁTSZÁS ÉS IMPORT MOTOR ---
 // ==========================================================
-
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const masterGain = audioCtx.createGain();
 masterGain.connect(audioCtx.destination);
@@ -714,11 +837,8 @@ let audioSources = [];
 const importBtn = document.querySelector('.project-btn:nth-child(6)'); 
 const fileInput = document.getElementById('audioImportInput');
 const playBtn = document.querySelector('.play-btn');
-const pauseBtn = document.querySelector('.pause-btn'); 
-const playTimeDisplay = document.querySelector('.play-time-btn');
 
 // --- IMPORT ---
-
 importBtn.onclick = () => {
     if (document.querySelectorAll('.track-container').length === 0) {
         alert("Előbb hozz létre egy Track-et (pl. '+ add track' -> 'vocal')!");
@@ -746,11 +866,10 @@ fileInput.onchange = async (e) => {
         importBtn.textContent = "Import";
 
         const targetTrack = document.querySelector('.track-container.selected');
-
         if (!targetTrack) return; 
         const clipsContainer = targetTrack.querySelector('.clips');
+        
         addClipToTrack(clipsContainer, audioBuffer, file.name);
-
     } catch (err) {
         console.error(err);
         alert("Hiba a fájl betöltésekor: " + err.message);
@@ -772,26 +891,23 @@ function addClipToTrack(container, buffer, name) {
     clip.style.border = '1px solid #00ffd5';
     clip.style.borderRadius = '4px';
     clip.style.position = 'absolute';
-    clip.style.left = '0px'; 
-    clip.style.top = '0px';
     clip.style.overflow = 'hidden';
     clip.style.whiteSpace = 'nowrap';
     clip.style.fontSize = '10px';
     clip.style.padding = '2px';
     clip.style.cursor = 'grab';
     
-    clip.dataset.start = 0; 
-    clip.dataset.offset = 0; 
+    // IMPORT A PLAYHEAD POZÍCIÓJÁHOZ
+    const playheadTime = currentPlayTime; 
+    clip.dataset.start = playheadTime; 
+    clip.style.left = `${playheadTime * PX_PER_SECOND}px`;
     
     clip.audioBuffer = buffer;
-
     clip.textContent = name;
     container.appendChild(clip);
 }
 
-
 // --- LEJÁTSZÁS ---
-
 playBtn.onclick = (e) => {
     e.target.closest('button').classList.toggle('active');
     
@@ -802,23 +918,14 @@ playBtn.onclick = (e) => {
     }
 };
 
-if(document.querySelector('.pause-btn')) {
-    document.querySelector('.pause-btn').onclick = () => {
-        if (isPlaying) stopPlayback();
-        playBtn.classList.remove('active');
-    };
-}
-
-
 function startPlayback() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     
     isPlaying = true;
     startPlayTime = audioCtx.currentTime;
     
-    let currentLeftPx = parseFloat(playhead.style.left) || 0;
-    
-    startOffset = currentLeftPx / PX_PER_SECOND; 
+    // A lejátszás az aktuális lejátszófej pozíciótól indul
+    startOffset = currentPlayTime; 
 
     const allClips = document.querySelectorAll('.audio-clip');
     audioSources = []; 
@@ -828,7 +935,6 @@ function startPlayback() {
         const clipStartFilter = parseFloat(clipDiv.dataset.start); 
         
         if (startOffset < clipStartFilter + buffer.duration) {
-            
             const source = audioCtx.createBufferSource();
             source.buffer = buffer;
             source.connect(masterGain);
@@ -849,7 +955,7 @@ function startPlayback() {
         }
     });
 
-    requestAnimationFrame(updatePlayhead);
+    requestAnimationFrame(updatePlayheadAnim);
 }
 
 function stopPlayback() {
@@ -859,33 +965,24 @@ function stopPlayback() {
     });
     audioSources = [];
     cancelAnimationFrame(animationFrameId);
-    
     playBtn.classList.remove('active');
 }
 
-function updatePlayhead() {
+function updatePlayheadAnim() {
     if (!isPlaying) return;
 
     const elapsed = audioCtx.currentTime - startPlayTime;
-    const currentTotalTime = startOffset + elapsed;
+    currentPlayTime = startOffset + elapsed;
 
-    const newLeftPx = currentTotalTime * PX_PER_SECOND;
-    playhead.style.left = `${newLeftPx}px`;
-
-    const mins = Math.floor(currentTotalTime / 60).toString().padStart(2, '0');
-    const secs = Math.floor(currentTotalTime % 60).toString().padStart(2, '0');
-    const ms = Math.floor((currentTotalTime % 1) * 1000).toString().padStart(3, '0');
-    playTimeDisplay.textContent = `${mins}:${secs}.${ms}`;
-
-    const containerWidth = timelineScroll.clientWidth;
-    const currentScroll = timelineScroll.scrollLeft;
-    const realPlayheadScreenPos = newLeftPx - currentScroll; 
-    
-    if (realPlayheadScreenPos > containerWidth * 0.9) {
-        timelineScroll.scrollLeft += 5; 
+    // Automatikus görgetés jobbra, ha a lejátszófej kimegy a képernyő 90%-ára
+    const screenX = 164 + (currentPlayTime * PX_PER_SECOND) - globalScrollX;
+    const containerWidth = window.innerWidth;
+    if (screenX > containerWidth * 0.9) {
+        setScroll(globalScrollX + 5); 
     }
 
-    animationFrameId = requestAnimationFrame(updatePlayhead);
+    updatePlayheadVisuals();
+    animationFrameId = requestAnimationFrame(updatePlayheadAnim);
 }
 
 drawRuler();
