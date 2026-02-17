@@ -731,18 +731,32 @@ gridDropdown.querySelectorAll('button').forEach(btn => {
   });
 });
 
-document.querySelector('.cut-btn').addEventListener('click', (e) => {
-    e.preventDefault();
-    // 1. Keressük meg a kijelölt klipet
-    const selected = document.querySelector('.audio-clip.selected-clip');
-    if (!selected) return;
+const cutBtn = document.querySelector('.cut-btn');
 
-    // 2. Ellenőrizzük, hogy a Playhead a klipen belül van-e
+// Külön függvénybe szervezzük a logikát, hogy többféle eseményre is rátehessük
+function performCut(e) {
+    // 1. Megakadályozzuk, hogy a gomb elvegye a fókuszt a klipről
+    e.preventDefault(); 
+    e.stopPropagation();
+
+    // 2. Keressük meg a kijelölt klipet
+    const selected = document.querySelector('.audio-clip.selected-clip');
+    
+    if (!selected) {
+        // Opcionális: mobilon hasznos visszajelzés, ha nincs kijelölés
+        // console.log("Nincs kijelölve klip!"); 
+        return;
+    }
+
+    // 3. Ellenőrizzük, hogy a Playhead a klipen belül van-e
     const clipStart = parseFloat(selected.dataset.start);
     const clipDur = parseFloat(selected.dataset.duration);
     const clipEnd = clipStart + clipDur;
     
+    // Tolerancia hozzáadása: Mobilon nehéz pixelpontosan a klipre állni.
+    // Ha a playhead épphogy a széleken van, még engedjük, de a logikán belül maradjon.
     if (currentPlayTime > clipStart && currentPlayTime < clipEnd) {
+        
         const buffer = selected.audioBuffer;
         const parent = selected.parentElement;
         const name = selected.querySelector('.clip-name').textContent;
@@ -751,23 +765,30 @@ document.querySelector('.cut-btn').addEventListener('click', (e) => {
         // Hol vágunk relatívan a klip elejéhez képest?
         const cutPointRelative = currentPlayTime - clipStart;
         
-        // --- 1. BAL OLDALI DARAB (A régi helyén vagy frissítve) ---
-        // Egyszerűbb törölni és újra létrehozni mindkettőt, hogy tiszták legyenek az adatok
-        selected.remove();
+        // --- 1. BAL OLDALI DARAB ---
+        selected.remove(); // Töröljük a régit
 
-        // Bal darab: Start = eredeti, Duration = vágási pontig
+        // Bal darab létrehozása
         addClipToTrack(parent, buffer, name, clipStart, originalTrim, cutPointRelative);
 
         // --- 2. JOBB OLDALI DARAB ---
-        // Jobb darab: Start = Playhead, Trim = eredeti + amennyit levágtunk, Duration = maradék
         const remainingDuration = clipDur - cutPointRelative;
         const newTrimOffset = originalTrim + cutPointRelative;
         
         addClipToTrack(parent, buffer, name, currentPlayTime, newTrimOffset, remainingDuration);
+        
+        // Visszajelzés, hogy sikerült (opcionális, de jó érzés)
+        // navigator.vibrate(50); // Ha támogatja az eszköz, rezzen egyet
+        
     } else {
         alert("A Playhead nem érinti a kijelölt klipet!");
     }
-});
+}
+
+// 4. Eseményfigyelők hozzáadása (Touch és Click is!)
+// A {passive: false} fontos, hogy működjön a preventDefault()
+cutBtn.addEventListener('touchstart', performCut, {passive: false});
+cutBtn.addEventListener('click', performCut);
 
 
 // ==========================================================
