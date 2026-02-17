@@ -290,7 +290,7 @@ h1, h2, h3 {
     z-index: 500 !important;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     padding: 8px 20px;
     height: 34px;
     flex-wrap: nowrap;   
@@ -311,7 +311,7 @@ h1, h2, h3 {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.7rem;
-    padding: 8px 12px;
+    padding: 8px 10px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -563,9 +563,9 @@ h1, h2, h3 {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  flex: 0 0 146px;
+  flex: 0 0 138px;
   font-family: var(--font-mono);
-  border-left: 6px solid var(--accent);
+  border-left: 14px solid var(--accent);
 }
 
 .track-inspector {
@@ -590,8 +590,8 @@ h1, h2, h3 {
 }
 
 .track-container.selected .track-inspector {
-    background: rgba(255, 255, 255, 0.05); /* Enyhe accent háttér */
-    border-left: 6px solid #fff; /* Fehér csík jelzi, hogy ez az aktív */
+    background: rgba(255, 255, 255, 0.06); /* Enyhe accent háttér */
+    border-left: 14px solid #fff; /* Fehér csík jelzi, hogy ez az aktív */
 }
 
 .delete-track {
