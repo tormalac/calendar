@@ -125,23 +125,6 @@
     </footer>
  </div>
 
-<style>
-  /* HOTFIX: Ez a CSS elengedhetetlen, hogy a sávok és a vonalzó együtt görögjenek! */
-  .track-area {
-    flex: 1;
-    min-width: 0;
-  }
-  .audio-clip {
-    transition: box-shadow 0.15s ease;
-    box-sizing: border-box;
-  }
-  .audio-clip.selected-clip {
-    border: 1px solid #fff !important;
-    box-shadow: 0 0 10px rgba(0, 255, 213, 0.6);
-    z-index: 50;
-  }
-</style>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
@@ -314,6 +297,111 @@ function selectOutput(track, btn, picker) {
     }
 }
 
+// --- WAVEFORM RAJZOLÓ ---
+function drawWaveform(canvas, buffer, color = '#00ffd5') {
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const data = buffer.getChannelData(0);
+    const step = Math.ceil(data.length / width);
+    const amp = height / 2;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+
+    for (let i = 0; i < width; i++) {
+        let min = 1.0;
+        let max = -1.0;
+        for (let j = 0; j < step; j++) {
+            const datum = data[(i * step) + j];
+            if (datum < min) min = datum;
+            if (datum > max) max = datum;
+        }
+        // Ha csend van, rajzoljunk egy vékony vonalat
+        if (max === -1 && min === 1) { max = 0.002; min = -0.002; }
+        
+        ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
+    }
+}
+
+// --- KLIP ÁTMÉRETEZÉS (TRIMMING) LOGIKA ---
+let isResizing = false;
+let resizeTarget = null;
+let resizeSide = null; // 'left' vagy 'right'
+let resizeStartX = 0;
+let resizeStartWidth = 0;
+let resizeStartLeft = 0;
+let resizeStartTrim = 0; // Mennyit vágtunk le az elejéből eddig
+
+function initResize(e, handle, clip) {
+    e.stopPropagation(); // Ne indítsa el a drag&drop-ot
+    e.preventDefault();
+    
+    isResizing = true;
+    resizeTarget = clip;
+    resizeSide = handle.classList.contains('left') ? 'left' : 'right';
+    resizeStartX = e.clientX;
+    
+    // Jelenlegi értékek mentése
+    resizeStartWidth = parseFloat(clip.style.width);
+    resizeStartLeft = parseFloat(clip.style.left);
+    resizeStartTrim = parseFloat(clip.dataset.trimOffset || 0);
+    
+    document.body.style.cursor = 'col-resize';
+}
+
+function handleResizeMove(clientX) {
+    if (!isResizing || !resizeTarget) return;
+
+    const deltaPx = clientX - resizeStartX;
+    const deltaSec = deltaPx / PX_PER_SECOND;
+
+    if (resizeSide === 'right') {
+        // Jobb oldal húzása: csak a szélesség változik
+        let newWidth = resizeStartWidth + deltaPx;
+        if (newWidth < 10) newWidth = 10; // Min szélesség
+        
+        // Nem lehet hosszabb, mint az eredeti fájl (buffer duration - start trim)
+        const maxDuration = resizeTarget.audioBuffer.duration - resizeStartTrim;
+        if (newWidth / PX_PER_SECOND > maxDuration) {
+            newWidth = maxDuration * PX_PER_SECOND;
+        }
+
+        resizeTarget.style.width = `${newWidth}px`;
+        resizeTarget.dataset.duration = newWidth / PX_PER_SECOND;
+    
+    } else if (resizeSide === 'left') {
+        // Bal oldal húzása: szélesség csökken, left nő, trimOffset nő
+        let newWidth = resizeStartWidth - deltaPx;
+        let newLeft = resizeStartLeft + deltaPx;
+
+        // Validáció: ne lehessen negatív szélesség, és ne menjen 0 alá a start
+        if (newWidth < 10) return;
+        if (newLeft < 0) newLeft = 0;
+
+        // Audio offset validáció (ne lehessen a fájl eleje elé menni)
+        let newTrim = resizeStartTrim + deltaSec;
+        if (newTrim < 0) {
+            newTrim = 0;
+            newLeft = resizeStartLeft - (resizeStartTrim * PX_PER_SECOND);
+            newWidth = resizeStartWidth + (resizeStartTrim * PX_PER_SECOND);
+        }
+
+        resizeTarget.style.width = `${newWidth}px`;
+        resizeTarget.style.left = `${newLeft}px`;
+        resizeTarget.dataset.start = newLeft / PX_PER_SECOND;
+        resizeTarget.dataset.trimOffset = newTrim;
+        resizeTarget.dataset.duration = newWidth / PX_PER_SECOND;
+        
+        // Waveform eltolása (vizuális trükk: a canvas-t negatív marginnal toljuk)
+        const canvas = resizeTarget.querySelector('canvas');
+        if(canvas) {
+            canvas.style.left = `-${newTrim * PX_PER_SECOND}px`;
+        }
+    }
+}
+
 // ==========================================================
 // --- DAW LOGIKA & ESEMÉNYEK ---
 // ==========================================================
@@ -433,7 +521,7 @@ picker.addEventListener('click', (e) => {
 
     const track = document.createElement('div');
     track.className = `track-container ${type}`;
-    track.setAttribute('draggable', 'true');
+    /*track.setAttribute('draggable', 'true');*/
 
     track.innerHTML = `
       <div class="track-inspector">
@@ -505,27 +593,58 @@ document.addEventListener('input', e => {
   }
 });
 
-// --- TRACK (SÁV) DRAG & DROP LOGIKA ---
 let draggedTrack = null;
 
-function addTrackDragEvents(item) {
-    item.addEventListener('dragstart', (e) => {
-        draggedTrack = item;
-        item.classList.add('dragging');
-        setTimeout(() => item.style.display = 'none', 0);
+// --- TRACK (SÁV) DRAG & DROP LOGIKA ---
+function addTrackDragEvents(trackContainer) {
+    // 1. Megkeressük a fogantyút (Inspector)
+    const inspector = trackContainer.querySelector('.track-inspector');
+    
+    // 2. KIZÁRÓLAG az Inspectort tesszük húzhatóvá!
+    inspector.setAttribute('draggable', 'true');
+
+    // --- DRAG START ---
+    inspector.addEventListener('dragstart', (e) => {
+        // VÉDELEM: Ha gombra, inputra vagy szövegre kattintasz, NE induljon el!
+        if (e.target.tagName === 'INPUT' || 
+            e.target.tagName === 'BUTTON' || 
+            e.target.closest('button') || 
+            e.target.getAttribute('contenteditable') === 'true') {
+            
+            e.preventDefault();
+            return;
+        }
+
+        // 3. A globális változóba a TELJES SÁVOT (szülőt) mentjük
+        draggedTrack = trackContainer;
+        
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'track-move'); // Kötelező adat
+
+        // Vizuális trükk: A sáv halványítása
+        setTimeout(() => {
+            trackContainer.classList.add('dragging');
+        }, 0);
     });
 
-    item.addEventListener('dragend', () => {
-        item.classList.remove('dragging');
-        setTimeout(() => item.style.display = 'flex', 0);
+    // --- DRAG END ---
+    inspector.addEventListener('dragend', () => {
+        trackContainer.classList.remove('dragging');
+        trackContainer.style.display = 'flex';
         draggedTrack = null;
     });
 }
 
+// 4. LISTA SZINTŰ KEZELÉS (Ez felel az átrendezésért)
 list.addEventListener('dragover', (e) => {
-    e.preventDefault(); 
-    if(!draggedTrack) return;
+    e.preventDefault(); // KÖTELEZŐ: engedélyezi a drop-ot
+
+    // Ha nem sávot húzunk (pl. fájlt importálunk), akkor ne csináljon semmit
+    if (!draggedTrack) return;
+
     const afterElement = getDragAfterElement(list, e.clientY);
+    
+    // Átrendezés a DOM-ban
     if (afterElement == null) {
         list.appendChild(draggedTrack);
     } else {
@@ -533,11 +652,16 @@ list.addEventListener('dragover', (e) => {
     }
 });
 
+// Segédfüggvény: kiszámolja, melyik elem után vagyunk
 function getDragAfterElement(container, y) {
     const draggableElements = [...container.querySelectorAll('.track-container:not(.dragging)')];
+
     return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
+        // A távolság az elem közepétől
         const offset = y - box.top - box.height / 2;
+        
+        // Keressük azt az elemet, ami fölött vagyunk (offset < 0), de a legközelebb (legnagyobb negatív szám)
         if (offset < 0 && offset > closest.offset) {
             return { offset: offset, element: child };
         } else {
@@ -577,6 +701,43 @@ gridDropdown.querySelectorAll('button').forEach(btn => {
     btn.classList.add('active');
     drawAllGrids();
   });
+});
+
+document.querySelector('.cut-btn').addEventListener('click', () => {
+    // 1. Keressük meg a kijelölt klipet
+    const selected = document.querySelector('.audio-clip.selected-clip');
+    if (!selected) return;
+
+    // 2. Ellenőrizzük, hogy a Playhead a klipen belül van-e
+    const clipStart = parseFloat(selected.dataset.start);
+    const clipDur = parseFloat(selected.dataset.duration);
+    const clipEnd = clipStart + clipDur;
+    
+    if (currentPlayTime > clipStart && currentPlayTime < clipEnd) {
+        const buffer = selected.audioBuffer;
+        const parent = selected.parentElement;
+        const name = selected.querySelector('.clip-name').textContent;
+        const originalTrim = parseFloat(selected.dataset.trimOffset || 0);
+
+        // Hol vágunk relatívan a klip elejéhez képest?
+        const cutPointRelative = currentPlayTime - clipStart;
+        
+        // --- 1. BAL OLDALI DARAB (A régi helyén vagy frissítve) ---
+        // Egyszerűbb törölni és újra létrehozni mindkettőt, hogy tiszták legyenek az adatok
+        selected.remove();
+
+        // Bal darab: Start = eredeti, Duration = vágási pontig
+        addClipToTrack(parent, buffer, name, clipStart, originalTrim, cutPointRelative);
+
+        // --- 2. JOBB OLDALI DARAB ---
+        // Jobb darab: Start = Playhead, Trim = eredeti + amennyit levágtunk, Duration = maradék
+        const remainingDuration = clipDur - cutPointRelative;
+        const newTrimOffset = originalTrim + cutPointRelative;
+        
+        addClipToTrack(parent, buffer, name, currentPlayTime, newTrimOffset, remainingDuration);
+    } else {
+        alert("A Playhead nem érinti a kijelölt klipet!");
+    }
 });
 
 
@@ -742,13 +903,55 @@ function handleClipDragEnd() {
 
 // PC
 document.addEventListener('mousedown', (e) => {
-    if (handleClipInteraction(e.clientX, e.target)) {
-        e.preventDefault(); 
-        return;
+    if (e.target.closest('.track-inspector')) {
+        return; 
+    }
+    if (isResizing) return;
+
+    // 2. Select gomb állapota
+    const selectBtn = document.querySelector('.select-btn');
+    const isSelectMode = selectBtn && selectBtn.classList.contains('active');
+
+    // 3. Megnézzük, mire kattintottunk
+    const clickedClip = e.target.closest('.audio-clip');
+    
+    // --- A) HA AUDIO KLIPRE KATTINTOTTUNK ---
+    if (clickedClip) {
+        // Ha a resize fülre kattintottunk, hagyjuk békén (azt az initResize kezeli)
+        if (e.target.classList.contains('resize-handle')) return;
+
+        // Kijelfileölés (Select): Ezt MINDIG megengedjük, vagy csak Select módban?
+        // DAW szokás: kijelölni mindig lehet, mozgatni csak eszközzel.
+        // Most a kérésed szerint: Csak ha aktív a Select, akkor történjen bármi.
+        
+        if (isSelectMode) {
+            e.preventDefault(); // Szövegkijelölés tiltása
+            
+            // Kijelölés vizuálisan
+            document.querySelectorAll('.audio-clip').forEach(c => c.classList.remove('selected-clip'));
+            clickedClip.classList.add('selected-clip');
+            
+            // Drag indítása
+            isDraggingClip = true;
+            draggedClip = clickedClip;
+            selectedClip = clickedClip; // Globális változó a Cut funkcióhoz
+            
+            clipMouseStartX = e.clientX;
+            clipStartLeft = parseFloat(clickedClip.style.left) || 0;
+            return; // Megállunk, nem görgetünk
+        } else {
+            // Ha NINCS Select mód, akkor szimplán return, vagy engedjük a görgetést?
+            // Általában ilyenkor "semmi" nem történik a clippel, de a timeline görgethető marad.
+            // Hagyjuk továbbfolyni a kódot a görgetéshez? 
+            // Igen, így ha a klipen húzod az egeret (nem select módban), görgetni fogja a timeline-t.
+        }
     }
 
+    // --- B) TIMELINE GÖRGETÉS (PANNING) ---
+    // Ha a track területén vagy a vonalzón vagyunk (és nem gombot nyomtunk)
     if (e.target.closest('.track-area') || e.target.closest('.timeline-ruler')) {
         if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+        
         isPanning = true;
         panStartX = e.clientX;
         panStartScroll = globalScrollX;
@@ -757,6 +960,10 @@ document.addEventListener('mousedown', (e) => {
 });
 
 document.addEventListener('mousemove', (e) => {
+    if (isResizing) {
+        handleResizeMove(e.clientX);
+        return; 
+    }
     if (isDraggingClip) {
         e.preventDefault();
         handleClipDragMove(e.clientX);
@@ -770,6 +977,10 @@ document.addEventListener('mousemove', (e) => {
 });
 
 document.addEventListener('mouseup', () => {
+    isResizing = false;
+    resizeTarget = null;
+    document.body.style.cursor = '';
+
     handleClipDragEnd();
     if (isPanning) {
         isPanning = false;
@@ -869,7 +1080,7 @@ fileInput.onchange = async (e) => {
         if (!targetTrack) return; 
         const clipsContainer = targetTrack.querySelector('.clips');
         
-        addClipToTrack(clipsContainer, audioBuffer, file.name);
+        addClipToTrack(clipsContainer, audioBuffer, file.name, currentPlayTime);
     } catch (err) {
         console.error(err);
         alert("Hiba a fájl betöltésekor: " + err.message);
@@ -879,31 +1090,61 @@ fileInput.onchange = async (e) => {
     fileInput.value = '';
 };
 
-function addClipToTrack(container, buffer, name) {
+function addClipToTrack(container, buffer, name, startTime = null, trimOffset = 0, duration = null) {
     const clip = document.createElement('div');
     clip.className = 'audio-clip';
     
-    const width = buffer.duration * PX_PER_SECOND;
+    // Ha nincs megadva start, akkor a playhead; ha van, akkor az (pl. cut esetén)
+    const startPos = startTime !== null ? startTime : currentPlayTime;
+    const clipDuration = duration !== null ? duration : buffer.duration;
+    const width = clipDuration * PX_PER_SECOND;
     
     clip.style.width = `${width}px`;
-    clip.style.height = '100%';
-    clip.style.background = 'rgba(0, 255, 213, 0.3)';
-    clip.style.border = '1px solid #00ffd5';
-    clip.style.borderRadius = '4px';
-    clip.style.position = 'absolute';
-    clip.style.overflow = 'hidden';
-    clip.style.whiteSpace = 'nowrap';
-    clip.style.fontSize = '10px';
-    clip.style.padding = '2px';
-    clip.style.cursor = 'grab';
+    clip.style.left = `${startPos * PX_PER_SECOND}px`;
     
-    // IMPORT A PLAYHEAD POZÍCIÓJÁHOZ
-    const playheadTime = currentPlayTime; 
-    clip.dataset.start = playheadTime; 
-    clip.style.left = `${playheadTime * PX_PER_SECOND}px`;
+    // Adatok tárolása
+    clip.dataset.start = startPos;         // Mikor kezdődik a timeline-on
+    clip.dataset.trimOffset = trimOffset;  // Mennyit vágtunk le az elejéből (audio file start)
+    clip.dataset.duration = clipDuration;  // Milyen hosszú a klip
+    clip.audioBuffer = buffer;             // Maga az audio adat
     
-    clip.audioBuffer = buffer;
-    clip.textContent = name;
+    // 1. Név címke
+    const label = document.createElement('div');
+    label.className = 'clip-name';
+    label.textContent = name;
+    clip.appendChild(label);
+
+    // 2. Waveform Canvas
+    const canvas = document.createElement('canvas');
+    canvas.className = 'clip-waveform';
+    
+    // TRÜKK: A canvas szélessége mindig a TELJES eredeti fájl hossza
+    const fullWidth = buffer.duration * PX_PER_SECOND;
+    
+    canvas.width = fullWidth;          // Belső felbontás
+    canvas.style.width = `${fullWidth}px`; // CSS szélesség
+    
+    // ELTOLÁS: Ha van trimOffset (vágás az elejéről), ennyivel húzzuk balra a canvast
+    // Így a megfelelő rész kerül a "keret" alá.
+    canvas.style.left = `-${trimOffset * PX_PER_SECOND}px`;
+    
+    clip.appendChild(canvas);
+    
+    // Kirajzoljuk a teljes buffert
+    setTimeout(() => drawWaveform(canvas, buffer), 0);
+
+    // 3. Resize fülek
+    const leftHandle = document.createElement('div');
+    leftHandle.className = 'resize-handle left';
+    leftHandle.onmousedown = (e) => initResize(e, leftHandle, clip);
+    
+    const rightHandle = document.createElement('div');
+    rightHandle.className = 'resize-handle right';
+    rightHandle.onmousedown = (e) => initResize(e, rightHandle, clip);
+    
+    clip.appendChild(leftHandle);
+    clip.appendChild(rightHandle);
+
     container.appendChild(clip);
 }
 
@@ -923,8 +1164,6 @@ function startPlayback() {
     
     isPlaying = true;
     startPlayTime = audioCtx.currentTime;
-    
-    // Indítás a Playheadtől
     startOffset = currentPlayTime; 
 
     const allClips = document.querySelectorAll('.audio-clip');
@@ -932,25 +1171,43 @@ function startPlayback() {
 
     allClips.forEach(clipDiv => {
         const buffer = clipDiv.audioBuffer;
-        const clipStartFilter = parseFloat(clipDiv.dataset.start); 
         
-        if (startOffset < clipStartFilter + buffer.duration) {
+        // Adatok olvasása
+        const clipStartTimeline = parseFloat(clipDiv.dataset.start); 
+        const clipDuration = parseFloat(clipDiv.dataset.duration);
+        const trimOffset = parseFloat(clipDiv.dataset.trimOffset || 0); // Mennyit vágunk az elejéből
+        
+        const clipEndTimeline = clipStartTimeline + clipDuration;
+
+        // Ha a klipnek még szólnia kell a mostani időpont után
+        if (startOffset < clipEndTimeline) {
             const source = audioCtx.createBufferSource();
             source.buffer = buffer;
             source.connect(masterGain);
             
-            let whenToStart = 0;
-            let offsetInFile = 0;
+            let whenToStart = 0; // Mikor induljon a hangszóróból (delay)
+            let offsetInFile = 0; // Honnan olvassa a fájlt (head position)
 
-            if (startOffset > clipStartFilter) {
-                whenToStart = 0; 
-                offsetInFile = startOffset - clipStartFilter; 
+            if (startOffset > clipStartTimeline) {
+                // A klip közepén járunk
+                whenToStart = 0; // Azonnal
+                // Offset = (hol tartunk - klip eleje) + vágás
+                offsetInFile = (startOffset - clipStartTimeline) + trimOffset;
             } else {
-                whenToStart = clipStartFilter - startOffset; 
-                offsetInFile = 0;
+                // A klip még ezután jön
+                whenToStart = clipStartTimeline - startOffset;
+                // Offset = Csak a vágás (az elejéről indul, de a vágást figyelembe véve)
+                offsetInFile = trimOffset;
             }
 
-            source.start(audioCtx.currentTime + whenToStart, offsetInFile);
+            // Duration kiszámítása: meddig szóljon?
+            // Max annyi, amennyi a visible duration, vagy amennyi hátravan a fájlból
+            let playDuration = clipDuration;
+            if (startOffset > clipStartTimeline) {
+                playDuration = clipEndTimeline - startOffset;
+            }
+
+            source.start(audioCtx.currentTime + whenToStart, offsetInFile, playDuration);
             audioSources.push(source);
         }
     });
