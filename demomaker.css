@@ -485,10 +485,26 @@ h1, h2, h3 {
   background: transparent;
 }
 
+.snap-btn.active svg{
+  color: var(--accent);
+}
+
 /* kijelölő eszköz toggle */
 .select-btn.active {
   color: var(--accent);
   background: transparent;
+}
+
+.select-btn.active svg{
+  color: var(--accent);
+}
+
+.cut-btn.active svg{
+  color: var(--accent);
+}
+
+.delete-btn.active svg{
+  color: var(--accent);
 }
 
 /* vonalzó */
@@ -508,6 +524,9 @@ h1, h2, h3 {
   font-size: 11px;
   cursor: pointer;
   overflow-x: hidden !important;
+  user-select: none;
+  -webkit-user-select: none;  
+  -webkit-touch-callout: none;
 }
 
 .ruler-inner {
@@ -561,13 +580,14 @@ h1, h2, h3 {
 .track-inspector {
   position: relative;
   padding: 6px;
+  margin-left: 10px;
   background: rgba(255,255,255,0.01);
   display: flex;
   flex-direction: column;
   gap: 5px;
-  flex: 0 0 138px;
+  flex: 0 0 136px;
   font-family: var(--font-mono);
-  border-left: 14px solid var(--accent);
+  border-left: 6px solid var(--accent);
   cursor: grab; 
 }
 
@@ -591,7 +611,7 @@ h1, h2, h3 {
 
 .track-container.selected .track-inspector {
     background: rgba(255, 255, 255, 0.06); /* Enyhe accent háttér */
-    border-left: 14px solid #fff; /* Fehér csík jelzi, hogy ez az aktív */
+    border-left: 6px solid #fff; /* Fehér csík jelzi, hogy ez az aktív */
 }
 
 /* --- KLIP SZÍNEK TÍPUS SZERINT --- */
