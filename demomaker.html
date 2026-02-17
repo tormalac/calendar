@@ -96,13 +96,38 @@
         </div>
        </div>
        <button class="snap-btn">
-       Snap
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+         <line x1="12" y1="5" x2="12" y2="19"/>
+  
+         <!-- Left arrow -->
+         <line x1="4" y1="12" x2="10" y2="12"/>
+         <polyline points="8,10 10,12 8,14"/>
+  
+         <!-- Right arrow -->
+         <line x1="20" y1="12" x2="14" y2="12"/>
+         <polyline points="16,10 14,12 16,14"/>
+        </svg>
        </button>
        <button class="select-btn">
-       Select
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+         <rect x="4" y="6" width="16" height="12" stroke-dasharray="4 3"/>
+        </svg>
        </button>
        <button class="cut-btn">
-       Cut
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+         <circle cx="6" cy="6" r="3"/>
+         <circle cx="6" cy="18" r="3"/>
+         <path d="M20 4L8.5 14.5"/>
+         <path d="M20 20L8.5 9.5"/>
+        </svg>
+       </button>
+       <button class="delete-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+         <path d="M4 7H20"/>
+         <path d="M9 7V4H15V7"/>
+         <rect x="6" y="7" width="12" height="13" rx="2"/>
+         <path d="M10 11V17M14 11V17"/>
+        </svg>
        </button>
        <button class="play-time-btn">00:00.00
        </button>
@@ -335,15 +360,18 @@ let resizeStartLeft = 0;
 let resizeStartTrim = 0; // Mennyit vágtunk le az elejéből eddig
 
 function initResize(e, handle, clip) {
-    e.stopPropagation(); // Ne indítsa el a drag&drop-ot
-    e.preventDefault();
+    e.stopPropagation(); 
+    // Mobilon a preventDefault fontos, hogy ne kezdjen el görgni a képernyő húzás közben
+    if(e.cancelable) e.preventDefault(); 
     
     isResizing = true;
     resizeTarget = clip;
     resizeSide = handle.classList.contains('left') ? 'left' : 'right';
-    resizeStartX = e.clientX;
     
-    // Jelenlegi értékek mentése
+    // Itt a javítás: megnézzük, hogy touch vagy egér esemény történt-e
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    resizeStartX = clientX;
+    
     resizeStartWidth = parseFloat(clip.style.width);
     resizeStartLeft = parseFloat(clip.style.left);
     resizeStartTrim = parseFloat(clip.dataset.trimOffset || 0);
@@ -703,7 +731,8 @@ gridDropdown.querySelectorAll('button').forEach(btn => {
   });
 });
 
-document.querySelector('.cut-btn').addEventListener('click', () => {
+document.querySelector('.cut-btn').addEventListener('click', (e) => {
+    e.preventDefault();
     // 1. Keressük meg a kijelölt klipet
     const selected = document.querySelector('.audio-clip.selected-clip');
     if (!selected) return;
@@ -1002,11 +1031,21 @@ document.addEventListener('touchstart', (e) => {
 }, {passive: false});
 
 document.addEventListener('touchmove', (e) => {
+    // 1. HA épp átméretezünk (Trim)
+    if (isResizing) {
+        e.preventDefault(); // Ne görgessen a képernyő
+        handleResizeMove(e.touches[0].clientX);
+        return; 
+    }
+
+    // 2. HA épp klipet mozgatunk
     if (isDraggingClip) {
         e.preventDefault();
         handleClipDragMove(e.touches[0].clientX);
         return;
     }
+
+    // 3. HA csak a timeline-t görgetjük
     if (isPanning) {
         e.preventDefault();
         const walk = panStartX - e.touches[0].clientX;
@@ -1015,8 +1054,13 @@ document.addEventListener('touchmove', (e) => {
 }, {passive: false});
 
 document.addEventListener('touchend', () => {
+    // Resetelünk mindent
+    isResizing = false;
+    resizeTarget = null;
+    
     handleClipDragEnd();
     isPanning = false;
+    document.body.style.cursor = '';
 });
 
 // Egérgörgő/Touchpad
@@ -1147,11 +1191,17 @@ function addClipToTrack(container, buffer, name, startTime = null, trimOffset = 
     // 3. Resize fülek
     const leftHandle = document.createElement('div');
     leftHandle.className = 'resize-handle left';
+    // Egér
     leftHandle.onmousedown = (e) => initResize(e, leftHandle, clip);
+    // Mobil / Touch
+    leftHandle.ontouchstart = (e) => initResize(e, leftHandle, clip);
     
     const rightHandle = document.createElement('div');
     rightHandle.className = 'resize-handle right';
+    // Egér
     rightHandle.onmousedown = (e) => initResize(e, rightHandle, clip);
+    // Mobil / Touch
+    rightHandle.ontouchstart = (e) => initResize(e, rightHandle, clip);
     
     clip.appendChild(leftHandle);
     clip.appendChild(rightHandle);
