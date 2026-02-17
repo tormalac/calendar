@@ -1094,6 +1094,17 @@ function addClipToTrack(container, buffer, name, startTime = null, trimOffset = 
     const clip = document.createElement('div');
     clip.className = 'audio-clip';
     
+    // Megkeressük a sávot, amibe épp tesszük a klipet
+    const parentTrack = container.closest('.track-container');
+    let waveColor = '#00ffd5'; // Alapértelmezett (Guitar/Default)
+
+    if (parentTrack) {
+        if (parentTrack.classList.contains('drum')) waveColor = '#3fa9f5';
+        else if (parentTrack.classList.contains('bass')) waveColor = '#ffd93d';
+        else if (parentTrack.classList.contains('synth')) waveColor = '#b084f7';
+        else if (parentTrack.classList.contains('vocal')) waveColor = '#ff7ac8';
+    }
+
     // Ha nincs megadva start, akkor a playhead; ha van, akkor az (pl. cut esetén)
     const startPos = startTime !== null ? startTime : currentPlayTime;
     const clipDuration = duration !== null ? duration : buffer.duration;
