@@ -770,6 +770,7 @@ h1, h2, h3 {
   height: 6px;
   background: rgba(255,255,255,0.1);
   border-radius: 3px;
+  touch-action: pan-y;
 }
 
 .track-sliders input[type=range]::-webkit-slider-thumb {
