@@ -95,7 +95,7 @@
          <button data-grid="1/64">1/64</button>
         </div>
        </div>
-       <button class="snap-btn">
+       <button class="snap-btn" title="Snap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
          <line x1="12" y1="5" x2="12" y2="19"/>
   
@@ -108,12 +108,12 @@
          <polyline points="16,10 14,12 16,14"/>
         </svg>
        </button>
-       <button class="select-btn">
+       <button class="select-btn" title="Select">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
          <rect x="4" y="6" width="16" height="12" stroke-dasharray="4 3"/>
         </svg>
        </button>
-       <button class="cut-btn">
+       <button class="cut-btn" title="Cut">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
          <circle cx="6" cy="6" r="3"/>
          <circle cx="6" cy="18" r="3"/>
@@ -121,7 +121,15 @@
          <path d="M20 20L8.5 9.5"/>
         </svg>
        </button>
-       <button class="delete-btn">
+       <button class="duplicate-btn" title="Duplicate">
+        <svg width="64" height="64" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+         <rect x="10" y="10" width="22" height="22" rx="3"
+         stroke="currentColor" stroke-width="3"/>
+         <rect x="16" y="16" width="22" height="22" rx="3"
+         stroke="currentColor" stroke-width="3"/>
+        </svg>
+       </button>
+       <button class="delete-btn" title="Delete">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
          <path d="M4 7H20"/>
          <path d="M9 7V4H15V7"/>
@@ -789,6 +797,77 @@ function performCut(e) {
 // A {passive: false} fontos, hogy működjön a preventDefault()
 cutBtn.addEventListener('touchstart', performCut, {passive: false});
 cutBtn.addEventListener('click', performCut);
+
+// --- DUPLICATE (MÁSOLÁS) FUNKCIÓ ---
+const duplicateBtn = document.querySelector('.duplicate-btn');
+
+function performDuplicate(e) {
+    // 1. Megakadályozzuk a fókuszvesztést (mobilon kritikus!)
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+
+    // 2. Kijelölt klip keresése
+    const selected = document.querySelector('.audio-clip.selected-clip');
+    if (!selected) return;
+
+    // 3. Adatok másolása a meglévő klipből
+    const parent = selected.parentElement; // Ez a .clips konténer
+    const buffer = selected.audioBuffer;   // A nyers hangadat
+    const name = selected.querySelector('.clip-name').textContent; // A név
+    
+    // Pozíciók számolása
+    const currentStart = parseFloat(selected.dataset.start);
+    const currentDuration = parseFloat(selected.dataset.duration);
+    const currentTrim = parseFloat(selected.dataset.trimOffset || 0);
+
+    // Az új klip közvetlenül a régi UTÁN kezdődjön
+    // (Így könnyű loopokat építeni egymás után rakosgatva)
+    const newStart = currentStart + currentDuration;
+
+    // 4. Új klip létrehozása a már meglévő segédfüggvényünkkel
+    addClipToTrack(parent, buffer, name, newStart, currentTrim, currentDuration);
+    
+    // Opcionális: Rezgés visszajelzés mobilon
+    if (navigator.vibrate) navigator.vibrate(50);
+}
+
+// --- DELETE (TÖRLÉS) FUNKCIÓ ---
+const deleteBtn = document.querySelector('.delete-btn');
+
+function performDelete(e) {
+    // 1. Fókuszvédelem
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+
+    // 2. Kijelölt klip keresése
+    const selected = document.querySelector('.audio-clip.selected-clip');
+    
+    // 3. Ha van kijelölés, töröljük a DOM-ból
+    if (selected) {
+        selected.remove();
+        
+        // Ha épp szólt a zene, a következő lejátszásnál a motor 
+        // automatikusan frissíti a listát, nem kell mást tenni.
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]); // Dupla rezzenés törlésnél
+    }
+}
+
+// --- ESEMÉNYFIGYELŐK BEKÖTÉSE ---
+
+// Duplicate gomb (Touch + Click)
+if (duplicateBtn) {
+    duplicateBtn.addEventListener('touchstart', performDuplicate, {passive: false});
+    duplicateBtn.addEventListener('click', performDuplicate);
+}
+
+// Delete gomb (Touch + Click)
+// Fontos: A HTML-ben lévő .delete-btn gombot használjuk erre
+if (deleteBtn) {
+    // Először levesszük a régi "toggle" logikát, ha volt rajta (tisztább így)
+    // De mivel most írjuk felül, elég csak hozzáadni az újat:
+    deleteBtn.addEventListener('touchstart', performDelete, {passive: false});
+    deleteBtn.addEventListener('click', performDelete);
+}
 
 
 // ==========================================================
