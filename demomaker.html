@@ -483,6 +483,32 @@ list.addEventListener('click', e => {
     if (btn && !btn.classList.contains('monitor')) {
         btn.classList.toggle('active');
     }
+
+    // MUTE KEZELÉS
+    const muteBtn = e.target.closest('.daw-btn.mute');
+    if (muteBtn) {
+        muteBtn.classList.toggle('active');
+        const track = muteBtn.closest('.track-container');
+        const isMuted = muteBtn.classList.contains('active');
+        
+        // Ha Solo van, az bonyolítja, de alap mute:
+        if (track.trackGainNode) {
+            // Ha mute aktív, a gain legyen 0, amúgy vissza a slider értékére (vagy 1)
+            const volSlider = track.querySelector('.track-sliders input[type=range]');
+            const originalVol = parseInt(volSlider.value) / 100;
+            
+            track.trackGainNode.gain.value = isMuted ? 0 : originalVol;
+        }
+        return;
+    }
+
+    // SOLO KEZELÉS (Kicsit trükkösebb: minden MÁST némít)
+    const soloBtn = e.target.closest('.daw-btn.solo');
+    if (soloBtn) {
+        soloBtn.classList.toggle('active');
+        updateSoloStates(); // Külön függvény kell neki
+        return;
+    }
     
     if (e.target.classList.contains('delete-track')) {
         if (confirm('Törlöd?')) {
@@ -500,6 +526,29 @@ document.addEventListener('click', () => closeAllPickers());
 function closeAllPickers() {
     document.querySelectorAll('.audio-source-picker, .output-picker').forEach(p => {
         p.style.display = 'none';
+    });
+}
+
+function updateSoloStates() {
+    const allTracks = document.querySelectorAll('.track-container');
+    const soloTracks = document.querySelectorAll('.track-container .daw-btn.solo.active');
+    const isAnySolo = soloTracks.length > 0;
+
+    allTracks.forEach(track => {
+        const hasSolo = track.querySelector('.daw-btn.solo').classList.contains('active');
+        const isMuted = track.querySelector('.daw-btn.mute').classList.contains('active');
+        const volSlider = track.querySelector('.track-sliders input[type=range]');
+        const vol = parseInt(volSlider.value) / 100;
+
+        if (track.trackGainNode) {
+            if (isAnySolo) {
+                // Ha van bárhol Solo, akkor csak a Solo-sok szólnak
+                track.trackGainNode.gain.value = hasSolo ? vol : 0;
+            } else {
+                // Ha nincs Solo, akkor a Mute dönt
+                track.trackGainNode.gain.value = isMuted ? 0 : vol;
+            }
+        }
     });
 }
 
@@ -575,9 +624,12 @@ picker.addEventListener('click', (e) => {
           <label>Vol<input type="range" min="0" max="100" value="80"><span class="slider-value">80%</span></label>
           <label>Pan<input type="range" min="-50" max="50" value="0"><span class="slider-value">0</span></label>
         </div>
-        <div class="track-meta">
-          <span class="audio-source">No Input</span><div class="audio-source-picker"></div>
-          <span class="output">No Output</span><div class="output-picker"></div>
+        <div class="track-meta"><span class="audio-source">No Input</span><div class="audio-source-picker"></div>
+          <span class="output">
+             No Output
+             <div class="vu-meter-bg"></div>
+          </span>
+          <div class="output-picker"></div>
         </div>
         <div class="track-inserts">Audio Inserts</div>
       </div>
@@ -596,6 +648,18 @@ picker.addEventListener('click', (e) => {
         document.querySelectorAll('.track-container').forEach(t => t.classList.remove('selected'));
         track.classList.add('selected');
     });
+
+    // --- AUDIO GRAPH ÉPÍTÉS ---
+    // Minden sávnak saját GainNode (Hangerő/Mute kezeléshez)
+    const trackGain = audioCtx.createGain();
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    trackGain.connect(analyser);
+    analyser.connect(masterGain);
+    
+    track.trackGainNode = trackGain;
+    track.analyserNode = analyser;
+    trackGain.gain.value = 0.8;
 
     addTrackDragEvents(track);
     list.appendChild(track);
@@ -618,10 +682,28 @@ picker.addEventListener('click', (e) => {
 // Slider érték vizualizáció
 document.addEventListener('input', e => {
   if (e.target.matches('.track-sliders input[type="range"]')) {
+    
+    // 1. Vizualizáció (szám kiírása) - Ez már megvolt
     const valueSpan = e.target.nextElementSibling;
     if (valueSpan) {
       if (e.target.parentElement.textContent.includes('Vol')) {
         valueSpan.textContent = e.target.value + '%';
+        
+        // --- 2. ÚJ RÉSZ: Hangerő frissítése valós időben ---
+        const track = e.target.closest('.track-container');
+        if (track && track.trackGainNode) {
+            // Csak akkor állítjuk, ha nincs Mute, vagy ha épp ez a sáv Solo
+            const isMuted = track.querySelector('.daw-btn.mute').classList.contains('active');
+            const isSolo = track.querySelector('.daw-btn.solo').classList.contains('active');
+            const anySolo = document.querySelectorAll('.daw-btn.solo.active').length > 0;
+
+            // Logika: Ha (nincs Solo mód ÉS nincs Mute) VAGY (van Solo mód és ez a sáv Solo)
+            if ((!anySolo && !isMuted) || (anySolo && isSolo)) {
+                track.trackGainNode.gain.value = parseInt(e.target.value) / 100;
+            }
+        }
+        // --------------------------------------------------
+
       } else {
         valueSpan.textContent = e.target.value;
       }
@@ -1344,7 +1426,14 @@ function startPlayback() {
         if (startOffset < clipEndTimeline) {
             const source = audioCtx.createBufferSource();
             source.buffer = buffer;
-            source.connect(masterGain);
+            
+            const parentTrack = clipDiv.closest('.track-container');
+            // Megnézzük, hogy a sávnak van-e saját GainNode-ja (amit létrehozáskor ráraktunk)
+            if (parentTrack && parentTrack.trackGainNode) {
+                source.connect(parentTrack.trackGainNode); 
+            } else {
+                source.connect(masterGain); // Biztonsági tartalék, ha mégse lenne
+            }
             
             let whenToStart = 0; // Mikor induljon a hangszóróból (delay)
             let offsetInFile = 0; // Honnan olvassa a fájlt (head position)
@@ -1403,6 +1492,47 @@ function updatePlayheadAnim() {
     animationFrameId = requestAnimationFrame(updatePlayheadAnim);
 }
 
+// --- VU METER ANIMÁCIÓS LOOP ---
+function updateMeters() {
+    const tracks = document.querySelectorAll('.track-container');
+    
+    tracks.forEach(track => {
+        if (!track.analyserNode) return;
+
+        const analyser = track.analyserNode;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        analyser.getByteTimeDomainData(dataArray);
+
+        let max = 0;
+        for (let i = 0; i < bufferLength; i++) {
+            const value = dataArray[i]; 
+            const volume = Math.abs(value - 128); 
+            if (volume > max) max = volume;
+        }
+
+        // Kicsit érzékenyebb skálázás (* 3.0), hogy jobban látszódjon
+        let percentage = (max / 128) * 100 * 3.0; 
+        if (percentage > 100) percentage = 100;
+
+        // ITT A VÁLTOZÁS: A belső hátteret keressük
+        const meterBg = track.querySelector('.vu-meter-bg');
+        
+        // Trükk: Csak akkor rajzoljuk ki, ha van jel, amúgy 0%
+        // (Így biztosan "No Output" felirat marad az alap, ha csend van)
+        if (meterBg) {
+             meterBg.style.width = percentage + '%';
+        }
+        
+        // Extra: Ha klip (túlvezérlés) van, a szöveg legyen piros/félkövér?
+        // if (percentage > 95) track.querySelector('.output').style.color = '#fff';
+    });
+
+    requestAnimationFrame(updateMeters);
+}
+
+updateMeters();
 drawRuler();
 drawAllGrids();
 </script>
