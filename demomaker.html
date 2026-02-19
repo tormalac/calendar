@@ -453,8 +453,9 @@ const GRID_MAP = {
   "1/32": 0.125, "1/64": 0.0625 
 };
 
-// Picker Nyitás/Csukás
+// --- TRACK LISTA ESEMÉNYEK ---
 list.addEventListener('click', e => {
+    // 1. Picker bezárás logikák (Audio Source / Output) - EZ MARAD A RÉGI
     const sourceSpan = e.target.closest('.audio-source');
     if (sourceSpan) {
         const p = sourceSpan.nextElementSibling;
@@ -472,52 +473,65 @@ list.addEventListener('click', e => {
         e.stopPropagation();
         return;
     }
-    
+
+    // --- GOMB KEZELÉS ---
+
+    // 2. MONITOR
     const monitorBtn = e.target.closest('.daw-btn.monitor');
     if (monitorBtn) {
         handleMonitorClick(monitorBtn);
         return;
     }
-    
-    const btn = e.target.closest('.daw-btn');
-    if (btn && !btn.classList.contains('monitor')) {
-        btn.classList.toggle('active');
-    }
 
-    // MUTE KEZELÉS
+    // 3. MUTE GOMB (ITT A VÁLTOZÁS)
     const muteBtn = e.target.closest('.daw-btn.mute');
     if (muteBtn) {
         muteBtn.classList.toggle('active');
-        const track = muteBtn.closest('.track-container');
-        const isMuted = muteBtn.classList.contains('active');
         
-        // Ha Solo van, az bonyolítja, de alap mute:
-        if (track.trackGainNode) {
-            // Ha mute aktív, a gain legyen 0, amúgy vissza a slider értékére (vagy 1)
-            const volSlider = track.querySelector('.track-sliders input[type=range]');
-            const originalVol = parseInt(volSlider.value) / 100;
-            
-            track.trackGainNode.gain.value = isMuted ? 0 : originalVol;
+        // Ha bekapcsoltuk a Mute-ot, kapcsoljuk ki a Solót ugyanazon a sávon
+        if (muteBtn.classList.contains('active')) {
+            const track = muteBtn.closest('.track-container');
+            const soloBtn = track.querySelector('.daw-btn.solo');
+            if (soloBtn) soloBtn.classList.remove('active');
         }
+
+        updateSoloStates(); // Újraszámolás
         return;
     }
 
-    // SOLO KEZELÉS (Kicsit trükkösebb: minden MÁST némít)
+    // 4. SOLO GOMB (ITT A VÁLTOZÁS)
     const soloBtn = e.target.closest('.daw-btn.solo');
     if (soloBtn) {
         soloBtn.classList.toggle('active');
-        updateSoloStates(); // Külön függvény kell neki
+
+        // Ha bekapcsoltuk a Solót, kapcsoljuk ki a Mute-ot ugyanazon a sávon
+        if (soloBtn.classList.contains('active')) {
+            const track = soloBtn.closest('.track-container');
+            const muteBtn = track.querySelector('.daw-btn.mute');
+            if (muteBtn) muteBtn.classList.remove('active');
+        }
+
+        updateSoloStates(); // Újraszámolás
         return;
     }
-    
+
+    // 5. EGYÉB DAW GOMBOK (Record, Edit, stb.)
+    const otherBtn = e.target.closest('.daw-btn');
+    if (otherBtn) {
+        otherBtn.classList.toggle('active');
+        return;
+    }
+
+    // 6. DELETE TRACK
     if (e.target.classList.contains('delete-track')) {
-        if (confirm('Törlöd?')) {
+        if (confirm('Törlöd ezt a sávot?')) {
             e.target.closest('.track-container').remove();
             const remainingTracks = document.querySelectorAll('.track-container').length;
             if (remainingTracks === 0) {
                 document.getElementById('timelineRuler').style.display = 'none';
             }
-        }                    
+            updateSoloStates(); 
+        }
     }
 });
 
@@ -531,22 +545,42 @@ function closeAllPickers() {
 
 function updateSoloStates() {
     const allTracks = document.querySelectorAll('.track-container');
-    const soloTracks = document.querySelectorAll('.track-container .daw-btn.solo.active');
-    const isAnySolo = soloTracks.length > 0;
+    
+    // Megnézzük, van-e legalább egy aktív SOLO gomb a teljes projektben
+    const activeSolos = document.querySelectorAll('.track-container .daw-btn.solo.active');
+    const isAnySolo = activeSolos.length > 0;
 
     allTracks.forEach(track => {
-        const hasSolo = track.querySelector('.daw-btn.solo').classList.contains('active');
-        const isMuted = track.querySelector('.daw-btn.mute').classList.contains('active');
-        const volSlider = track.querySelector('.track-sliders input[type=range]');
-        const vol = parseInt(volSlider.value) / 100;
+        // Ha még nincs audio node (pl. betöltés alatt), kihagyjuk
+        if (!track.trackGainNode) return;
 
-        if (track.trackGainNode) {
-            if (isAnySolo) {
-                // Ha van bárhol Solo, akkor csak a Solo-sok szólnak
-                track.trackGainNode.gain.value = hasSolo ? vol : 0;
+        const isMuted = track.querySelector('.daw-btn.mute').classList.contains('active');
+        const isSolo = track.querySelector('.daw-btn.solo').classList.contains('active');
+        
+        // Hangerő csúszka értéke (0.0 - 1.0)
+        // Fontos: a 'track-sliders' első inputja a Volume
+        const volInput = track.querySelector('.track-sliders input[type=range]');
+        const sliderVolume = parseInt(volInput.value) / 100;
+
+        // --- A DÖNTÉS ---
+        if (isAnySolo) {
+            // SOLO MÓD: Van valahol Solo, tehát szigorú szabályok vannak.
+            if (isSolo) {
+                // Én vagyok a kiválasztott -> Szólok.
+                // (A Solo felülírja a Mute-ot, ez a standard DAW működés)
+                track.trackGainNode.gain.value = sliderVolume;
             } else {
-                // Ha nincs Solo, akkor a Mute dönt
-                track.trackGainNode.gain.value = isMuted ? 0 : vol;
+                // Nem én vagyok Solo, de valaki más igen -> Csendben maradok.
+                track.trackGainNode.gain.value = 0;
+            }
+        } else {
+            // NORMÁL MÓD: Nincs Solo sehol.
+            if (isMuted) {
+                // Le vagyok némítva -> Csend.
+                track.trackGainNode.gain.value = 0;
+            } else {
+                // Minden oké -> Szólok a csúszka szerint.
+                track.trackGainNode.gain.value = sliderVolume;
             }
         }
     });
@@ -683,28 +717,18 @@ picker.addEventListener('click', (e) => {
 document.addEventListener('input', e => {
   if (e.target.matches('.track-sliders input[type="range"]')) {
     
-    // 1. Vizualizáció (szám kiírása) - Ez már megvolt
     const valueSpan = e.target.nextElementSibling;
     if (valueSpan) {
+      // Ha ez a Hangerő slider (Volume)
       if (e.target.parentElement.textContent.includes('Vol')) {
         valueSpan.textContent = e.target.value + '%';
         
-        // --- 2. ÚJ RÉSZ: Hangerő frissítése valós időben ---
-        const track = e.target.closest('.track-container');
-        if (track && track.trackGainNode) {
-            // Csak akkor állítjuk, ha nincs Mute, vagy ha épp ez a sáv Solo
-            const isMuted = track.querySelector('.daw-btn.mute').classList.contains('active');
-            const isSolo = track.querySelector('.daw-btn.solo').classList.contains('active');
-            const anySolo = document.querySelectorAll('.daw-btn.solo.active').length > 0;
-
-            // Logika: Ha (nincs Solo mód ÉS nincs Mute) VAGY (van Solo mód és ez a sáv Solo)
-            if ((!anySolo && !isMuted) || (anySolo && isSolo)) {
-                track.trackGainNode.gain.value = parseInt(e.target.value) / 100;
-            }
-        }
-        // --------------------------------------------------
-
+        // Nem állítjuk közvetlenül a gain-t, hanem meghívjuk a logikát!
+        // Így ha Mute van, akkor a csúszka mozog, de a hang 0 marad.
+        updateSoloStates();
+        
       } else {
+        // Ha ez a Pan slider
         valueSpan.textContent = e.target.value;
       }
     }
@@ -1391,14 +1415,24 @@ function addClipToTrack(container, buffer, name, startTime = null, trimOffset = 
     container.appendChild(clip);
 }
 
+// Ikonok SVG stringek
+const ICON_PLAY = `<svg width="16" height="16" viewBox="0 0 16 16"><polygon points="3,2 13,8 3,14" fill="currentColor"/></svg>`;
+const ICON_PAUSE = `<svg width="16" height="16" viewBox="0 0 16 16"><rect x="3" y="2" width="4" height="12" fill="currentColor"/><rect x="9" y="2" width="4" height="12" fill="currentColor"/></svg>`;
+
 // --- LEJÁTSZÁS ---
 playBtn.onclick = (e) => {
-    e.target.closest('button').classList.toggle('active');
+    // A gomb aktív állapotát (zöld szín) kapcsoljuk
+    // (Ez a .active class a CSS-ben)
+    playBtn.classList.toggle('active');
     
     if (isPlaying) {
+        // Ha eddig ment, most megállítjuk -> Váltson vissza PLAY ikonra
         stopPlayback();
+        playBtn.innerHTML = ICON_PLAY;
     } else {
+        // Ha eddig állt, most elindítjuk -> Váltson PAUSE ikonra
         startPlayback();
+        playBtn.innerHTML = ICON_PAUSE;
     }
 };
 
@@ -1473,6 +1507,7 @@ function stopPlayback() {
     audioSources = [];
     cancelAnimationFrame(animationFrameId);
     playBtn.classList.remove('active');
+    playBtn.innerHTML = ICON_PLAY;
 }
 
 function updatePlayheadAnim() {
