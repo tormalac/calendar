@@ -319,7 +319,7 @@ function populateOutputDevices(track) {
 
 function selectOutput(track, btn, picker) {
     const span = track.querySelector('.output');
-    span.textContent = btn.textContent;
+    span.innerHTML = `${btn.textContent}<div class="vu-meter-bg"></div>`;
     picker.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     picker.style.display = 'none';
@@ -1512,21 +1512,22 @@ function updateMeters() {
             if (volume > max) max = volume;
         }
 
-        // Kicsit érzékenyebb skálázás (* 3.0), hogy jobban látszódjon
-        let percentage = (max / 128) * 100 * 3.0; 
+        let percentage = (max / 128) * 100 * 1.2; 
         if (percentage > 100) percentage = 100;
 
-        // ITT A VÁLTOZÁS: A belső hátteret keressük
         const meterBg = track.querySelector('.vu-meter-bg');
-        
-        // Trükk: Csak akkor rajzoljuk ki, ha van jel, amúgy 0%
-        // (Így biztosan "No Output" felirat marad az alap, ha csend van)
         if (meterBg) {
-             meterBg.style.width = percentage + '%';
+             // TRÜKK: Nem a szélességet állítjuk, hanem a vágást!
+             // "inset(top right bottom left)"
+             // Ha 80%-os a jel, akkor jobbról 20%-ot vágunk le (100 - 80).
+             const insetAmount = 100 - percentage;
+             
+             meterBg.style.clipPath = `inset(0 ${insetAmount}% 0 0)`;
+             meterBg.style.webkitClipPath = `inset(0 ${insetAmount}% 0 0)`;
+             
+             // A színváltó JS kódot (backgroundColor) TÖRÖLD KI INNEN!
+             // Azt most már a CSS gradiens intézi automatikusan.
         }
-        
-        // Extra: Ha klip (túlvezérlés) van, a szöveg legyen piros/félkövér?
-        // if (percentage > 95) track.querySelector('.output').style.color = '#fff';
     });
 
     requestAnimationFrame(updateMeters);
