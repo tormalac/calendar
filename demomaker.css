@@ -807,41 +807,44 @@ h1, h2, h3 {
 }
 
 .track-meta span.output {
-    position: relative;  /* Ez tartja a keretet */
-    overflow: hidden;    /* Ami kilóg, azt levágjuk */
-    z-index: 1;          /* Hogy a szöveg a háttér előtt legyen */
-    background: rgba(255,255,255,0.05); /* Alap háttér */
-    /* A szöveg stílusa marad */
+    position: relative; 
+    overflow: hidden;    
+    z-index: 1;          
+    background: rgba(255,255,255,0.05);
     padding: 10px 4px;
     border-radius: 2px;
     font-size: 0.7rem;
     cursor: pointer;
-    display: inline-block; /* Fontos a méretezéshez */
-    min-width: 60px;       /* Legyen egy kis fix szélessége */
-    text-align: center;
+    display: inline-block;
+    min-width: 60px;
 }
 
-/* A mozgó színes háttér */
 .vu-meter-bg {
     position: absolute;
     top: 0;
     left: 0;
     bottom: 0;
-    width: 0%; /* Ez fog változni JS-ből */
-    z-index: -1; /* A szöveg mögé küldjük */
-    opacity: 0.6; /* Átlátszó, hogy a szöveg olvasható maradjon */
-    
-    background: linear-gradient(to right, 
-        #00ffd5 0%,   /* Zöld */
-        #00ffd5 60%, 
-        #ffd93d 60%,  /* Sárga */
-        #ffd93d 85%, 
-        #ff4c4c 85%,  /* Piros */
+    height: 100%;
+    width: 100%; 
+    z-index: 2;
+    opacity: 0.6;
+    pointer-events: none; 
+    /* A SZÍNTÉRKÉP (Hard Stop Gradient) */
+    background: linear-gradient(90deg, 
+        #00ffd5 0%, 
+        #00ffd5 80%,  
+        
+        #ffd93d 80%, 
+        #ffd93d 90%,  
+        
+        #ff4c4c 90%, 
         #ff4c4c 100%
     );
     
-    transition: width 0.05s linear; /* Finom mozgás */
-    pointer-events: none; /* Átkattinthatsz rajta (fontos!) */
+    clip-path: inset(0 100% 0 0);
+    -webkit-clip-path: inset(0 100% 0 0); 
+    
+    transition: clip-path 0.05s linear, -webkit-clip-path 0.05s linear;
 }
 
 .audio-source-picker {
