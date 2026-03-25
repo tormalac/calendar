@@ -452,7 +452,7 @@ input, select {
   margin-top: 16px;
   padding: 4px 10px;
   border-radius: 12px;
-  background: rgba(0,0,0,0.01);
+  /*background: rgba(0,0,0,0.01);*/
   font-size: 12px;
   white-space: nowrap;
 }
@@ -466,7 +466,7 @@ input, select {
   margin-bottom: 20px;
   padding: 10px;
   background: #fefefe;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
   border-radius: 5px;
   max-width: 680px;
   font-size: 14px;
@@ -507,12 +507,12 @@ input, select {
 .month {
   flex:0 0 320px;
   max-width: 460px;
-  border:1px solid #ccc;
+  border:1px solid #ddd;
   border-radius:5px;
   padding:10px;
   box-sizing:border-box;
   background: #fefefe;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  /*box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);*/
 }
 
 .month th, .month td {
