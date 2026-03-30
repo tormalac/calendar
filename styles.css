@@ -102,7 +102,7 @@ button:hover .material-symbols-rounded {
         'wght' 400, 
         'GRAD' 0, 
         'opsz' 48;
-    font-size: 36px;
+    font-size: 32px;
 }
 
 .cards {
@@ -118,7 +118,7 @@ button:hover .material-symbols-rounded {
     text-decoration: none;
     color: inherit;
     border: 1px solid var(--card-border);
-    transition: background 0.2s, border-color 0.2s;
+    transition: background 0.2s, border-color 0.4s;
 }
 
 .card.link:hover {
@@ -127,7 +127,7 @@ button:hover .material-symbols-rounded {
 }
 
 .card.link .icon {
-    font-size: 34px;
+    font-size: 32px;
     margin-bottom: 12px;
 }
 
@@ -145,29 +145,25 @@ button:hover .material-symbols-rounded {
     color: var(--text-light);
 }
 
-/* Dupla szélességű kártya nagyobb képernyőkön */
 @media (min-width: 600px) {
     .card.double {
         grid-column: span 2;
     }
 }
 
-/* Opcionális: Kisebb igazítás a dupla kártya tartalmához */
 .card.double ul {
-    padding-left: 20px;
+    padding-left: 0;
 }
 
 .card.double li {
     margin-bottom: 6px;
 }
 
-.card.static {
-    background: #f1f3f6;              
+.card.static {              
     color: #444;                       
     border-radius: var(--radius);
     padding: 26px;
-    box-shadow: none;
-    border: 1px solid #d7dce3;         
+    box-shadow: none;         
 }
 
 .card.static .icon {
@@ -221,10 +217,55 @@ button:hover .material-symbols-rounded {
     }
 }
 
+.bottom-dark-section {
+    background: #141414;
+    color: #eee;
+    padding: 40px 0 10px 0;
+    margin-top: 40px;
+    border-top: 1px solid #222;
+}
+
+
+.content-limit {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.bottom-dark-section .card.static {
+    color: #ccc;
+}
+
+.bottom-dark-section .card.static h3 {
+    color: #ddd;
+}
+
+.bottom-dark-section .card.static .icon .material-symbols-rounded {
+    color: #ddd;
+    font-size: 32px !important;
+}
+
+.bottom-dark-section .feature-list li {
+    color: #bbb;
+}
+
+/* Footer modernizálása */
 footer {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid #222;
     text-align: center;
-    margin: 20px 0;
-    color: #777;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.footer-content p {
+    margin-bottom: 10px;
+}
+
+.footer-links {
+    font-size: 0.8rem;
+    opacity: 0.6;
 }
 
 h1 {
