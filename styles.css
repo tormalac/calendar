@@ -26,53 +26,6 @@ body.notesApp {
     overflow: hidden;
 }
 
-.ad-bar {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    width: 100%;
-    height: 48px;
-    background: #1f1f1f;
-    overflow: hidden;
-    z-index: 9999;
-    border-bottom: 1px solid #222;
-}
-
-.ad-content {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    height: 100%;
-    white-space: nowrap;
-
-    animation: slideAd 30s linear infinite;
-}
-
-.ad-content img {
-    height: 32px;
-    filter: drop-shadow(0 0 4px #00ffd5);
-}
-
-.ad-content span {
-    color: #fff;
-    font-size: 15px;
-    letter-spacing: 1px;
-}
-
-.ad-content b {
-    color: #00ffd5;
-}
-
-/* FIXÁLT ANIMÁCIÓ */
-@keyframes slideAd {
-    from {
-        transform: translateX(100vw);
-    }
-    to {
-        transform: translateX(-100%);
-    }
-}
-
 nav {
     background: #ffffffcc;
     backdrop-filter: blur(10px);
@@ -123,13 +76,13 @@ button:hover .material-symbols-rounded {
 
 #aboutWrapper {
     max-width: 900px;
-    margin: 40px auto 20px;
-    padding: 20px;
+    margin: 0 auto 10px;
+    padding: 0 20px;
 }
 
 #aboutHeader {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 #aboutHeader h1 {
@@ -140,6 +93,7 @@ button:hover .material-symbols-rounded {
 #aboutHeader p {
     font-size: 1.15rem;
     color: var(--text-light);
+    margin: 4px;
 }
 
 #aboutWrapper .material-symbols-rounded {
@@ -191,6 +145,22 @@ button:hover .material-symbols-rounded {
     color: var(--text-light);
 }
 
+/* Dupla szélességű kártya nagyobb képernyőkön */
+@media (min-width: 600px) {
+    .card.double {
+        grid-column: span 2;
+    }
+}
+
+/* Opcionális: Kisebb igazítás a dupla kártya tartalmához */
+.card.double ul {
+    padding-left: 20px;
+}
+
+.card.double li {
+    margin-bottom: 6px;
+}
+
 .card.static {
     background: #f1f3f6;              
     color: #444;                       
@@ -220,9 +190,40 @@ button:hover .material-symbols-rounded {
     color: #555;                       
 }
 
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 18px;
+    text-align: left;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.feature-list li .material-symbols-rounded {
+    color: var(--accent);
+    font-size: 24px !important;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* Dupla szélességű kártya nagyobb képernyőkön */
+@media (min-width: 600px) {
+    .card.double {
+        grid-column: span 2;
+    }
+}
+
 footer {
     text-align: center;
-    margin: 50px 0;
+    margin: 20px 0;
     color: #777;
 }
 
