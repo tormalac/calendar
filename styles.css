@@ -19,11 +19,15 @@ body {
     font-family: "Inter", sans-serif;
     color: var(--text-dark);
     min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
 }
 
 body.notesApp {
     height: 100%;
     overflow: hidden;
+    display: block;
 }
 
 nav {
@@ -70,8 +74,11 @@ button:hover .material-symbols-rounded {
 
 #aboutWrapper {
     max-width: 900px;
-    margin: 0 auto 10px;
+    margin: 0 auto 40px;
     padding: 0 20px;
+
+    width: 100%;
+    box-sizing: border-box;
 }
 
 #aboutHeader {
@@ -204,18 +211,11 @@ button:hover .material-symbols-rounded {
     margin-top: 2px;
 }
 
-/* Dupla szélességű kártya nagyobb képernyőkön */
-@media (min-width: 600px) {
-    .card.double {
-        grid-column: span 2;
-    }
-}
-
 .bottom-dark-section {
     background: #141414;
     color: #eee;
     padding: 40px 0 10px 0;
-    margin-top: 40px;
+    margin-top: auto;
     border-top: 1px solid #222;
 }
 
@@ -231,11 +231,11 @@ button:hover .material-symbols-rounded {
 }
 
 .bottom-dark-section .card.static h3 {
-    color: #ddd;
+    color: #ccc;
 }
 
 .bottom-dark-section .card.static .icon .material-symbols-rounded {
-    color: #ddd;
+    color: #ccc;
     font-size: 32px !important;
 }
 
