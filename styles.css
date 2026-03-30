@@ -208,7 +208,7 @@ button:hover .material-symbols-rounded {
 }
 
 .feature-list li .material-symbols-rounded {
-    color: var(--accent);
+    color: #333;
     font-size: 24px !important;
     flex-shrink: 0;
     margin-top: 2px;
