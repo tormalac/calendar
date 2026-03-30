@@ -3,7 +3,7 @@
     --card-bg: #ffffff;
     --card-border: #e3e8f5;
     --shadow-soft: 0 4px 12px rgba(0,0,0,0.05);
-    --radius: 16px;
+    --radius: 8px;
 
     --accent: #3a1aa8;
     --text-dark: #222;
@@ -50,15 +50,9 @@ button {
     transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
-/*button:hover {
-    background: #eef3ff;
-    border-color: var(--accent);
-    color: var(--accent);
-}*/
-
 button:hover {
-    background: #f4f4f4;
-    border-color: #999;
+    background: rgba(58, 26, 168, 0.02);
+    border-color: rgba(58, 26, 168, 0.2);
     color: var(--accent);
 }
 
@@ -122,8 +116,8 @@ button:hover .material-symbols-rounded {
 }
 
 .card.link:hover {
-    background: #e0e0ff;
-    border-color: var(--accent);
+    background: rgba(58, 26, 168, 0.02);
+    border-color: rgba(58, 26, 168, 0.2);
 }
 
 .card.link .icon {
