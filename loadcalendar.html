@@ -54,7 +54,17 @@
 </div>
 
 <!-- Sidebar -->
-<div id="sidebarEdge"></div>
+<div id="sidebarEdge">
+   <div class="toggle-btn" id="toggleBtn">
+       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+           <path d="M15 6L9 12L15 18" 
+                 stroke="currentColor" 
+                 stroke-width="2" 
+                 stroke-linecap="round" 
+                 stroke-linejoin="round"/>
+       </svg>      
+   </div>
+</div>
 <div id="settingsSidebar">
 <h2>További szerkesztés</h2>
 <button id="closeSidebar">✖ Bezárás</button>
@@ -215,16 +225,19 @@ const muszakNevek = { 1:'DE', 2:'DE', 3:'DU', 4:'ÉJ' };
 const settingsSidebar = document.getElementById("settingsSidebar");
 const sidebarEdge = document.getElementById("sidebarEdge");
 const closeSidebar = document.getElementById("closeSidebar");
+const toggleBtn = document.getElementById('toggleBtn');
 
 // --- A keskeny élre kattintva nyílik ki ---
 sidebarEdge.onclick = () => {
     settingsSidebar.classList.add("open");
+    toggleBtn.classList.add("close");
 };
 
 // --- Sidebar bezárása, ha a bezárás gombra kattintasz ---
 closeSidebar.onclick = (e) => {
     e.stopPropagation();
     settingsSidebar.classList.remove("open");
+    toggleBtn.classList.remove("close");
 };
 
 // --- Sidebaron kívülre kattintva csukódik ---
@@ -232,9 +245,11 @@ document.addEventListener("click", (e) => {
     if (
         settingsSidebar.classList.contains("open") &&
         !settingsSidebar.contains(e.target) &&
-        e.target !== sidebarEdge
+        !sidebarEdge.contains(e.target) &&
+        !toggleBtn.contains(e.target)
     ) {
         settingsSidebar.classList.remove("open");
+        toggleBtn.classList.remove("close");
     }
 });
 
