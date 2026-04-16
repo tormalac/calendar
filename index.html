@@ -12,14 +12,8 @@
 
 <!-- MENÜ -->
 <nav>
-    <button onclick="location.href='newcalendar.html'">
-        <span class="material-symbols-rounded">calendar_month</span> Új naptár
-    </button>
     <button onclick="location.href='loadcalendar.html'">
-        <span class="material-symbols-rounded">edit</span> Naptár szerkesztése
-    </button>
-    <button onclick="location.href='budget.html'">
-        <span class="material-symbols-rounded">paid</span> Bérkalkulátor
+        <span class="material-symbols-rounded">edit</span> Naptár
     </button>
     <button onclick="location.href='texteditor.html'">
         <span class="material-symbols-rounded">note</span> Jegyzetek
@@ -36,57 +30,77 @@
 
     <div id="aboutHeader">
         <h1>Munkaidő naptár, jegyzetek és zene</h1>
-        <p>Gyors és letisztult eszközök a mindennapok rendszerezéséhez.</p>
+        <p>
+            Gyors és letisztult eszközök a mindennapok rendszerezéséhez<br>
+            <strong>Vanilla JavaScript</strong>,
+            <strong>Firebase</strong> és külső 
+            <strong>API</strong>-k integrációjával.
+        </p>
+        
+        <div class="profile-container">
+            <img src="profile.png" alt="Torma László profilképe" class="profile-pic">
+    
+            <div class="profile-text">
+                    
+            </div>
+        </div>
+
+        <div class="portfolio-divider">Full Stack fejlesztések</div>
+
     </div>
 
     <!-- INTERAKTÍV KÁRTYÁK -->
     <div class="cards">
         <a href="loadcalendar.html" class="card link">
             <div class="icon"><span class="material-symbols-rounded">calendar_month</span></div>
-            <h3>Naptár & események</h3>
-            <p>Átlátható havi nézet és könnyű eseménykezelés.</p>
+            <h3>Munkaidő Naptár & CRUD</h3>
+            <p>
+               Egyedi algoritmus alapján működő műszakrend-generátor LocalStorage és Firestore adattárolással.
+               Támogatja a CSV alapú adatimportálást és exportálást.
+            </p>
         </a>
 
         <a href="texteditor.html" class="card link">
             <div class="icon"><span class="material-symbols-rounded">edit</span></div>
-            <h3>Jegyzetek</h3>
-            <p>Gyors szövegbevitel, automatikus mentés.</p>
+            <h3>Cloud Notes (Firebase Auth)</h3>
+            <p>
+               Valós idejű szövegszerkesztő alkalmazás biztonságos felhasználói autentikációval.
+               Funkciók: dinamikus rendezés, duplikálás és felhő alapú szinkronizáció.
+            </p>
         </a>
 
         <a href="musicplayer.html" class="card link">
             <div class="icon"><span class="material-symbols-rounded">music_note</span></div>
-            <h3>Zenelejátszó</h3>
-            <p>Albumokba rendezhető zenék és modern lejátszó.</p>
+            <h3>Audio Engine & Cloudinary API</h3>
+            <p>
+               Egyedi fejlesztésű médialejátszó, amely külső API-t használ az audiófájlok streamingelésére.
+               Tartalmazza a dinamikus albumkezelést és a feltöltési folyamat vizualizációját (Progress Bar).
+            </p>
         </a>
 
         <a href="https://tormalac.github.io/demomaker/" class="card link" target="_blank">
             <div class="icon"><span class="material-symbols-rounded">graphic_eq</span></div>
-            <h3>demoMaker DAW</h3>
-            <p>Ingyenes online stúdió. Felvétel, effektek és zeneszerkesztés bárhol.</p>
-            <p style="margin-top: 10px; font-size: 0.8rem; color: #777;">
-                A demoMaker egy böngészőből futtatható, ingyenes digitális audio munkaállomás (DAW), 
-                amely elhozza a home stúdió élményt. Nincs szükség telepítésre, azonnal kezdheted a zenélést!
-                Az oldal folyamatos fejlesztés alatt áll, így elképzelhető, hogy pillanatnyilag nem elérhető,
-                de később felkerülnek az újabb fejlesztések, és mehet is tovább a móka!
+            <h3>Advanced Web Audio (demoMaker)</h3>
+            <p>
+               Egy komplex digitális audió munkaállomás (DAW) prototípusa.
+               A projekt demonstrálja a Web Audio API mélyebb ismeretét,
+               a sávszintű effektezést és a JSON alapú projektmentést.
             </p>
         </a>
         
         <div class="card static double">
-            <div class="icon"><span class="material-symbols-rounded">info</span></div>
-            <h3>Mit tud a demoMaker?</h3>
-            <p>                
-                Elkészítheted saját zenéidet közvetlenül a böngészőből. Nincs szükség telepítésre, 
-                azonnal használhatod a beépített eszközöket, a keverőpultot és a sávokat. 
-                Próbáld ki a legújabb Béta verziót!
-            </p> 
-            <ul class="feature-list">
-                <li><span class="material-symbols-rounded">check_circle</span> Sávok rögzítése </li>
-                <li><span class="material-symbols-rounded">check_circle</span> Beépített effektek és szintetizátorok </li>
-                <li><span class="material-symbols-rounded">check_circle</span> PC-re és mobiltelefonra optimalizált felület </li>
-                <li><span class="material-symbols-rounded">check_circle</span> Projektek mentése és exportálása (.json fájlba) </li>
-                <li><span class="material-symbols-rounded">check_circle</span> Projektek elérése felhőből </li>
-            </ul>       
-        </div>
+        <div class="icon"><span class="material-symbols-rounded">architecture</span></div>
+        <h3>Fejlesztési Szemlélet és Architektúra</h3>
+        <p>                
+        A projekt célja az volt, hogy külső, nehézkes keretrendszerek (pl. React, Angular) nélkül, <strong>tisztán Vanilla JavaScript</strong> használatával építsek fel egy komplex, állapottartó (stateful) alkalmazást.
+        </p> 
+        <ul class="feature-list">
+            <li><span class="material-symbols-rounded">check_circle</span> <strong>Keretrendszer-független megközelítés:</strong> Mélyebb megértés a DOM manipuláció és a böngésző API-k terén.</li>
+            <li><span class="material-symbols-rounded">check_circle</span> <strong>Aszinkron adatkezelés:</strong> Promise-ok és Async/Await használata a Firebase és a REST API hívásoknál a blokkolásmentes UI érdekében.</li>
+            <li><span class="material-symbols-rounded">check_circle</span> <strong>Moduláris felépítés:</strong> Az alkalmazások különálló, de egymással integrálható logikai egységekre vannak bontva.</li>
+            <li><span class="material-symbols-rounded">check_circle</span> <strong>Biztonság és jogosultságok:</strong> Firebase Authentication alapú route- és adatvédelem.</li>
+        </ul>       
+    </div>
      </div>
 </div>
 
@@ -95,26 +109,35 @@
 
        <div class="cards">
            <div class="card static">
-              <div class="icon"><span class="material-symbols-rounded">cloud</span></div>
-              <h3>Felhő alapú mentés</h3>
-              <p>Bejelentkezés után minden Firestore-ban és Cloudinary-ben tárolódik biztonságosan.</p>
+              <div class="icon"><span class="material-symbols-rounded">database</span></div>
+              <h3>Backend & Adatkezelés</h3>
+              <p>
+                 Firebase (Firestore, Auth) integráció a felhasználói adatok biztonságos kezeléséhez
+                 és a valós idejű szinkronizációhoz.
+              </p>
            </div>
 
            <div class="card static">
-              <div class="icon"><span class="material-symbols-rounded">speed</span></div>
-              <h3>Gyors & mobilbarát</h3>
-              <p>Minden eszközön kényelmes, modern és gyors.</p>
+              <div class="icon"><span class="material-symbols-rounded">code_blocks</span></div>
+              <h3>Frontend Architektúra</h3>
+              <p>
+                 Modularitásra törekvő Vanilla JavaScript (ES6+), reszponzív CSS Grid/Flexbox elrendezések és
+                 aszinkron (Async/Await) API hívások.
+              </p>
            </div>
 
            <div class="card static">
-              <div class="icon"><span class="material-symbols-rounded">palette</span></div>
-              <h3>Letisztult design</h3>
-              <p>Minimal stílus, ami a használhatóságot helyezi előtérbe.</p>
+              <div class="icon"><span class="material-symbols-rounded">data_object</span></div>
+              <h3>Fájlkezelés & Parsolás</h3>
+              <p>
+                 Kliensoldali fájlfeldolgozás: CSV parsolás (PapaParse),
+                 FileReader API és dinamikus Blob generálás a letöltésekhez.
+              </p>
            </div>
         </div>
 
 <footer>
-    © 2025 Munkaidő naptár – Minden eszköz egy helyen.
+    © 2025 Torma László – Design & Code 
 </footer>
 
    </div>
