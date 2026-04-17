@@ -214,10 +214,8 @@ strong {
     color: var(--text-light);
 }
 
-@media (min-width: 600px) {
-    .card.double {
-        grid-column: span 2;
-    }
+.card.double {
+    grid-column: span 2;
 }
 
 .card.double ul {
@@ -226,6 +224,13 @@ strong {
 
 .card.double li {
     margin-bottom: 6px;
+    padding-left: 30px;
+    display: block;
+    text-indent: -16px;
+}
+
+.card.double li material-symbols-rounded {
+     
 }
 
 .card.static {              
