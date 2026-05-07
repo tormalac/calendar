@@ -1069,7 +1069,7 @@ input, select {
     gap: 20px;
     box-sizing: border-box;
     height: auto;
-    max-width: 1200px;
+    min-width: 1200px;
 }
 
 #topZone {
@@ -1086,10 +1086,10 @@ input, select {
     flex-direction: column;
 }
 
-#albumsContainer {
+/*#albumsContainer {
     flex: 1;
     overflow-y: auto;
-}
+}*/
 
 #albumSort {
     padding-bottom: 20px;
@@ -1181,7 +1181,7 @@ input, select {
     filter: invert(85%) hue-rotate(180deg);
 }
 
-.album {
+/*.album {
     background: #f1f3f6;              
     color: #444;                       
     border-radius: var(--radius);
@@ -1204,13 +1204,13 @@ input, select {
 
 .album-header:hover {
     background: #b0b4bd;
-}
+}*/
 
-.album-content {
+/*.album-content {
     display: none;
     padding: 10px 16px;
     border-top: 1px solid #ccc;
-}
+}*/
 .album.open .album-content {
     display: block;
 }
@@ -1258,7 +1258,7 @@ input, select {
     cursor: pointer;
 }
 
-.song {
+/*.song {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1269,7 +1269,7 @@ input, select {
     border: 1px solid #ddd;
     border-radius: 4px;
     transition: background 0.2s;
-}
+}*/
 
 .song.playing {
     background-color: #ccf0d2; /*#cce7ff*/
@@ -1277,14 +1277,14 @@ input, select {
     color: #0c5928; /*#003366*/
 }
 
-.song .song-info {
+/*.song .song-info {
     flex: 1 1 auto; /* növekedhet, de alap 200px */
     margin-left: 0;                   /* bal margó nullázva */
     max-width: calc(100% - 260px); 
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-}
+}*/
 
 .song-info[contenteditable="true"] {
     border-bottom: 1px solid transparent; /* dashed → solid */
@@ -1297,12 +1297,12 @@ input, select {
     border-color: #999;
 }
 
-.song .song-actions {
+/*.song .song-actions {
     display: flex;
     gap: 8px;
     min-width: 250px; /* hogy a gombok elférjenek */
     justify-content: flex-end;
-}
+}*/
 
 .song select {
     background: #f0f0f0;
@@ -1369,12 +1369,6 @@ input, select {
     border-radius: 4px;
     box-sizing: border-box !important;
     font-weight: normal;
-}
-
-#albumsContainer {
-    flex: 1;          
-    padding-right: 10px;
-    overflow-y: auto;     
 }
 
 .help-btn {
