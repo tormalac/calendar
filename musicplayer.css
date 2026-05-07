@@ -1,0 +1,192 @@
+
+/* =========================================
+   1. A konténer (Pinterest stílusú oszlopok)
+========================================= */
+#albumsContainer {
+    display: block !important;   /* Kikapcsoljuk a Gridet */
+    column-width: 280px;         /* Egy oszlop minimum szélessége */
+    column-gap: 20px;            /* Oszlopok közötti távolság */
+    padding-bottom: 40px;
+}
+
+/* =========================================
+   2. Az album kártya
+========================================= */
+.album {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    border: 1px solid #e3e8f5;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+    
+    /* --- EZEK AZ ÚJ SZABÁLYOK --- */
+    break-inside: avoid;         /* Garantálja, hogy egy album ne törjön ketté két oszlop között */
+    margin-bottom: 20px;         /* Távolság az egymás ALATT lévő kártyák között */
+}
+
+.album:hover {
+    box-shadow: 0 0px 10px rgba(0,0,0,0.12);
+    /*transform: translateY(-2px);*/
+}
+
+/* --- Album borító placeholder --- */
+.album-cover-placeholder {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #e0e0ff 0%, #f3f3f3 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    position: relative; /* <-- Ez tartja kordában az abszolút pozicionált képet */
+}
+
+/* --- Maga a feltöltött kép --- */
+.album-cover-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    
+    /* --- EZT IS HOZZÁADHATOD --- */
+    z-index: 1; /* Alacsonyabb réteg */
+    
+    transition: transform 0.3s ease;
+}
+
+/* Hover effektus (opcionális látvány) */
+.album-cover-placeholder:hover .album-cover-img {
+    transform: scale(1.08);
+}
+
+.album-cover-placeholder .material-symbols-rounded {
+    font-size: 80px;
+    color: #b0b4bd;
+    transition: transform 0.3s;
+}
+
+.album-cover-placeholder:hover .material-symbols-rounded {
+    transform: scale(1.1);
+}
+
+/* --- Képfeltöltő gomb alapból elrejtve --- */
+.upload-cover-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    
+    /* EZ REJTI EL */
+    display: none !important; 
+    
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    
+    /* EZ RAKJA A KÉP FÖLÉ */
+    z-index: 999 !important; 
+    
+    transition: transform 0.2s, background 0.2s;
+}
+
+/* --- HA AZ ALBUM NYITVA VAN ('open' class), AKKOR MEGJELENIK --- */
+.album.open .upload-cover-btn {
+    display: flex !important; /* A JS/HTML flexboxot használ, így az ikon középre kerül */
+}
+
+/* --- Hover (ha fölé viszed az egeret) --- */
+.upload-cover-btn:hover {
+    background: rgba(0, 0, 0, 0.95);
+    transform: scale(1.15);
+}
+
+.upload-cover-btn .material-icons {
+    color: white;
+    font-size: 20px;
+}
+
+/* =========================================
+   Album Fejléc (Cím és gombok)
+========================================= */
+.album-header {
+    background: #fff;
+    padding: 16px;
+    display: flex;             /* Visszatettük! */
+    flex-direction: column; 
+    align-items: stretch;
+    gap: 12px;
+}
+
+.album-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #222;
+    text-align: center;
+}
+
+.right-controls {
+    display: flex;             /* Visszatettük! */
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-top: 1px dashed #eee;
+    padding-top: 10px;
+}
+
+/* =========================================
+   Dalok listája (Harmonika logika)
+========================================= */
+.album-content {
+    display: none;             /* Alapból rejtve van! */
+    padding: 0 12px 12px;
+    background: #fafafa;
+}
+
+/* Ha az album megkapja az 'open' classt, megjelenik a lista */
+.album.open .album-content {
+    display: block;             
+}
+
+/* --- Dal sor stílusa --- */
+.song {
+    display: flex;
+    flex-wrap: nowrap; /* NE törjön új sorba, tartsuk egy sorban */
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden; /* Ne lógjon ki semmi */
+}
+
+.song .song-info {
+    flex: 1;
+    min-width: 0; /* <--- Ez engedi a szöveget "összenyomódni" ahelyett, hogy feszítené a dobozt */
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Ha hosszú a cím, ... lesz a vége */
+}
+
+.song .song-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0; /* A gombok viszont ne nyomódjanak össze soha */
+}
