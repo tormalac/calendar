@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" />
 <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="musicplayer.css" />
 
 </head>
 <body>
@@ -64,6 +65,8 @@
       </div>
       </div>
       <input type="file" id="fileInput" accept="audio/*" style="display:none;">
+      
+      <input type="file" id="coverUploadInput" accept="image/*" style="display:none;">
    </div>
 
    <div id="midZone">
@@ -123,7 +126,8 @@ import {
   orderBy,
   doc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -200,6 +204,8 @@ let albumSortMode = {};
 let lastPlayButton = null;
 let playlist = [];
 let currentIndex = 0;
+
+let currentUploadAlbum = null;
 
 // Play gomb
 player.onplay = () => {
@@ -319,6 +325,15 @@ document.getElementById('newAlbumBtn').onclick = () => {
 
 async function renderSongs() {
     const songs = await fetchSongs();
+
+    let albumCovers = {};
+    if (auth.currentUser) {
+        const coversSnap = await getDocs(collection(db, "albums"));
+        coversSnap.forEach(doc => {
+            albumCovers[doc.id] = doc.data().url; // doc.id lesz az album neve
+        });
+    }
+
     const container = document.getElementById("albumsContainer");
     container.innerHTML = "";
 
@@ -354,7 +369,7 @@ async function renderSongs() {
         });
     }
 
-    for (const albumName of allAlbumNames) {
+    /*for (const albumName of allAlbumNames) {
 
         // --- Alapértelmezett rendezés beállítása
         if (!albumSortMode[albumName]) albumSortMode[albumName] = 'time';
@@ -386,7 +401,75 @@ async function renderSongs() {
           </span>
         </span>
     </span>
-`;
+`;*/
+
+    for (const albumName of allAlbumNames) {
+
+            if (!albumSortMode[albumName]) albumSortMode[albumName] = 'time';
+
+            const albumDiv = document.createElement("div");
+            albumDiv.className = "album";
+
+            if (openAlbums.has(albumName)) albumDiv.classList.add("open");
+
+            // --- 1. ÚJ RÉSZ: Borítókép létrehozása ---
+            const coverDiv = document.createElement("div");
+            coverDiv.className = "album-cover-placeholder";
+
+            if (albumCovers[albumName]) {
+                coverDiv.innerHTML = `<img src="${albumCovers[albumName]}" class="album-cover-img">`;
+            } else {
+                coverDiv.innerHTML = `<span class="material-symbols-rounded">album</span>`;
+            }
+
+            // Képfeltöltő gomb
+            const uploadBtn = document.createElement("button");
+            uploadBtn.className = "upload-cover-btn";
+            uploadBtn.innerHTML = `<span class="material-icons">add_a_photo</span>`;
+            uploadBtn.title = "Borítókép feltöltése";
+            
+            uploadBtn.onclick = (e) => {
+                e.stopPropagation(); // Ez megakadályozza, hogy az album kinyíljon/becsukódjon kattintáskor
+                currentUploadAlbum = albumName;
+                document.getElementById("coverUploadInput").click();
+            };
+            
+            coverDiv.appendChild(uploadBtn);
+
+            // Ha a borítóra kattintanak (de nem a feltöltő gombra), nyíljon le a tracklist
+            coverDiv.addEventListener("click", () => {
+                albumDiv.classList.toggle("open");
+                const arrowIcon = header.querySelector(".arrow .material-symbols-rounded");
+                arrowIcon.textContent = albumDiv.classList.contains("open") ? "expand_less" : "expand_more";
+                
+                if (albumDiv.classList.contains("open")) openAlbums.add(albumName);
+                else openAlbums.delete(albumName);
+            });
+            // ------------------------------------------
+
+            // --- 2. MÓDOSÍTOTT: Album fejléc ---
+            const header = document.createElement("div");
+            header.className = "album-header";
+
+            header.innerHTML = `
+                <span class="album-title">
+                    <span class="album-name" contenteditable="true" spellcheck="false">${albumName}</span>
+                </span>
+                <span class="right-controls">
+                    <select class="sortSelect">
+                        <option value="time" ${albumSortMode[albumName]==='time' ? 'selected' : ''}>Idő</option>
+                        <option value="abc" ${albumSortMode[albumName]==='abc' ? 'selected' : ''}>ABC</option>
+                    </select>
+                    <span class="arrow" style="cursor:pointer; padding: 4px;">
+                      <span class="material-symbols-rounded">
+                      ${openAlbums.has(albumName) ? "expand_less" : "expand_more"}
+                      </span>
+                    </span>
+                </span>
+            `;
+
+            // ... A kódod további része innen változatlan marad (névszerkesztés, nyit/csuk események) ...
+
     // Album szerkesztése
     const nameSpan = header.querySelector(".album-name");
 
@@ -585,6 +668,7 @@ playBtn.onclick = (e) => {
             content.appendChild(songDiv);
         });
 
+        albumDiv.appendChild(coverDiv);
         albumDiv.appendChild(header);
         albumDiv.appendChild(content);
         container.appendChild(albumDiv);
@@ -829,6 +913,64 @@ document.getElementById("albumSortSelect").addEventListener("change", () => {
     renderSongs();
 });
 
+// --- ALBUM BORÍTÓ FELTÖLTÉSE (RÉGI TÖRLÉSÉVEL) ---
+document.getElementById('coverUploadInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file || !currentUploadAlbum) return;
+
+    try {
+        // 1. Megkeressük, van-e már régi borító ehhez az albumhoz
+        const albumDocRef = doc(db, "albums", currentUploadAlbum);
+        const albumSnap = await getDocs(query(collection(db, "albums"), where("__name__", "==", currentUploadAlbum)));
+        
+        // Mivel a doc name-et használjuk ID-nak, egyszerűbb így:
+        // (A korábbi kódomban setDoc-ot használtunk az album nevével ID-ként)
+        const existingDoc = await (await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js")).getDoc(albumDocRef);
+
+        if (existingDoc.exists()) {
+            const oldData = existingDoc.data();
+            if (oldData.public_id) {
+                console.log("Régi kép törlése:", oldData.public_id);
+                // Meghívjuk a backend törlés végpontját
+                await fetch(`https://music-backend-jq1s.onrender.com/delete/${oldData.public_id}`, {
+                    method: 'DELETE'
+                });
+            }
+        }
+
+        // 2. Jöhet az új kép feltöltése
+        alert("Új borítókép feltöltése folyamatban...");
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch('https://music-backend-jq1s.onrender.com/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!res.ok) throw new Error("Feltöltési hiba");
+
+        const data = await res.json();
+
+        // 3. Firestore frissítése az új adatokkal
+        await setDoc(albumDocRef, {
+            url: data.url,
+            public_id: data.public_id,
+            owner: auth.currentUser.uid,
+            uploadedAt: serverTimestamp()
+        });
+
+        alert("✅ Borító sikeresen lecserélve (régi törölve)!");
+        renderSongs();
+
+    } catch (err) {
+        console.error("Hiba a csere során:", err);
+        alert("❌ Hiba történt: " + err.message);
+    } finally {
+        e.target.value = ""; 
+    }
+});
+
 const helpBtn = document.getElementById("helpBtn");
 const helpModal = document.getElementById("helpModal");
 const closeModal = document.getElementById("closeModal");
@@ -839,6 +981,8 @@ closeModal.onclick = () => helpModal.classList.remove("show");
 helpModal.onclick = e => {
     if (e.target === helpModal) helpModal.classList.remove("show");
 };
+
+
 
 </script>
 </body>
