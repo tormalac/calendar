@@ -1062,14 +1062,19 @@ input, select {
 /* MusicPlayer*/
 
 #mainContentMusic {
-    margin: 214px auto 20px; 
+    margin: 214px auto 20px;
+    width: 100%; /* <--- EZ A BŰVÖS SOR HIÁNYZOTT! */
     display: flex;
     flex-direction: column; 
     padding: 20px;
     gap: 20px;
     box-sizing: border-box;
     height: auto;
-    min-width: 1800px;
+    transition: padding-right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+body.sidebar-open #mainContentMusic {
+    padding-right: 500px !important; 
 }
 
 #topZone {
@@ -1153,7 +1158,7 @@ input, select {
 }
 
 #musicToolbar .icon-btn:hover .material-icons {
-    color: #1db954; /* zöld, ha hover-effektet akarsz */ 
+    color: #7252db; /* #1db954 zöld, ha hover-effektet akarsz */ 
 }
 
 .album-select {
@@ -1272,9 +1277,10 @@ input, select {
 }*/
 
 .song.playing {
-    background-color: #ccf0d2; /*#cce7ff*/
+    background-color: #f0eaff; /*#ccf0d2 #cce7ff*/
     transition: background-color 0.3s;
-    color: #0c5928; /*#003366*/
+    color: #3a1aa8; /*#0c5928 #003366*/
+    border-color: #d1c4f9;
 }
 
 /*.song .song-info {
