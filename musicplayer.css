@@ -3,9 +3,9 @@
    1. A konténer (Pinterest stílusú oszlopok)
 ========================================= */
 #albumsContainer {
-    display: block !important;   /* Kikapcsoljuk a Gridet */
-    column-width: 280px;         /* Egy oszlop minimum szélessége */
-    column-gap: 20px;            /* Oszlopok közötti távolság */
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 25px;
     padding-bottom: 40px;
 }
 
@@ -20,12 +20,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    min-width: 0;
     transition: transform 0.2s, box-shadow 0.2s;
-    
-    /* --- EZEK AZ ÚJ SZABÁLYOK --- */
-    break-inside: avoid;         /* Garantálja, hogy egy album ne törjön ketté két oszlop között */
-    margin-bottom: 20px;         /* Távolság az egymás ALATT lévő kártyák között */
+    cursor: pointer;
 }
 
 .album:hover {
@@ -189,4 +185,97 @@
     align-items: center;
     gap: 6px;
     flex-shrink: 0; /* A gombok viszont ne nyomódjanak össze soha */
+}
+
+/* =========================================
+   Becsúszó oldalsáv a daloknak
+========================================= */
+#songsSidebar {
+    position: fixed;
+    top: 214px;                  /* Pontosan a lejátszó sávja alól indul */
+    right: -520px;
+    width: 480px;
+    height: calc(100vh - 214px); /* Kitölti a maradék képernyőmagasságot */
+    background: #ffffff;
+    box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+    z-index: 850;                /* A #musicToolbar (900) alatt marad */
+    transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #e0e0e0;
+}
+
+#songsSidebar.open {
+    right: 0; /* Becsúszik */
+}
+
+#closeSongsSidebar {
+    background: none;
+    border: none;
+    border-radius: 50%;
+    color: #aaa;
+}
+
+#closeSongsSidebar:hover {
+    color: var(--accent);
+    border-radius: 50%;
+    background: rgba(58, 26, 168, 0.05);
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #222;
+}
+
+.sidebar-controls {
+    padding: 10px 20px;
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+#sidebarSongsList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+/* Kicsit igazítunk az album kártyán, hogy egyértelmű legyen a kattintás */
+.album {
+    cursor: pointer;
+}
+.album .right-controls .arrow {
+    display: none; /* A nyilakra (expand_more) már nem lesz szükség */
+}
+
+/* =========================================
+   Vékony progress bar a lejátszó alján
+========================================= */
+#uploadProgressContainer {
+    display: none;             /* Alapból rejtve van (a JS kapcsolja be) */
+    position: absolute;        /* Kikerül a normál folyamból */
+    bottom: 0;                 /* Rátapad a #musicToolbar legaljára */
+    left: 0;                   /* Bal szélről indul */
+    width: 100%;               /* Teljes szélességű */
+    height: 3px;               /* Nagyon vékony csík (3 pixel) */
+    background: rgba(255, 255, 255, 0.1); /* Halvány áttetsző sáv a háttérben */
+    z-index: 10;
+}
+
+#uploadProgress {
+    width: 0%;
+    height: 100%;
+    background: #6948d7;       /* A világosabb lila színed */
+    transition: width 0.3s ease; /* Finom animáció ahogy nő az érték */
+    box-shadow: 0 0 8px #5938c7; /* Egy pici "ragyogás" a csíknak */
 }
