@@ -60,9 +60,11 @@
          <div class="player-box">
             <audio id="player" controls preload="metadata"></audio>
          </div>
-         <div id="uploadProgressContainer" style="display:none; margin-top:10px; width:100%; background:#ccc; border-radius:8px;">
-         <div id="uploadProgress" style="width:0%; height:12px; background:#4caf50; border-radius:8px;"></div>
-      </div>
+
+         <div id="uploadProgressContainer">
+             <div id="uploadProgress"></div>
+         </div>
+
       </div>
       <input type="file" id="fileInput" accept="audio/*" style="display:none;">
       
@@ -79,6 +81,24 @@
      </div>
      <div id="albumsContainer"></div>
    </div>
+
+   <div id="songsSidebar">
+    <div class="sidebar-header">
+        <h2 id="sidebarAlbumTitle">Album neve</h2>
+        <button id="closeSongsSidebar" class="icon-btn">
+            <span class="material-symbols-rounded">close</span>
+        </button>
+    </div>
+    <div class="sidebar-controls">
+        <label>Rendezés: 
+            <select id="sidebarSortSelect">
+                <option value="time">Idő</option>
+                <option value="abc">ABC</option>
+            </select>
+        </label>
+    </div>
+    <div id="sidebarSongsList"></div>
+  </div>
 </div>
 
 <div class="modal" id="helpModal">
@@ -369,310 +389,124 @@ async function renderSongs() {
         });
     }
 
-    /*for (const albumName of allAlbumNames) {
-
-        // --- Alapértelmezett rendezés beállítása
-        if (!albumSortMode[albumName]) albumSortMode[albumName] = 'time';
-
-
-        const albumDiv = document.createElement("div");
-        albumDiv.className = "album";
-
-        if (openAlbums.has(albumName)) albumDiv.classList.add("open");
-
-        // --- Album fejléc
-        const header = document.createElement("div");
-        header.className = "album-header";
-
-        header.innerHTML = `
-    <span class="album-title">
-        <span class="folder-icon material-symbols-rounded">folder</span>
-        <span class="album-name" contenteditable="true" spellcheck="false">${albumName}</span>
-    </span>
-    <span class="right-controls">
-        Dalok rendezése: 
-        <select class="sortSelect">
-            <option value="time" ${albumSortMode[albumName]==='time' ? 'selected' : ''}>Időrend</option>
-            <option value="abc" ${albumSortMode[albumName]==='abc' ? 'selected' : ''}>ABC</option>
-        </select>
-        <span class="arrow">
-          <span class="material-symbols-rounded">
-          ${openAlbums.has(albumName) ? "expand_less" : "expand_more"}
-          </span>
-        </span>
-    </span>
-`;*/
-
     for (const albumName of allAlbumNames) {
+    if (!albumSortMode[albumName]) albumSortMode[albumName] = 'time';
 
-            if (!albumSortMode[albumName]) albumSortMode[albumName] = 'time';
+    const albumDiv = document.createElement("div");
+    albumDiv.className = "album";
+    // openAlbums logikát kiveheted, mert már nem lenyílik, hanem oldalt jön be
 
-            const albumDiv = document.createElement("div");
-            albumDiv.className = "album";
-
-            if (openAlbums.has(albumName)) albumDiv.classList.add("open");
-
-            // --- 1. ÚJ RÉSZ: Borítókép létrehozása ---
-            const coverDiv = document.createElement("div");
-            coverDiv.className = "album-cover-placeholder";
-
-            if (albumCovers[albumName]) {
-                coverDiv.innerHTML = `<img src="${albumCovers[albumName]}" class="album-cover-img">`;
-            } else {
-                coverDiv.innerHTML = `<span class="material-symbols-rounded">album</span>`;
-            }
-
-            // Képfeltöltő gomb
-            const uploadBtn = document.createElement("button");
-            uploadBtn.className = "upload-cover-btn";
-            uploadBtn.innerHTML = `<span class="material-icons">add_a_photo</span>`;
-            uploadBtn.title = "Borítókép feltöltése";
-            
-            uploadBtn.onclick = (e) => {
-                e.stopPropagation(); // Ez megakadályozza, hogy az album kinyíljon/becsukódjon kattintáskor
-                currentUploadAlbum = albumName;
-                document.getElementById("coverUploadInput").click();
-            };
-            
-            coverDiv.appendChild(uploadBtn);
-
-            // Ha a borítóra kattintanak (de nem a feltöltő gombra), nyíljon le a tracklist
-            coverDiv.addEventListener("click", () => {
-                albumDiv.classList.toggle("open");
-                const arrowIcon = header.querySelector(".arrow .material-symbols-rounded");
-                arrowIcon.textContent = albumDiv.classList.contains("open") ? "expand_less" : "expand_more";
-                
-                if (albumDiv.classList.contains("open")) openAlbums.add(albumName);
-                else openAlbums.delete(albumName);
-            });
-            // ------------------------------------------
-
-            // --- 2. MÓDOSÍTOTT: Album fejléc ---
-            const header = document.createElement("div");
-            header.className = "album-header";
-
-            header.innerHTML = `
-                <span class="album-title">
-                    <span class="album-name" contenteditable="true" spellcheck="false">${albumName}</span>
-                </span>
-                <span class="right-controls">
-                    <select class="sortSelect">
-                        <option value="time" ${albumSortMode[albumName]==='time' ? 'selected' : ''}>Idő</option>
-                        <option value="abc" ${albumSortMode[albumName]==='abc' ? 'selected' : ''}>ABC</option>
-                    </select>
-                    <span class="arrow" style="cursor:pointer; padding: 4px;">
-                      <span class="material-symbols-rounded">
-                      ${openAlbums.has(albumName) ? "expand_less" : "expand_more"}
-                      </span>
-                    </span>
-                </span>
-            `;
-
-            // ... A kódod további része innen változatlan marad (névszerkesztés, nyit/csuk események) ...
-
-    // Album szerkesztése
-    const nameSpan = header.querySelector(".album-name");
-
-nameSpan.addEventListener("click", e => {
-    e.stopPropagation(); // ne csukja be az albumot
-});
-
-nameSpan.addEventListener("blur", async () => {
-    const newName = nameSpan.textContent.trim();
-    if (!newName) {
-        nameSpan.textContent = albumName;
-        return;
-    }
-    if (newName === albumName) return;
-
-    const oldName = albumName;
-    const songsToUpdate = albums[oldName];
-
-    // dalok album mező átírása
-    for (const song of songsToUpdate) {
-        await updateDoc(doc(db, "songs", song.id), { album: newName });
-    }
-
-    // állapot átmozgatása
-    openAlbums.delete(oldName);
-    openAlbums.add(newName);
-
-    albumSortMode[newName] = albumSortMode[oldName];
-    delete albumSortMode[oldName];
-
-    renderSongs();
-});
-
-    // Album nyit/csuk toggle
-    header.addEventListener("click", (e) => {
-    // Ha a kattintás a selectre esett, ne csináljon semmit
-    if (e.target.tagName === 'SELECT') return;
-
-    albumDiv.classList.toggle("open");
-
-    const arrowIcon = header.querySelector(".arrow .material-symbols-rounded");
-    arrowIcon.textContent = albumDiv.classList.contains("open")
-    ? "expand_less"
-    : "expand_more";
-
-    if (albumDiv.classList.contains("open")) openAlbums.add(albumName);
-    else openAlbums.delete(albumName);
-});
-
-// Rendezés select esemény (csak a rendezést változtatja, nem nyit/csuk)
-header.querySelector(".sortSelect").addEventListener("change", (e) => {
-    albumSortMode[albumName] = e.target.value;
-
-    // Megőrizni az album nyitott állapotát, hogy ne tűnjön el
-    renderSongs();
-});
-
-        // --- Tartalom
-        const content = document.createElement("div");
-        content.className = "album-content";
-
-        // Rendezés albumon belül
-        let songsInAlbum = [...albums[albumName]];
-        if (albumSortMode[albumName] === 'abc') {
-            songsInAlbum.sort((a, b) => a.name.localeCompare(b.name));
-        } else {
-            songsInAlbum.sort((a, b) => (b.uploadedAt?.seconds || 0) - (a.uploadedAt?.seconds || 0));
-        }
-
-        songsInAlbum.forEach(song => {
-            const songDiv = document.createElement("div");
-            songDiv.className = "song";
-
-            songDiv.dataset.id = song.id;
-
-            if (currentSongId === song.id) songDiv.classList.add("playing");
-
-            songDiv.innerHTML = `
-                <button class="playBtn"><span class="material-icons">play_arrow</span></button>
-                <div class="song-info" contenteditable="true" spellcheck="false" data-ms-editor="false">${song.name}</div>
-                <div class="song-actions">
-                    <select>
-                        ${allAlbumNames.map(a => `<option value="${a}" ${a === song.album ? 'selected' : ''}>${a}</option>`).join('')}
-                    </select>
-                    <button class="deleteBtn"><span class="material-icons">delete</span></button>
-                </div>
-            `;
-
-            songDiv.addEventListener("click", e => e.stopPropagation());
-
-            //Play pause gomb
-            const playBtn = songDiv.querySelector(".playBtn");
-
-playBtn.onclick = (e) => {
-    e.stopPropagation();
-
-    // Ha másik dal van kiválasztva, új playlist építése
-    if (currentSongId !== song.id) {
-        const albumName = song.album || "Alap Album";
-        // playlist: az összes dal ebben az albumban
-        playlist = songsInAlbum = [...albums[albumName]];
-        // rendezzük a playlistet az albumSortMode szerint
-        if (albumSortMode[albumName] === 'abc') {
-            playlist.sort((a, b) => a.name.localeCompare(b.name));
-        } else {
-            playlist.sort((a, b) => (b.uploadedAt?.seconds || 0) - (a.uploadedAt?.seconds || 0));
-        }
-
-        currentIndex = playlist.findIndex(s => s.id === song.id);
-        currentSongId = song.id;
-        selectedFileDocId = song.id;
-        selectedFilePublicId = song.public_id;
-        fileNameInput.value = song.name;
-        let url = song.url;
-        if (isMobileData) {
-            url = url.replace('/upload/', '/upload/q_auto:low/');
-        }
-        player.src = url;
-        player.play();
-        lastPlayButton = playBtn;
+    // 1. Borítókép létrehozása
+    const coverDiv = document.createElement("div");
+    coverDiv.className = "album-cover-placeholder";
+    if (albumCovers[albumName]) {
+        coverDiv.innerHTML = `<img src="${albumCovers[albumName]}" class="album-cover-img">`;
     } else {
-        // ugyanaz a dal → toggle play/pause
-        if (player.paused) player.play();
-        else player.pause();
+        coverDiv.innerHTML = `<span class="material-symbols-rounded">album</span>`;
     }
 
-    updatePlayingHighlight();
-};
+    const uploadBtn = document.createElement("button");
+    uploadBtn.className = "upload-cover-btn";
+    uploadBtn.innerHTML = `<span class="material-icons">add_a_photo</span>`;
+    uploadBtn.title = "Borítókép feltöltése";
+    uploadBtn.onclick = (e) => {
+        e.stopPropagation(); 
+        currentUploadAlbum = albumName;
+        document.getElementById("coverUploadInput").click();
+    };
+    coverDiv.appendChild(uploadBtn);
 
+    // 2. Album fejléc
+    const header = document.createElement("div");
+    header.className = "album-header";
+    header.innerHTML = `
+        <span class="album-title">
+            <span class="album-name" contenteditable="true" spellcheck="false">${albumName}</span>
+        </span>
+    `;
 
-            // Albumváltás
-            const albumSelect = songDiv.querySelector("select");
-            albumSelect.onchange = async (e) => {
-                e.stopPropagation();
-                await updateDoc(doc(db, "songs", song.id), { album: e.target.value });
-                renderSongs();
-            };
+    // --- KLIKK ESEMÉNYEK AZ OLDALSÁVHOZ ---
+    const openSidebar = () => {
+        openAlbumSidebar(albumName, albums[albumName], allAlbumNames);
+    };
 
-            // Lejátszás
-            /*songDiv.querySelector(".playBtn").onclick = (e) => {
-                e.stopPropagation();
-                player.src = song.url;
-                player.play();
-                currentSongId = song.id;
-                selectedFileDocId = song.id;
-                selectedFilePublicId = song.public_id;
-                fileNameInput.value = song.name;
-                renderSongs();
-            };*/
+    coverDiv.addEventListener("click", openSidebar);
+    
+    header.addEventListener("click", (e) => {
+        // Ha a cím átnevezésére kattint, ne nyissa meg az oldalsávot
+        if (e.target.classList.contains('album-name')) return;
+        openSidebar();
+    });
 
-            // Átnevezés
-            songDiv.querySelector(".song-info").addEventListener("blur", async (e) => {
-                const newName = e.target.textContent.trim();
-                if (!newName) { e.target.textContent = song.name; return; }
-                if (newName !== song.name) {
-                    await updateDoc(doc(db, "songs", song.id), { name: newName });
-                    song.name = newName;
-                    if (selectedFileDocId === song.id) fileNameInput.value = newName;
-                }
-            });
+    // Név szerkesztése mentés
+    /*const nameSpan = header.querySelector(".album-name");
+    nameSpan.addEventListener("blur", async () => {
+        const newName = nameSpan.textContent.trim();
+        if (!newName || newName === albumName) {
+            nameSpan.textContent = albumName;
+            return;
+        }
+        for (const song of albums[albumName]) {
+            await updateDoc(doc(db, "songs", song.id), { album: newName });
+        }
+        renderSongs();
+    });*/
 
-            // Törlés
-            songDiv.querySelector(".deleteBtn").onclick = async (e) => {
-                e.stopPropagation();
-                if (!confirm(`Biztos törlöd: ${song.name}?`)) return;
-                if (song.public_id) {
-                    try {
-                        const res = await fetch(`https://music-backend-jq1s.onrender.com/delete/${song.public_id}`, { method: "DELETE" });
-                        console.log("DELETE response:", res);
-                        if (!res.ok) {
-                            console.error("Hiba a backend törlésnél:", res.status, await res.text());
-                            alert("Hiba a törlés során a backendnél!");
-                            return;
-                        }
-                    } catch(err) {
-                        console.error("Fetch hiba:", err);
-                        alert("Hiba a törlés során: "+err.message);
-                        return;
-                    }
-                }
-                    try {
-                        await deleteDoc(doc(db, "songs", song.id));
-                    } catch(err) {
-                        console.error("Firestore törlési hiba:", err);
-                        alert("Hiba a Firestore törlés során: "+err.message);
-                        return;
-                    }
+    // Név szerkesztése mentés
+    const nameSpan = header.querySelector(".album-name");
+    nameSpan.addEventListener("blur", async () => {
+        const newName = nameSpan.textContent.trim();
+        if (!newName || newName === albumName) {
+            nameSpan.textContent = albumName;
+            return;
+        }
 
-                if (currentSongId === song.id) {
-                    player.src = "";
-                    currentSongId = null;
-                }
-                renderSongs();
-            };
+        const oldName = albumName;
+        const songsToUpdate = albums[oldName];
 
-            content.appendChild(songDiv);
-        });
+        // 1. Dalok frissítése az új album névre
+        for (const song of songsToUpdate) {
+            await updateDoc(doc(db, "songs", song.id), { album: newName });
+        }
 
-        albumDiv.appendChild(coverDiv);
-        albumDiv.appendChild(header);
-        albumDiv.appendChild(content);
-        container.appendChild(albumDiv);
-    }
+        // 2. ÚJ LÉPÉS: Borítókép áthelyezése a Firestore-ban az új ID (név) alá
+        try {
+            // Dinamikusan importáljuk a getDoc-ot (ahogy a feltöltésnél is csináltad)
+            const { getDoc } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js");
+            
+            const oldAlbumRef = doc(db, "albums", oldName);
+            const oldAlbumSnap = await getDoc(oldAlbumRef);
+
+            // Ha volt feltöltve borítókép a régi névhez
+            if (oldAlbumSnap.exists()) {
+                const coverData = oldAlbumSnap.data();
+                
+                // Létrehozzuk az újat az új névvel
+                await setDoc(doc(db, "albums", newName), coverData);
+                
+                // Töröljük a régit
+                await deleteDoc(oldAlbumRef);
+            }
+        } catch (err) {
+            console.error("Hiba a borítókép átnevezésekor:", err);
+        }
+
+        // 3. UI Állapotok átmozgatása
+        openAlbums.delete(oldName);
+        openAlbums.add(newName);
+
+        if (albumSortMode[oldName]) {
+            albumSortMode[newName] = albumSortMode[oldName];
+            delete albumSortMode[oldName];
+        }
+
+        renderSongs(); // Frissítjük a felületet
+    });
+
+    albumDiv.appendChild(coverDiv);
+    albumDiv.appendChild(header);
+    container.appendChild(albumDiv);
+}
 
     updateAlbumSelect(songs);
 }
@@ -970,6 +804,160 @@ document.getElementById('coverUploadInput').addEventListener('change', async (e)
         e.target.value = ""; 
     }
 });
+
+// Globális változó az épp nyitott album követésére
+let currentSidebarAlbum = null;
+let currentSidebarSongs = [];
+let currentAllAlbums = [];
+
+// Oldalsáv elemek
+const songsSidebar = document.getElementById('songsSidebar');
+const closeSongsSidebarBtn = document.getElementById('closeSongsSidebar');
+const sidebarAlbumTitle = document.getElementById('sidebarAlbumTitle');
+const sidebarSongsList = document.getElementById('sidebarSongsList');
+const sidebarSortSelect = document.getElementById('sidebarSortSelect');
+
+// Oldalsáv bezárása
+closeSongsSidebarBtn.onclick = () => {
+    songsSidebar.classList.remove('open');
+    document.body.classList.remove('sidebar-open');
+    currentSidebarAlbum = null;
+};
+
+// Rendezés változása az oldalsávban
+sidebarSortSelect.addEventListener('change', (e) => {
+    if(currentSidebarAlbum) {
+        albumSortMode[currentSidebarAlbum] = e.target.value;
+        renderSidebarSongs();
+    }
+});
+
+// Oldalsáv megnyitása és adatok átadása
+function openAlbumSidebar(albumName, songsInAlbum, allAlbumNames) {
+    currentSidebarAlbum = albumName;
+    currentSidebarSongs = songsInAlbum;
+    currentAllAlbums = allAlbumNames;
+    
+    sidebarAlbumTitle.textContent = albumName;
+    
+    // Beállítjuk a selectet az adott album mentett rendezésére
+    if (albumSortMode[albumName]) {
+        sidebarSortSelect.value = albumSortMode[albumName];
+    } else {
+        sidebarSortSelect.value = "time";
+    }
+
+    renderSidebarSongs();
+    document.body.classList.add('sidebar-open');
+    songsSidebar.classList.add('open');
+}
+
+// Dalok kirajzolása az oldalsávba (Ebbe mozgattuk át a régi kódodat)
+function renderSidebarSongs() {
+    sidebarSongsList.innerHTML = "";
+    
+    let songsToRender = [...currentSidebarSongs];
+    
+    // Rendezés
+    if (sidebarSortSelect.value === 'abc') {
+        songsToRender.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+        songsToRender.sort((a, b) => (b.uploadedAt?.seconds || 0) - (a.uploadedAt?.seconds || 0));
+    }
+
+    songsToRender.forEach(song => {
+        const songDiv = document.createElement("div");
+        songDiv.className = "song";
+        songDiv.dataset.id = song.id;
+
+        if (currentSongId === song.id) songDiv.classList.add("playing");
+
+        songDiv.innerHTML = `
+            <button class="playBtn"><span class="material-icons">play_arrow</span></button>
+            <div class="song-info" contenteditable="true" spellcheck="false">${song.name}</div>
+            <div class="song-actions">
+                <select class="moveSelect">
+                    ${currentAllAlbums.map(a => `<option value="${a}" ${a === song.album ? 'selected' : ''}>${a}</option>`).join('')}
+                </select>
+                <button class="deleteBtn"><span class="material-icons">delete</span></button>
+            </div>
+        `;
+
+        // Lejátszás logika
+        const playBtn = songDiv.querySelector(".playBtn");
+        playBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (currentSongId !== song.id) {
+                playlist = [...songsToRender];
+                currentIndex = playlist.findIndex(s => s.id === song.id);
+                currentSongId = song.id;
+                selectedFileDocId = song.id;
+                selectedFilePublicId = song.public_id;
+                fileNameInput.value = song.name;
+                
+                let url = song.url;
+                if (isMobileData) url = url.replace('/upload/', '/upload/q_auto:low/');
+                
+                player.src = url;
+                player.play();
+                lastPlayButton = playBtn;
+            } else {
+                if (player.paused) player.play();
+                else player.pause();
+            }
+            updatePlayingHighlight();
+        };
+
+        // Átnevezés
+        songDiv.querySelector(".song-info").addEventListener("blur", async (e) => {
+            const newName = e.target.textContent.trim();
+            if (!newName) { e.target.textContent = song.name; return; }
+            if (newName !== song.name) {
+                await updateDoc(doc(db, "songs", song.id), { name: newName });
+                song.name = newName;
+                if (selectedFileDocId === song.id) fileNameInput.value = newName;
+                renderSongs(); // Fő lista frissítése a háttérben
+            }
+        });
+
+        // Átmozgatás másik albumba
+        songDiv.querySelector(".moveSelect").onchange = async (e) => {
+            e.stopPropagation();
+            await updateDoc(doc(db, "songs", song.id), { album: e.target.value });
+            renderSongs(); // Frissíti a dom-ot
+            songsSidebar.classList.remove('open'); 
+            document.body.classList.remove('sidebar-open');
+        };
+
+        // Törlés
+        songDiv.querySelector(".deleteBtn").onclick = async (e) => {
+            e.stopPropagation();
+            if (!confirm(`Biztos törlöd: ${song.name}?`)) return;
+            
+            // ... (Itt hagyd meg a korábbi törlési fetch/Firestore logikádat) ...
+             try {
+                if (song.public_id) {
+                    await fetch(`https://music-backend-jq1s.onrender.com/delete/${song.public_id}`, { method: "DELETE" });
+                }
+                await deleteDoc(doc(db, "songs", song.id));
+             } catch(err) {
+                 alert("Hiba a törlés során"); return;
+             }
+
+            if (currentSongId === song.id) {
+                player.src = "";
+                currentSongId = null;
+            }
+            
+            // Frissítjük a nézeteket
+            currentSidebarSongs = currentSidebarSongs.filter(s => s.id !== song.id);
+            renderSidebarSongs();
+            renderSongs();
+        };
+
+        sidebarSongsList.appendChild(songDiv);
+    });
+}
 
 const helpBtn = document.getElementById("helpBtn");
 const helpModal = document.getElementById("helpModal");
