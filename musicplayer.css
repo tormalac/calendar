@@ -98,9 +98,9 @@
     transition: transform 0.2s, background 0.2s;
 }
 
-/* --- HA AZ ALBUM NYITVA VAN ('open' class), AKKOR MEGJELENIK --- */
-.album.open .upload-cover-btn {
-    display: flex !important; /* A JS/HTML flexboxot használ, így az ikon középre kerül */
+/* --- HA AZ EGERET AZ ALBUM FÖLÉ VISZED (HOVER), AKKOR MEGJELENIK --- */
+.album:hover .upload-cover-btn {
+    display: flex !important; 
 }
 
 /* --- Hover (ha fölé viszed az egeret) --- */
